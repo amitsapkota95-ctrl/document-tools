@@ -11,14 +11,14 @@
   "kv_namespaces": [
     {
       "binding": "URL_SHORTENER",
-      "id": "0703b74e6e3443fab6a0b6384c29d1a2"
+      "id": "06ffb2b911c74a28b7e8b6421e8cc4b0"
     }
   ],
   "d1_databases": [
     {
       "binding": "FEEDBACK_DB",
-      "database_name": "paperless-feedback",
-      "database_id": "2341a3bf-4c18-43a8-9992-242dca887f52"
+      "database_name": "paperless-tools-feedback",
+      "database_id": "7c24f79e-b910-409a-9ecd-e5eaa48de615"
     }
   ]
 }

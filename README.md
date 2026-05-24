@@ -15,9 +15,6 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### 1. Create KV namespace (URL shortener)
 
-The production namespace is `paperless-shortner-kv`. Its ID is already in `wrangler.jsonc`.
-To create a new one:
-
 ```bash
 npx wrangler kv namespace create URL_SHORTENER
 ```
@@ -26,11 +23,8 @@ Copy the namespace ID into `wrangler.jsonc` under `kv_namespaces`.
 
 ### 2. Create D1 database (feedback)
 
-The production database is `paperless-feedback`. Its ID is already in `wrangler.jsonc`.
-To create a new one:
-
 ```bash
-npx wrangler d1 create paperless-feedback
+npx wrangler d1 create paperless-tools-feedback
 ```
 
 Apply the feedback schema:
