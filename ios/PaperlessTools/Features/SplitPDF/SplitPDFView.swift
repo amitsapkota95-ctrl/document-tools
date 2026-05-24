@@ -6,7 +6,7 @@ struct SplitPDFView: View {
     @State private var pdfURL: URL?
     @State private var pdfDocument: PDFDocument?
     @State private var showPicker = false
-    @State private var splitMode: SplitMode = .everyPage
+    @State private var splitMode: SplitMode = .selectedPages
     @State private var interval = 2
     @State private var selectedPages = Set<Int>()
     @State private var isProcessing = false
@@ -15,41 +15,55 @@ struct SplitPDFView: View {
     @State private var showShareSheet = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                if pdfDocument == nil {
-                    emptyState
-                } else if let pdfDocument {
-                    documentSummary(pdfDocument)
-                    splitModePicker
-                    pageGrid(pdfDocument)
-                }
-
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.captionText)
-                        .foregroundStyle(.red)
-                }
-
+        VStack(spacing: pdfDocument == nil ? 20 : 12) {
+            if pdfDocument == nil {
+                emptyState
+            } else if let pdfDocument {
                 VStack(spacing: 12) {
-                    PrimaryButton(
-                        title: pdfDocument == nil ? "Choose PDF" : "Change PDF",
-                        icon: "doc"
-                    ) {
-                        showPicker = true
-                    }
+                    documentSummary(pdfDocument)
+                        .padding(.horizontal, 20)
+                    splitModePicker
+                        .padding(.horizontal, 20)
 
-                    if pdfDocument != nil, canSplit {
-                        PrimaryButton(title: splitButtonTitle, icon: "scissors", isLoading: isProcessing) {
-                            Task { await splitPDF() }
-                        }
+                    ScrollView {
+                        pageGrid(pdfDocument)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 8)
                     }
+                    .frame(maxHeight: .infinity)
+                }
+            }
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.captionText)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 20)
+            }
+
+            HStack(spacing: 12) {
+                compactActionButton(title: "Add PDF", icon: "plus") {
+                    showPicker = true
                 }
 
-                PrivacyBadge()
+                if pdfDocument != nil, canSplit {
+                    compactActionButton(
+                        title: splitButtonTitle,
+                        icon: "scissors",
+                        isLoading: isProcessing
+                    ) {
+                        Task { await splitPDF() }
+                    }
+                }
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
+
+            if pdfDocument == nil {
+                Spacer()
+            }
         }
+        .padding(.top, pdfDocument == nil ? 20 : 12)
         .background(Color.paper.ignoresSafeArea())
         .navigationTitle("Split PDF")
         .navigationBarTitleDisplayMode(.inline)
@@ -79,19 +93,20 @@ struct SplitPDFView: View {
                 .foregroundStyle(Color.forest)
             Text("Split a PDF into parts")
                 .font(.sectionTitle)
-            Text("Separate every page, split by interval, or export selected pages.")
+            Text("Add a PDF, select pages to export, split every page, or split by interval.")
                 .font(.bodyText)
                 .foregroundStyle(Color.sandLight)
                 .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
         }
-        .padding(.top, 20)
+        .padding(.top, 40)
     }
 
     private func documentSummary(_ document: PDFDocument) -> some View {
-        HStack {
+        HStack(spacing: 10) {
             Image(systemName: "doc.fill")
                 .foregroundStyle(Color.forest)
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(pdfURL?.lastPathComponent ?? "Document")
                     .font(.bodyText.weight(.semibold))
                     .lineLimit(1)
@@ -99,15 +114,25 @@ struct SplitPDFView: View {
                     .font(.captionText)
                     .foregroundStyle(Color.sandLight)
             }
-            Spacer()
+            Spacer(minLength: 0)
+            Button {
+                clearPDF()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(Color.sandLight)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Remove PDF")
         }
-        .padding(16)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(Color.cream)
         .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
     }
 
     private var splitModePicker: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("Split mode")
                 .font(.sectionTitle)
 
@@ -133,9 +158,20 @@ struct SplitPDFView: View {
         }
     }
 
+    private func displayIndices(for document: PDFDocument) -> [Int] {
+        switch splitMode {
+        case .selectedPages:
+            let selected = selectedPages.sorted()
+            let unselected = (0..<document.pageCount).filter { !selectedPages.contains($0) }
+            return selected + unselected
+        case .everyPage, .byInterval:
+            return Array(0..<document.pageCount)
+        }
+    }
+
     private func pageGrid(_ document: PDFDocument) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-            ForEach(0..<document.pageCount, id: \.self) { index in
+            ForEach(displayIndices(for: document), id: \.self) { index in
                 if let page = document.page(at: index) {
                     pageCell(page: page, index: index)
                 }
@@ -145,6 +181,7 @@ struct SplitPDFView: View {
 
     private func pageCell(page: PDFPage, index: Int) -> some View {
         let isSelected = selectedPages.contains(index)
+        let showHighlight = splitMode == .selectedPages && isSelected
         let thumbnail = page.thumbnail(of: CGSize(width: 120, height: 160), for: .mediaBox)
 
         return Button {
@@ -163,7 +200,7 @@ struct SplitPDFView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay {
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(isSelected ? Color.forest : Color.clear, lineWidth: 3)
+                            .stroke(showHighlight ? Color.forest : Color.clear, lineWidth: 3)
                     }
 
                 Text("Page \(index + 1)")
@@ -184,6 +221,35 @@ struct SplitPDFView: View {
         }
     }
 
+    private func compactActionButton(
+        title: String,
+        icon: String,
+        isLoading: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if isLoading {
+                    ProgressView()
+                        .tint(.white)
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: icon)
+                }
+                Text(title)
+                    .font(.buttonLabel)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .foregroundStyle(.white)
+            .background(isLoading ? Color.forest.opacity(0.7) : Color.forest)
+            .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.buttonCornerRadius))
+        }
+        .disabled(isLoading)
+    }
+
     private var splitButtonTitle: String {
         switch splitMode {
         case .everyPage:
@@ -195,22 +261,37 @@ struct SplitPDFView: View {
         }
     }
 
+    private func clearPDF() {
+        pdfURL = nil
+        pdfDocument = nil
+        selectedPages = []
+        errorMessage = nil
+    }
+
     private func loadPDF(from url: URL) {
         errorMessage = nil
         selectedPages = []
-        pdfURL = url
 
         do {
-            pdfDocument = try PDFService.loadDocument(from: url)
+            let data = try Data(contentsOf: url)
+            guard let document = PDFDocument(data: data), document.pageCount > 0 else {
+                throw PDFServiceError.invalidPDF
+            }
+            pdfDocument = document
+            pdfURL = try PDFService.writeTemporaryPDF(
+                data,
+                filename: url.deletingPathExtension().lastPathComponent
+            )
         } catch {
             pdfDocument = nil
-            errorMessage = error.localizedDescription
+            pdfURL = nil
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 
     @MainActor
     private func splitPDF() async {
-        guard let pdfURL else { return }
+        guard let pdfDocument, let pdfURL else { return }
 
         isProcessing = true
         errorMessage = nil
@@ -223,11 +304,11 @@ struct SplitPDFView: View {
 
             switch splitMode {
             case .everyPage:
-                entries = try PDFService.splitEveryPage(from: pdfURL, baseName: baseName)
+                entries = try PDFService.splitEveryPage(from: pdfDocument, baseName: baseName)
             case .byInterval:
-                entries = try PDFService.splitByInterval(from: pdfURL, interval: interval, baseName: baseName)
+                entries = try PDFService.splitByInterval(from: pdfDocument, interval: interval, baseName: baseName)
             case .selectedPages:
-                let data = try PDFService.extractPages(from: pdfURL, indices: Array(selectedPages))
+                let data = try PDFService.extractPages(from: pdfDocument, indices: Array(selectedPages))
                 let suffix = selectedPages.count == 1 ? "page-\(selectedPages.sorted().first! + 1)" : "selected-pages"
                 entries = [(name: "\(baseName)-\(suffix).pdf", data: data)]
             }

@@ -43,9 +43,9 @@ enum ExportImageFormat: String, CaseIterable, Identifiable {
 }
 
 enum SplitMode: String, CaseIterable, Identifiable {
+    case selectedPages
     case everyPage
     case byInterval
-    case selectedPages
 
     var id: String { rawValue }
 
@@ -175,6 +175,10 @@ enum PDFService {
 
     static func splitEveryPage(from url: URL, baseName: String) throws -> [(name: String, data: Data)] {
         let document = try loadDocument(from: url)
+        return try splitEveryPage(from: document, baseName: baseName)
+    }
+
+    static func splitEveryPage(from document: PDFDocument, baseName: String) throws -> [(name: String, data: Data)] {
         var results: [(name: String, data: Data)] = []
 
         for index in 0..<document.pageCount {
@@ -189,9 +193,13 @@ enum PDFService {
     }
 
     static func splitByInterval(from url: URL, interval: Int, baseName: String) throws -> [(name: String, data: Data)] {
+        let document = try loadDocument(from: url)
+        return try splitByInterval(from: document, interval: interval, baseName: baseName)
+    }
+
+    static func splitByInterval(from document: PDFDocument, interval: Int, baseName: String) throws -> [(name: String, data: Data)] {
         guard interval >= 1 else { throw PDFServiceError.invalidInterval }
 
-        let document = try loadDocument(from: url)
         let pageCount = document.pageCount
         var results: [(name: String, data: Data)] = []
         var chunkIndex = 1
@@ -212,6 +220,27 @@ enum PDFService {
     static func extractPages(from url: URL, indices: [Int]) throws -> Data {
         let document = try loadDocument(from: url)
         return try extractPages(from: document, indices: indices)
+    }
+
+    static func extractPages(from document: PDFDocument, indices: [Int]) throws -> Data {
+        let sorted = Array(Set(indices)).sorted()
+        guard !sorted.isEmpty else { throw PDFServiceError.noPages }
+
+        let output = PDFDocument()
+        var outputIndex = 0
+
+        for index in sorted {
+            guard index >= 0, index < document.pageCount, let page = document.page(at: index) else {
+                throw PDFServiceError.splitFailed
+            }
+            output.insert(page, at: outputIndex)
+            outputIndex += 1
+        }
+
+        guard outputIndex > 0, let data = output.dataRepresentation() else {
+            throw PDFServiceError.splitFailed
+        }
+        return data
     }
 
     static func pdfToImages(
@@ -419,27 +448,6 @@ enum PDFService {
             page.draw(with: .mediaBox, to: context.cgContext)
             context.cgContext.restoreGState()
         }
-    }
-
-    private static func extractPages(from document: PDFDocument, indices: [Int]) throws -> Data {
-        let sorted = Array(Set(indices)).sorted()
-        guard !sorted.isEmpty else { throw PDFServiceError.noPages }
-
-        let output = PDFDocument()
-        var outputIndex = 0
-
-        for index in sorted {
-            guard index >= 0, index < document.pageCount, let page = document.page(at: index) else {
-                throw PDFServiceError.splitFailed
-            }
-            output.insert(page, at: outputIndex)
-            outputIndex += 1
-        }
-
-        guard outputIndex > 0, let data = output.dataRepresentation() else {
-            throw PDFServiceError.splitFailed
-        }
-        return data
     }
 
     private static func singlePagePDFData(from page: PDFPage) -> Data? {
