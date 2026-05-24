@@ -44,6 +44,10 @@ func destinationView(for destination: ToolDestination) -> some View {
         DocumentScannerView()
     case .mergePdf:
         MergePDFView()
+    case .splitPdf:
+        SplitPDFView()
+    case .pdfToImage:
+        PDFToImageView()
     case .fillAndSign:
         FillAndSignView()
     case .imageToPdf:
@@ -59,6 +63,8 @@ func destination(for slug: ToolSlug) -> ToolDestination? {
     case .urlShortener: return .urlShortener
     case .documentScanner: return .documentScanner
     case .mergePdf: return .mergePdf
+    case .splitPdf: return .splitPdf
+    case .pdfToImage: return .pdfToImage
     case .fillAndSign: return .fillAndSign
     case .imageToPdf: return .imageToPdf
     default: return nil

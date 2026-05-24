@@ -49,6 +49,8 @@ enum ToolRegistry {
         .urlShortener,
         .documentScanner,
         .mergePdf,
+        .splitPdf,
+        .pdfToImage,
         .fillAndSign,
         .imageToPdf,
     ]
@@ -91,12 +93,20 @@ enum ToolRegistry {
                     isAvailableInMVP: true
                 ),
                 ToolDefinition(
+                    slug: .pdfToImage,
+                    title: "PDF to Image",
+                    description: "Save each PDF page as a PNG or JPEG image.",
+                    actionLabel: "Convert to Images",
+                    iconName: "photo.on.rectangle.angled",
+                    isAvailableInMVP: true
+                ),
+                ToolDefinition(
                     slug: .splitPdf,
                     title: "Split a PDF",
                     description: "Separate pages into individual files.",
                     actionLabel: "Split PDF",
                     iconName: "scissors",
-                    isAvailableInMVP: false
+                    isAvailableInMVP: true
                 ),
                 ToolDefinition(
                     slug: .compressPdf,
@@ -166,6 +176,31 @@ enum ToolRegistry {
         categories.flatMap(\.tools)
     }
 
+    static let homeFeaturedSlugs: [ToolSlug] = [
+        .documentScanner,
+        .mergePdf,
+        .splitPdf,
+        .fillAndSign,
+        .qrTools,
+        .pdfToImage,
+    ]
+
+    static var homeFeaturedTools: [ToolDefinition] {
+        homeFeaturedSlugs.compactMap { tool(for: $0) }
+    }
+
+    static var availableTools: [ToolDefinition] {
+        allTools.filter(\.isAvailableInMVP)
+    }
+
+    static var comingSoonTools: [ToolDefinition] {
+        allTools.filter { !$0.isAvailableInMVP }
+    }
+
+    static func category(for slug: ToolSlug) -> ToolCategoryID? {
+        categories.first { $0.tools.contains { $0.slug == slug } }?.id
+    }
+
     static func tool(for slug: ToolSlug) -> ToolDefinition? {
         allTools.first { $0.slug == slug }
     }
@@ -176,6 +211,8 @@ enum ToolDestination: Hashable {
     case urlShortener
     case documentScanner
     case mergePdf
+    case splitPdf
+    case pdfToImage
     case fillAndSign
     case imageToPdf
     case qrScanner

@@ -121,11 +121,12 @@ struct MergePDFView: View {
 
 struct DocumentPicker: UIViewControllerRepresentable {
     let contentTypes: [UTType]
+    var allowsMultipleSelection = true
     let onPick: ([URL]) -> Void
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: contentTypes, asCopy: true)
-        picker.allowsMultipleSelection = true
+        picker.allowsMultipleSelection = allowsMultipleSelection
         picker.delegate = context.coordinator
         return picker
     }
