@@ -65,6 +65,9 @@ enum PDFServiceError: LocalizedError {
     case exportFailed
     case noPages
     case invalidInterval
+    case compressFailed
+    case cropFailed
+    case redactFailed
 
     var errorDescription: String? {
         switch self {
@@ -74,6 +77,9 @@ enum PDFServiceError: LocalizedError {
         case .exportFailed: return "Could not export the PDF."
         case .noPages: return "No pages to export."
         case .invalidInterval: return "Enter a page interval of at least 1."
+        case .compressFailed: return "Could not compress the PDF."
+        case .cropFailed: return "Could not crop the PDF."
+        case .redactFailed: return "Could not redact the PDF."
         }
     }
 }
@@ -266,6 +272,153 @@ enum PDFService {
         }
 
         return try ZipService.createArchive(filename: archiveName, entries: entries)
+    }
+
+    static func compressPDF(from url: URL, quality: CGFloat, dpi: CGFloat) throws -> Data {
+        let document = try loadDocument(from: url)
+        let scale = max(0.5, dpi / 72.0)
+        let jpegQuality = max(0.1, min(1.0, 0.3 + quality * 0.7))
+        let pdfData = NSMutableData()
+        var pageRect = CGRect.zero
+        UIGraphicsBeginPDFContextToData(pdfData, pageRect, nil)
+
+        for index in 0..<document.pageCount {
+            guard let page = document.page(at: index),
+                  let image = renderPageForExport(page, scale: scale),
+                  let jpegData = image.jpegData(compressionQuality: jpegQuality),
+                  let compressedImage = UIImage(data: jpegData) else {
+                throw PDFServiceError.compressFailed
+            }
+
+            let bounds = page.bounds(for: .mediaBox)
+            pageRect = CGRect(origin: .zero, size: bounds.size)
+            UIGraphicsBeginPDFPageWithInfo(pageRect, nil)
+            compressedImage.draw(in: pageRect)
+        }
+
+        UIGraphicsEndPDFContext()
+        return pdfData as Data
+    }
+
+    static func cropPDF(
+        from url: URL,
+        normalizedRect: CGRect,
+        applyToAllPages: Bool
+    ) throws -> Data {
+        let source = try loadDocument(from: url)
+        let output = PDFDocument()
+
+        for index in 0..<source.pageCount {
+            guard let page = source.page(at: index) else { continue }
+            let cropRect = pdfRect(fromNormalized: normalizedRect, page: page)
+            if applyToAllPages || index == 0 {
+                guard let cropped = renderCroppedPage(page, cropRect: cropRect) else {
+                    throw PDFServiceError.cropFailed
+                }
+                output.insert(cropped, at: output.pageCount)
+            } else {
+                output.insert(page, at: output.pageCount)
+            }
+        }
+
+        guard output.pageCount > 0, let data = output.dataRepresentation() else {
+            throw PDFServiceError.cropFailed
+        }
+        return data
+    }
+
+    static func redactPDF(from url: URL, boxesByPage: [Int: [CGRect]]) throws -> Data {
+        let source = try loadDocument(from: url)
+        let output = PDFDocument()
+
+        for index in 0..<source.pageCount {
+            guard let page = source.page(at: index) else { continue }
+            let boxes = boxesByPage[index] ?? []
+            guard let redacted = renderRedactedPage(page, boxes: boxes) else {
+                throw PDFServiceError.redactFailed
+            }
+            output.insert(redacted, at: output.pageCount)
+        }
+
+        guard output.pageCount > 0, let data = output.dataRepresentation() else {
+            throw PDFServiceError.redactFailed
+        }
+        return data
+    }
+
+    static func renderPageForExport(_ page: PDFPage, scale: CGFloat) -> UIImage? {
+        renderPage(page, scale: scale)
+    }
+
+    static func writeTemporaryText(_ text: String, filename: String) throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(FilenameHelper.sanitize(filename)).txt")
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        return url
+    }
+
+    private static func pdfRect(fromNormalized normalized: CGRect, page: PDFPage) -> CGRect {
+        let bounds = page.bounds(for: .mediaBox)
+        return CGRect(
+            x: bounds.minX + normalized.minX * bounds.width,
+            y: bounds.minY + (1 - normalized.maxY) * bounds.height,
+            width: normalized.width * bounds.width,
+            height: normalized.height * bounds.height
+        )
+    }
+
+    private static func renderCroppedPage(_ page: PDFPage, cropRect: CGRect) -> PDFPage? {
+        guard let image = renderPageRegion(page, rect: cropRect) else { return nil }
+        let newPage = PDFPage(image: image)
+        return newPage
+    }
+
+    private static func renderRedactedPage(_ page: PDFPage, boxes: [CGRect]) -> PDFPage? {
+        let bounds = page.bounds(for: .mediaBox)
+        let scale: CGFloat = 2.0
+        let size = CGSize(width: bounds.width * scale, height: bounds.height * scale)
+
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let image = renderer.image { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            context.cgContext.saveGState()
+            context.cgContext.translateBy(x: -bounds.origin.x * scale, y: size.height + bounds.origin.y * scale)
+            context.cgContext.scaleBy(x: scale, y: -scale)
+            page.draw(with: .mediaBox, to: context.cgContext)
+            context.cgContext.restoreGState()
+
+            UIColor.black.setFill()
+            for normalized in boxes {
+                let pdfRect = pdfRect(fromNormalized: normalized, page: page)
+                let viewRect = CGRect(
+                    x: (pdfRect.minX - bounds.minX) * scale,
+                    y: (bounds.maxY - pdfRect.maxY) * scale,
+                    width: pdfRect.width * scale,
+                    height: pdfRect.height * scale
+                )
+                context.fill(viewRect)
+            }
+        }
+
+        return PDFPage(image: image)
+    }
+
+    private static func renderPageRegion(_ page: PDFPage, rect: CGRect) -> UIImage? {
+        let scale: CGFloat = 2.0
+        let size = CGSize(width: rect.width * scale, height: rect.height * scale)
+        guard size.width > 0, size.height > 0 else { return nil }
+
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            context.cgContext.saveGState()
+            context.cgContext.translateBy(x: -rect.minX * scale, y: size.height + rect.minY * scale)
+            context.cgContext.scaleBy(x: scale, y: -scale)
+            page.draw(with: .mediaBox, to: context.cgContext)
+            context.cgContext.restoreGState()
+        }
     }
 
     private static func extractPages(from document: PDFDocument, indices: [Int]) throws -> Data {

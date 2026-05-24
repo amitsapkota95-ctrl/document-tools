@@ -46,12 +46,26 @@ func destinationView(for destination: ToolDestination) -> some View {
         MergePDFView()
     case .splitPdf:
         SplitPDFView()
+    case .compressPdf:
+        CompressPDFView()
     case .pdfToImage:
         PDFToImageView()
     case .fillAndSign:
         FillAndSignView()
     case .imageToPdf:
         ImageToPDFView()
+    case .redactPdf:
+        RedactPDFView()
+    case .cropPdf:
+        CropPDFView()
+    case .extractText:
+        ExtractTextView()
+    case .compareText:
+        CompareTextView()
+    case .invoiceBuilder:
+        InvoiceBuilderView()
+    case .teleprompter:
+        TeleprompterView()
     case .qrScanner:
         QRScannerView()
     }
@@ -64,9 +78,15 @@ func destination(for slug: ToolSlug) -> ToolDestination? {
     case .documentScanner: return .documentScanner
     case .mergePdf: return .mergePdf
     case .splitPdf: return .splitPdf
+    case .compressPdf: return .compressPdf
     case .pdfToImage: return .pdfToImage
     case .fillAndSign: return .fillAndSign
     case .imageToPdf: return .imageToPdf
-    default: return nil
+    case .redactPdf: return .redactPdf
+    case .cropPdf: return .cropPdf
+    case .extractText: return .extractText
+    case .compareText: return .compareText
+    case .invoiceBuilder: return .invoiceBuilder
+    case .teleprompter: return .teleprompter
     }
 }

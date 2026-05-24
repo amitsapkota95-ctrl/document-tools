@@ -44,16 +44,7 @@ struct ToolCategory: Identifiable {
 }
 
 enum ToolRegistry {
-    static let mvpSlugs: Set<ToolSlug> = [
-        .qrTools,
-        .urlShortener,
-        .documentScanner,
-        .mergePdf,
-        .splitPdf,
-        .pdfToImage,
-        .fillAndSign,
-        .imageToPdf,
-    ]
+    static let mvpSlugs: Set<ToolSlug> = Set(ToolSlug.allCases)
 
     static let categories: [ToolCategory] = [
         ToolCategory(
@@ -74,6 +65,22 @@ enum ToolRegistry {
                     description: "Join multiple PDFs into one document in the order you choose.",
                     actionLabel: "Combine PDFs",
                     iconName: "doc.on.doc",
+                    isAvailableInMVP: true
+                ),
+                ToolDefinition(
+                    slug: .splitPdf,
+                    title: "Split a PDF",
+                    description: "Separate pages into individual files.",
+                    actionLabel: "Split PDF",
+                    iconName: "scissors",
+                    isAvailableInMVP: true
+                ),
+                ToolDefinition(
+                    slug: .compressPdf,
+                    title: "Make File Smaller",
+                    description: "Reduce PDF file size while keeping documents readable.",
+                    actionLabel: "Make Smaller",
+                    iconName: "arrow.down.right.and.arrow.up.left",
                     isAvailableInMVP: true
                 ),
                 ToolDefinition(
@@ -101,20 +108,28 @@ enum ToolRegistry {
                     isAvailableInMVP: true
                 ),
                 ToolDefinition(
-                    slug: .splitPdf,
-                    title: "Split a PDF",
-                    description: "Separate pages into individual files.",
-                    actionLabel: "Split PDF",
-                    iconName: "scissors",
+                    slug: .redactPdf,
+                    title: "Redact PDF",
+                    description: "Cover sensitive information with black boxes.",
+                    actionLabel: "Redact PDF",
+                    iconName: "eye.slash",
                     isAvailableInMVP: true
                 ),
                 ToolDefinition(
-                    slug: .compressPdf,
-                    title: "Make File Smaller",
-                    description: "Reduce PDF file size while keeping documents readable.",
-                    actionLabel: "Make Smaller",
-                    iconName: "arrow.down.right.and.arrow.up.left",
-                    isAvailableInMVP: false
+                    slug: .cropPdf,
+                    title: "Crop PDF",
+                    description: "Trim margins or keep part of each page.",
+                    actionLabel: "Crop PDF",
+                    iconName: "crop",
+                    isAvailableInMVP: true
+                ),
+                ToolDefinition(
+                    slug: .extractText,
+                    title: "Extract Text",
+                    description: "Pull text from PDFs with OCR fallback.",
+                    actionLabel: "Extract Text",
+                    iconName: "text.viewfinder",
+                    isAvailableInMVP: true
                 ),
             ]
         ),
@@ -150,7 +165,7 @@ enum ToolRegistry {
                     description: "See what changed between two versions side by side.",
                     actionLabel: "Compare Texts",
                     iconName: "arrow.left.arrow.right",
-                    isAvailableInMVP: false
+                    isAvailableInMVP: true
                 ),
                 ToolDefinition(
                     slug: .invoiceBuilder,
@@ -158,15 +173,15 @@ enum ToolRegistry {
                     description: "Create invoices and export searchable PDFs.",
                     actionLabel: "Build Invoice",
                     iconName: "doc.text",
-                    isAvailableInMVP: false
+                    isAvailableInMVP: true
                 ),
                 ToolDefinition(
                     slug: .teleprompter,
                     title: "Teleprompter",
-                    description: "Read scripts with voice tracking and section markers.",
+                    description: "Read scripts with auto-scroll and section markers.",
                     actionLabel: "Open Teleprompter",
                     iconName: "text.viewfinder",
-                    isAvailableInMVP: false
+                    isAvailableInMVP: true
                 ),
             ]
         ),
@@ -180,9 +195,9 @@ enum ToolRegistry {
         .documentScanner,
         .mergePdf,
         .splitPdf,
+        .compressPdf,
         .fillAndSign,
         .qrTools,
-        .pdfToImage,
     ]
 
     static var homeFeaturedTools: [ToolDefinition] {
@@ -212,8 +227,15 @@ enum ToolDestination: Hashable {
     case documentScanner
     case mergePdf
     case splitPdf
+    case compressPdf
     case pdfToImage
     case fillAndSign
     case imageToPdf
+    case redactPdf
+    case cropPdf
+    case extractText
+    case compareText
+    case invoiceBuilder
+    case teleprompter
     case qrScanner
 }
