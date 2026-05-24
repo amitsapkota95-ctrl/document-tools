@@ -1,0 +1,509 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A100000001 /* PaperlessToolsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000001; };
+		A100000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000002; };
+		A100000003 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000003; };
+		A100000004 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000004; };
+		A100000005 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000005; };
+		A100000006 /* PrivacyBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000006; };
+		A100000007 /* ToolCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000007; };
+		A100000008 /* ProcessingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000008; };
+		A100000009 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000009; };
+		A100000010 /* ToolRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000010; };
+		A100000011 /* QRModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000011; };
+		A100000012 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000012; };
+		A100000013 /* ToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000013; };
+		A100000014 /* ScanTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000014; };
+		A100000015 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000015; };
+		A100000016 /* QRGeneratorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000016; };
+		A100000017 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000017; };
+		A100000018 /* QRPayloadEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000018; };
+		A100000019 /* URLShortenerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000019; };
+		A100000020 /* DocumentScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000020; };
+		A100000021 /* MergePDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000021; };
+		A100000022 /* ImageToPDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000022; };
+		A100000023 /* FillAndSignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000023; };
+		A100000024 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000024; };
+		A100000025 /* PDFService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000025; };
+		A100000026 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000026; };
+		A100000027 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A200000027; };
+		A100000028 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000028; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A200000001 /* PaperlessToolsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperlessToolsApp.swift; sourceTree = "<group>"; };
+		A200000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A200000003 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		A200000004 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		A200000005 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
+		A200000006 /* PrivacyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyBadge.swift; sourceTree = "<group>"; };
+		A200000007 /* ToolCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolCard.swift; sourceTree = "<group>"; };
+		A200000008 /* ProcessingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingOverlay.swift; sourceTree = "<group>"; };
+		A200000009 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		A200000010 /* ToolRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolRegistry.swift; sourceTree = "<group>"; };
+		A200000011 /* QRModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRModels.swift; sourceTree = "<group>"; };
+		A200000012 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A200000013 /* ToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsView.swift; sourceTree = "<group>"; };
+		A200000014 /* ScanTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanTabView.swift; sourceTree = "<group>"; };
+		A200000015 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A200000016 /* QRGeneratorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRGeneratorView.swift; sourceTree = "<group>"; };
+		A200000017 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		A200000018 /* QRPayloadEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRPayloadEncoder.swift; sourceTree = "<group>"; };
+		A200000019 /* URLShortenerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLShortenerView.swift; sourceTree = "<group>"; };
+		A200000020 /* DocumentScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentScannerView.swift; sourceTree = "<group>"; };
+		A200000021 /* MergePDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergePDFView.swift; sourceTree = "<group>"; };
+		A200000022 /* ImageToPDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageToPDFView.swift; sourceTree = "<group>"; };
+		A200000023 /* FillAndSignView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FillAndSignView.swift; sourceTree = "<group>"; };
+		A200000024 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+		A200000025 /* PDFService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFService.swift; sourceTree = "<group>"; };
+		A200000026 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		A200000027 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A200000028 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		A200000029 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A200000030 /* ShareExtension-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A300000001 /* PaperlessTools.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperlessTools.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A300000002 /* PaperlessToolsShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PaperlessToolsShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A400000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A400000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A500000001 = {
+			isa = PBXGroup;
+			children = (
+				A500000005 /* App */,
+				A500000006 /* Design */,
+				A500000007 /* Features */,
+				A500000008 /* Models */,
+				A500000009 /* Services */,
+				A500000010 /* Resources */,
+				A500000003 /* ShareExtension */,
+				A200000029 /* Info.plist */,
+				A500000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A500000003 /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				A200000028 /* ShareViewController.swift */,
+				A200000030 /* ShareExtension-Info.plist */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		A500000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A300000001 /* PaperlessTools.app */,
+				A300000002 /* PaperlessToolsShareExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A500000005 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A200000001 /* PaperlessToolsApp.swift */,
+				A200000002 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A500000006 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				A200000003 /* Colors.swift */,
+				A200000004 /* Typography.swift */,
+				A500000011 /* Components */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		A500000007 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				A500000012 /* Home */,
+				A500000013 /* Tools */,
+				A500000014 /* Scan */,
+				A500000015 /* Settings */,
+				A500000016 /* QR */,
+				A500000017 /* URLShortener */,
+				A500000018 /* DocumentScanner */,
+				A500000019 /* MergePDF */,
+				A500000020 /* ImageToPDF */,
+				A500000021 /* FillAndSign */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		A500000008 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A200000010 /* ToolRegistry.swift */,
+				A200000011 /* QRModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A500000009 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A200000024 /* APIService.swift */,
+				A200000025 /* PDFService.swift */,
+				A200000026 /* StorageService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A500000010 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A200000027 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A500000011 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A200000005 /* PrimaryButton.swift */,
+				A200000006 /* PrivacyBadge.swift */,
+				A200000007 /* ToolCard.swift */,
+				A200000008 /* ProcessingOverlay.swift */,
+				A200000009 /* ShareSheet.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		A500000012 /* Home */ = {isa = PBXGroup; children = (A200000012 /* HomeView.swift */); path = Home; sourceTree = "<group>"; };
+		A500000013 /* Tools */ = {isa = PBXGroup; children = (A200000013 /* ToolsView.swift */); path = Tools; sourceTree = "<group>"; };
+		A500000014 /* Scan */ = {isa = PBXGroup; children = (A200000014 /* ScanTabView.swift */); path = Scan; sourceTree = "<group>"; };
+		A500000015 /* Settings */ = {isa = PBXGroup; children = (A200000015 /* SettingsView.swift */); path = Settings; sourceTree = "<group>"; };
+		A500000016 /* QR */ = {isa = PBXGroup; children = (A200000016 /* QRGeneratorView.swift */, A200000017 /* QRScannerView.swift */, A200000018 /* QRPayloadEncoder.swift */); path = QR; sourceTree = "<group>"; };
+		A500000017 /* URLShortener */ = {isa = PBXGroup; children = (A200000019 /* URLShortenerView.swift */); path = URLShortener; sourceTree = "<group>"; };
+		A500000018 /* DocumentScanner */ = {isa = PBXGroup; children = (A200000020 /* DocumentScannerView.swift */); path = DocumentScanner; sourceTree = "<group>"; };
+		A500000019 /* MergePDF */ = {isa = PBXGroup; children = (A200000021 /* MergePDFView.swift */); path = MergePDF; sourceTree = "<group>"; };
+		A500000020 /* ImageToPDF */ = {isa = PBXGroup; children = (A200000022 /* ImageToPDFView.swift */); path = ImageToPDF; sourceTree = "<group>"; };
+		A500000021 /* FillAndSign */ = {isa = PBXGroup; children = (A200000023 /* FillAndSignView.swift */); path = FillAndSign; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A600000001 /* PaperlessTools */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A800000003 /* Build configuration list for PBXNativeTarget "PaperlessTools" */;
+			buildPhases = (
+				A700000001 /* Sources */,
+				A400000001 /* Frameworks */,
+				A700000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaperlessTools;
+			productName = PaperlessTools;
+			productReference = A300000001 /* PaperlessTools.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A600000002 /* PaperlessToolsShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A800000004 /* Build configuration list for PBXNativeTarget "PaperlessToolsShareExtension" */;
+			buildPhases = (
+				A700000003 /* Sources */,
+				A400000002 /* Frameworks */,
+				A700000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaperlessToolsShareExtension;
+			productName = PaperlessToolsShareExtension;
+			productReference = A300000002 /* PaperlessToolsShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A900000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A600000001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					A600000002 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = A800000001 /* Build configuration list for PBXProject "PaperlessTools" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A500000001;
+			productRefGroup = A500000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A600000001 /* PaperlessTools */,
+				A600000002 /* PaperlessToolsShareExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A700000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000027 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A700000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A700000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000001 /* PaperlessToolsApp.swift in Sources */,
+				A100000002 /* ContentView.swift in Sources */,
+				A100000003 /* Colors.swift in Sources */,
+				A100000004 /* Typography.swift in Sources */,
+				A100000005 /* PrimaryButton.swift in Sources */,
+				A100000006 /* PrivacyBadge.swift in Sources */,
+				A100000007 /* ToolCard.swift in Sources */,
+				A100000008 /* ProcessingOverlay.swift in Sources */,
+				A100000009 /* ShareSheet.swift in Sources */,
+				A100000010 /* ToolRegistry.swift in Sources */,
+				A100000011 /* QRModels.swift in Sources */,
+				A100000012 /* HomeView.swift in Sources */,
+				A100000013 /* ToolsView.swift in Sources */,
+				A100000014 /* ScanTabView.swift in Sources */,
+				A100000015 /* SettingsView.swift in Sources */,
+				A100000016 /* QRGeneratorView.swift in Sources */,
+				A100000017 /* QRScannerView.swift in Sources */,
+				A100000018 /* QRPayloadEncoder.swift in Sources */,
+				A100000019 /* URLShortenerView.swift in Sources */,
+				A100000020 /* DocumentScannerView.swift in Sources */,
+				A100000021 /* MergePDFView.swift in Sources */,
+				A100000022 /* ImageToPDFView.swift in Sources */,
+				A100000023 /* FillAndSignView.swift in Sources */,
+				A100000024 /* APIService.swift in Sources */,
+				A100000025 /* PDFService.swift in Sources */,
+				A100000026 /* StorageService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A700000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000028 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA00000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tools.paperless.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA00000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tools.paperless.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AA00000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tools.paperless.app.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA00000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tools.paperless.app.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AA00000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA00000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A800000001 /* Build configuration list for PBXProject "PaperlessTools" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA00000005 /* Debug */,
+				AA00000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A800000003 /* Build configuration list for PBXNativeTarget "PaperlessTools" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA00000001 /* Debug */,
+				AA00000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A800000004 /* Build configuration list for PBXNativeTarget "PaperlessToolsShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA00000003 /* Debug */,
+				AA00000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A900000001 /* Project object */;
+}

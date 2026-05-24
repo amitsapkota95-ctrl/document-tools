@@ -1,0 +1,43 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [platform/ios-native, master]
+    paths:
+      - 'ios/**'
+  pull_request:
+    paths:
+      - 'ios/**'
+
+jobs:
+  build:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: ios/PaperlessTools
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild \
+            -project PaperlessTools.xcodeproj \
+            -scheme PaperlessTools \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Build Share Extension
+        run: |
+          xcodebuild \
+            -project PaperlessTools.xcodeproj \
+            -scheme PaperlessToolsShareExtension \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build
