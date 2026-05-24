@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "paperless-tools",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-05-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "URL_SHORTENER",
+      "id": "0703b74e6e3443fab6a0b6384c29d1a2"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "FEEDBACK_DB",
+      "database_name": "paperless-feedback",
+      "database_id": "2341a3bf-4c18-43a8-9992-242dca887f52"
+    }
+  ]
+}

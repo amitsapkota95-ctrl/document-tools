@@ -16,13 +16,16 @@
 # next.js
 /.next/
 /out/
+/.open-next/
 
-# production
-/build
+# cloudflare
+/.wrangler/
 
 # misc
 .DS_Store
 *.pem
+/.test-pdfs/
+repomix-output.xml
 
 # debug
 npm-debug.log*

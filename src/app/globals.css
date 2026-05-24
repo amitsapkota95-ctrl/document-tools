@@ -1,26 +1,148 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+/* Direct hex in @theme — Tailwind v4 needs literal values, not var() chains */
+@theme {
+  --color-paper: #ecfdf5;
+  --color-cream: #f6fef8;
+  --color-forest: #14532d;
+  --color-forest-muted: #166534;
+  --color-sage: #22c55e;
+  --color-sage-dark: #16a34a;
+  --color-sage-light: #4ade80;
+  --color-moss: #bbf7d0;
+  --color-moss-light: #dcfce7;
+  --color-moss-dark: #86efac;
+  --color-sand: #3f5248;
+  --color-sand-light: #64796c;
+  --color-accent: #059669;
+  --color-accent-light: #10b981;
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-merriweather);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    background-color: #ecfdf5;
+  }
+
+  body {
+    background: linear-gradient(
+      160deg,
+      #ecfdf5 0%,
+      #d1fae5 35%,
+      #ecfdf5 70%,
+      #f0fdf4 100%
+    );
+    background-attachment: fixed;
+    color: #14532d;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: #bbf7d0;
+    color: #14532d;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.font-serif {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+
+.shadow-eco {
+  box-shadow:
+    0 2px 8px rgba(20, 83, 45, 0.08),
+    0 8px 24px -4px rgba(20, 83, 45, 0.12);
+}
+
+.shadow-eco-lg {
+  box-shadow:
+    0 4px 12px rgba(20, 83, 45, 0.1),
+    0 16px 40px -8px rgba(20, 83, 45, 0.15);
+}
+
+.shadow-eco-hover {
+  box-shadow:
+    0 8px 20px rgba(20, 83, 45, 0.12),
+    0 20px 48px -12px rgba(20, 83, 45, 0.2);
+}
+
+@keyframes scan-line {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+.animate-scan {
+  animation: scan-line 2s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out forwards;
+}
+
+/* Decorative eco wash behind hero */
+.eco-hero-wash {
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(74, 222, 128, 0.25) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(16, 185, 129, 0.18) 0%, transparent 50%),
+    linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #ecfdf5 100%);
+}
+
+.eco-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+  border: 1px solid #86efac;
+}
+
+.eco-btn-primary {
+  background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+  color: #ffffff;
+  border: 1px solid #166534;
+  box-shadow: 0 2px 8px rgba(22, 101, 52, 0.35);
+}
+
+.eco-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 4px 16px rgba(22, 101, 52, 0.4);
+}
+
+.diff-removed {
+  border-radius: 0.125rem;
+  background-color: #fef2f2;
+  padding-inline: 0.125rem;
+  color: #991b1b;
+  box-shadow: inset 0 0 0 1px rgba(254, 202, 202, 0.7);
+  text-decoration: line-through;
+  text-decoration-color: rgba(252, 165, 165, 0.5);
+}
+
+.diff-added {
+  border-radius: 0.125rem;
+  background-color: #ecfdf5;
+  padding-inline: 0.125rem;
+  color: #064e3b;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
 }
