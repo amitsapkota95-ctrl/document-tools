@@ -79,19 +79,19 @@ export function DiffMinimap({
   };
 
   const colorFor = (kind: LineKind) => {
-    if (kind === "added") return "bg-sage";
+    if (kind === "added") return "bg-forest-500";
     if (kind === "removed") return "bg-red-400";
-    return "bg-moss-dark/40";
+    return "bg-forest-200/40";
   };
 
   return (
     <div className="relative hidden h-full min-h-0 w-[72px] shrink-0 self-stretch md:flex md:flex-col">
-      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-sand">
+      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink/60">
         Overview
       </p>
       <div
         ref={minimapRef}
-        className="relative min-h-0 flex-1 cursor-pointer overflow-hidden rounded-lg border border-moss/70 bg-cream"
+        className="relative min-h-0 flex-1 cursor-pointer overflow-hidden rounded-lg border border-cream-300 bg-cream"
         onClick={handleClick}
         role="navigation"
         aria-label="Diff minimap"

@@ -11,6 +11,7 @@ import { FileUploader } from "@/components/tools/FileUploader";
 import { ProgressBar } from "@/components/tools/ProgressBar";
 import { ToolButton } from "@/components/tools/ToolButton";
 import { usePdfPasswordUnlock } from "@/hooks/usePdfPasswordUnlock";
+import { useHeroFileImport } from "@/hooks/useHeroFileImport";
 import { TOOL_SIDEBAR_CTA_CLASS, TOOL_THUMBNAIL_WORKSPACE } from "@/lib/ui/classes";
 
 export default function PdfToImageTool() {
@@ -36,6 +37,8 @@ export default function PdfToImageTool() {
     exportImages,
   } = usePdfToImageState(tryUnlock);
 
+  useHeroFileImport("pdf-to-image", loadFiles);
+
   return (
     <>
       <ToolWorkflowLayout
@@ -53,7 +56,7 @@ export default function PdfToImageTool() {
         workspace={
           hasPdf ? (
             <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-              <p className="shrink-0 text-sm text-sand">
+              <p className="shrink-0 text-sm text-ink/60">
                 Drag thumbnails to reorder pages from all uploaded PDFs, use the icons to rotate or remove
                 pages, then download your images from the sidebar.
               </p>
@@ -76,11 +79,11 @@ export default function PdfToImageTool() {
               {status === "processing" ? (
                 <ProgressBar progress={progress} label={message} />
               ) : (
-                <p className="text-sm text-sand">Loading page previews…</p>
+                <p className="text-sm text-ink/60">Loading page previews…</p>
               )}
             </div>
           ) : (
-            <p className="py-12 text-center text-sm text-sand">
+            <p className="py-12 text-center text-sm text-ink/60">
               All pages were removed. Add a PDF from the sidebar to continue.
             </p>
           )
@@ -119,7 +122,7 @@ export default function PdfToImageTool() {
                         type="radio"
                         checked={format === option}
                         onChange={() => setFormat(option)}
-                        className="h-4 w-4 accent-sage"
+                        className="h-4 w-4 accent-forest-600"
                         disabled={status === "processing"}
                       />
                       {option.toUpperCase()}
@@ -127,7 +130,7 @@ export default function PdfToImageTool() {
                   ))}
                 </fieldset>
 
-                <p className="text-sm text-sand">
+                <p className="text-sm text-ink/60">
                   {pages.length} page{pages.length !== 1 ? "s" : ""} ready to export
                   {proOutput ? " at 600 DPI" : ""}
                 </p>
@@ -138,12 +141,12 @@ export default function PdfToImageTool() {
                       type="checkbox"
                       checked={proOutput}
                       onChange={(event) => setProOutput(event.target.checked)}
-                      className="mt-0.5 h-4 w-4 accent-sage"
+                      className="mt-0.5 h-4 w-4 accent-forest-600"
                       disabled={status === "processing"}
                     />
                     <span>
                       High-resolution export (600 DPI)
-                      <span className="mt-1 block text-xs font-normal text-sand-light">
+                      <span className="mt-1 block text-xs font-normal text-ink/50">
                         Best for print. Creates larger files and takes longer to process.
                       </span>
                     </span>

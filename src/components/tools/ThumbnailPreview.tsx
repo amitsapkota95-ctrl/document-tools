@@ -20,20 +20,20 @@ export function ThumbnailPreview({
   imageStyle,
 }: ThumbnailPreviewProps) {
   return (
-    <div className="aspect-[3/4] w-full bg-moss-light/30">
+    <div className="aspect-[3/4] w-full bg-cream-200/40">
       {src ? (
-        <div className="flex h-full w-full items-center justify-center p-1">
+        <div className="flex h-full w-full items-center justify-center p-3.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={alt}
-            className="max-h-full max-w-full object-contain transition-transform duration-200"
+            className="max-h-full max-w-full rounded-lg object-contain shadow-sm transition-transform duration-200"
             style={imageStyle}
             draggable={false}
           />
         </div>
       ) : (
-        <div className="flex h-full items-center justify-center text-[11px] text-sand-light">
+        <div className="flex h-full items-center justify-center text-[11px] text-ink/50">
           {loading ? loadingLabel : placeholderLabel}
         </div>
       )}

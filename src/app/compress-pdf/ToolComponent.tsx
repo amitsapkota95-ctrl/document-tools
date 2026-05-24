@@ -9,6 +9,7 @@ import { ProgressBar } from "@/components/tools/ProgressBar";
 import { ToolButton } from "@/components/tools/ToolButton";
 import { ClientOnly } from "@/components/ui/ClientOnly";
 import { usePdfPasswordUnlock } from "@/hooks/usePdfPasswordUnlock";
+import { useHeroFileImport } from "@/hooks/useHeroFileImport";
 import { estimateCompressedSize } from "@/lib/pdf/compress-preview";
 import { analyzePdfStructure, type PdfDiagnostics } from "@/lib/pdf/pdf-diagnostics";
 import { downloadBytes, sanitizeFilename } from "@/lib/pdf/download";
@@ -32,21 +33,21 @@ function formatSegmentBytes(totalBytes: number, pct: number): string {
 
 function DiagnosticsChart({ diag }: { diag: PdfDiagnostics }) {
   const segments = [
-    { label: "Images", pct: diag.imagesPct, color: "bg-sage" },
+    { label: "Images", pct: diag.imagesPct, color: "bg-forest-500" },
     { label: "Fonts", pct: diag.fontsPct, color: "bg-forest" },
     { label: "Metadata", pct: diag.metadataPct, color: "bg-amber-400" },
-    { label: "Text", pct: diag.textPct, color: "bg-moss-dark" },
+    { label: "Text", pct: diag.textPct, color: "bg-forest-200" },
   ];
 
   return (
     <div
-      className="rounded-xl border border-moss/70 bg-moss-light/30 px-3 py-3"
+      className="rounded-xl border border-cream-300 bg-cream-200/50 px-3 py-3"
       role="group"
       aria-label="PDF storage breakdown"
     >
-      <p className="text-xs font-bold uppercase tracking-wide text-forest-muted">File breakdown</p>
+      <p className="text-xs font-bold uppercase tracking-wide text-forest-600">File breakdown</p>
       <div
-        className="mt-2 flex h-2.5 overflow-hidden rounded-full border border-moss/70"
+        className="mt-2 flex h-2.5 overflow-hidden rounded-full border border-cream-300"
         role="img"
         aria-label={segments.map((segment) => `${segment.label} ${segment.pct}%`).join(", ")}
       >
@@ -65,7 +66,7 @@ function DiagnosticsChart({ diag }: { diag: PdfDiagnostics }) {
         {segments.map((segment) => (
           <li
             key={segment.label}
-            className="flex min-w-0 items-center gap-1.5 text-[11px] text-sand"
+            className="flex min-w-0 items-center gap-1.5 text-[11px] text-ink/60"
           >
             <span className={`h-2 w-2 shrink-0 rounded-sm ${segment.color}`} aria-hidden />
             <span className="truncate">
@@ -74,7 +75,7 @@ function DiagnosticsChart({ diag }: { diag: PdfDiagnostics }) {
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-[11px] text-sand-light">
+      <p className="mt-2 text-[11px] text-ink/50">
         {diag.imageCount} image{diag.imageCount !== 1 ? "s" : ""}, {diag.fontCount} font
         {diag.fontCount !== 1 ? "s" : ""}
       </p>
@@ -179,6 +180,8 @@ export default function CompressPdfTool() {
     setDiagnostics(diag);
   };
 
+  useHeroFileImport("compress-pdf", handleFile);
+
   const compress = async () => {
     if (!file) return;
     reset();
@@ -221,11 +224,11 @@ export default function CompressPdfTool() {
         workspace={
           file ? (
             <div className="flex w-full max-w-xl flex-col items-center gap-3 self-center">
-              <p className="text-sm font-semibold text-forest">First page preview</p>
+              <p className="text-sm font-semibold text-forest-700">First page preview</p>
               {pagePreviewLoading ? (
-                <p className="py-12 text-center text-sm text-sand">Loading preview…</p>
+                <p className="py-12 text-center text-sm text-ink/60">Loading preview…</p>
               ) : pagePreviewUrl ? (
-                <div className="w-full overflow-hidden rounded-xl border border-moss/70 bg-cream shadow-eco">
+                <div className="w-full overflow-hidden rounded-xl border border-cream-300 bg-cream shadow-paper">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={pagePreviewUrl}
@@ -234,7 +237,7 @@ export default function CompressPdfTool() {
                   />
                 </div>
               ) : (
-                <p className="py-12 text-center text-sm text-sand">Preview unavailable for this PDF.</p>
+                <p className="py-12 text-center text-sm text-ink/60">Preview unavailable for this PDF.</p>
               )}
             </div>
           ) : null
@@ -250,7 +253,7 @@ export default function CompressPdfTool() {
                 replaceLabel="Replace PDF"
               />
 
-              <p className="text-sm text-sand">
+              <p className="text-sm text-ink/60">
                 {file.name} — {formatSize(file.size)}
               </p>
 
@@ -260,7 +263,7 @@ export default function CompressPdfTool() {
               fallback={
                 <div className="block space-y-2">
                   <span className="text-sm font-semibold">Quality: {quality}%</span>
-                  <div className="h-2 w-full rounded-full bg-moss-light" aria-hidden />
+                  <div className="h-2 w-full rounded-full bg-cream-200" aria-hidden />
                 </div>
               }
             >
@@ -272,24 +275,24 @@ export default function CompressPdfTool() {
                   max={100}
                   value={quality}
                   onChange={(e) => setQuality(Number(e.target.value))}
-                  className="w-full accent-sage"
+                  className="w-full accent-forest-600"
                   disabled={!file}
                 />
-                <span className="block text-xs font-normal text-sand-light">
+                <span className="block text-xs font-normal text-ink/50">
                   Higher keeps better quality. Lower creates a smaller file.
                 </span>
               </label>
             </ClientOnly>
 
             {estimate !== null || estimating ? (
-              <p className="rounded-xl border border-moss/70 bg-moss-light/50 px-4 py-3 text-sm text-forest shadow-eco">
+              <p className="rounded-xl border border-cream-300 bg-cream-200/80 px-4 py-3 text-sm text-forest-700 shadow-paper">
                 {estimating ? (
                   <>Calculating new file size…</>
                 ) : (
                   <>
                     Estimated new size: <strong>~{formatSize(estimate!)}</strong>
                     {file && estimate !== null ? (
-                      <span className="text-sand-light">
+                      <span className="text-ink/50">
                         {" "}
                         (from {formatSize(file.size)}
                         {estimate < file.size
@@ -310,7 +313,7 @@ export default function CompressPdfTool() {
 
             <ClientOnly
               fallback={
-                <div className="rounded-xl border-2 border-dashed border-moss-dark/60 bg-moss-light/30 px-4 py-3 text-sm text-sand">
+                <div className="rounded-xl border-2 border-dashed border-cream-300 bg-cream-200/50 px-4 py-3 text-sm text-ink/60">
                   Loading options…
                 </div>
               }
@@ -321,11 +324,11 @@ export default function CompressPdfTool() {
                     type="checkbox"
                     checked={crushImages}
                     onChange={(e) => setCrushImages(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 accent-sage"
+                    className="mt-0.5 h-4 w-4 accent-forest-600"
                   />
                   <span>
                     Reduce photos inside the PDF
-                    <span className="mt-1 block text-xs font-normal text-sand-light">
+                    <span className="mt-1 block text-xs font-normal text-ink/50">
                       Best for scanned documents and image-heavy files.
                     </span>
                   </span>
@@ -338,10 +341,10 @@ export default function CompressPdfTool() {
                     max={150}
                     value={imageDpi}
                     onChange={(e) => setImageDpi(Number(e.target.value))}
-                    className="mt-1 w-full accent-sage"
+                    className="mt-1 w-full accent-forest-600"
                     disabled={!crushImages}
                   />
-                  <span className="mt-1 block text-xs font-normal text-sand-light">
+                  <span className="mt-1 block text-xs font-normal text-ink/50">
                     Lower detail means a smaller download. The default works for most files.
                   </span>
                 </label>
@@ -350,11 +353,11 @@ export default function CompressPdfTool() {
                     type="checkbox"
                     checked={stripMetadata}
                     onChange={(e) => setStripMetadata(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 accent-sage"
+                    className="mt-0.5 h-4 w-4 accent-forest-600"
                   />
                   <span>
                     Remove hidden file info
-                    <span className="mt-1 block text-xs font-normal text-sand-light">
+                    <span className="mt-1 block text-xs font-normal text-ink/50">
                       Clears author, dates, and other background details you cannot see on the page.
                     </span>
                   </span>

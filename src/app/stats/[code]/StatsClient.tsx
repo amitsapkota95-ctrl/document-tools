@@ -43,7 +43,7 @@ export default function StatsClient({ code }: { code: string }) {
       type: "bar",
       data: {
         labels: Object.keys(data.byCountry),
-        datasets: [{ label: "Clicks", data: Object.values(data.byCountry), backgroundColor: "#22c55e" }],
+        datasets: [{ label: "Clicks", data: Object.values(data.byCountry), backgroundColor: "#466d45" }],
       },
       options: { responsive: true, plugins: { legend: { display: false } } },
     });
@@ -58,7 +58,7 @@ export default function StatsClient({ code }: { code: string }) {
       type: "bar",
       data: {
         labels,
-        datasets: [{ label: "Clicks", data: labels.map((l) => data.byDay[l]), backgroundColor: "#14532d" }],
+        datasets: [{ label: "Clicks", data: labels.map((l) => data.byDay[l]), backgroundColor: "#2d452c" }],
       },
       options: { responsive: true, plugins: { legend: { display: false } } },
     });
@@ -66,21 +66,21 @@ export default function StatsClient({ code }: { code: string }) {
   }, [data]);
 
   if (error) return <p className="p-8 text-red-700">{error}</p>;
-  if (!data) return <p className="p-8 text-sand">Loading analytics…</p>;
+  if (!data) return <p className="p-8 text-ink/60">Loading analytics…</p>;
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 px-4 py-10">
       <div>
-        <h1 className="font-serif text-3xl font-bold text-forest">Link Analytics</h1>
-        <p className="mt-2 break-all text-sm text-sand">{data.url}</p>
-        <p className="mt-4 text-2xl font-bold text-forest">{data.totalClicks} total clicks</p>
+        <h1 className="font-serif text-3xl font-bold text-forest-700">Link Analytics</h1>
+        <p className="mt-2 break-all text-sm text-ink/60">{data.url}</p>
+        <p className="mt-4 text-2xl font-bold text-forest-700">{data.totalClicks} total clicks</p>
       </div>
-      <div className="eco-card rounded-xl p-6 shadow-eco">
-        <h2 className="mb-4 font-semibold">Clicks by Country</h2>
+      <div className="paper-card rounded-xl p-6 shadow-paper">
+        <h2 className="mb-4 font-bold text-forest-700">Clicks by Country</h2>
         <canvas ref={countryRef} />
       </div>
-      <div className="eco-card rounded-xl p-6 shadow-eco">
-        <h2 className="mb-4 font-semibold">Clicks Over Time</h2>
+      <div className="paper-card rounded-xl p-6 shadow-paper">
+        <h2 className="mb-4 font-bold text-forest-700">Clicks Over Time</h2>
         <canvas ref={dayRef} />
       </div>
     </div>

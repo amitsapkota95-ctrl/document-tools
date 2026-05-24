@@ -2,10 +2,14 @@
 
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
-import { RotateCw, Trash2 } from "lucide-react";
+import { Check, RotateCw, Trash2 } from "lucide-react";
 import type { SplitPage } from "@/app/split-pdf/types";
-
 import { ThumbnailPreview } from "@/components/tools/ThumbnailPreview";
+import {
+  PAGE_CARD_BASE,
+  PAGE_CARD_DEFAULT,
+  PAGE_CARD_SELECTED,
+} from "@/lib/ui/classes";
 
 interface SplitPageCardProps {
   page: SplitPage;
@@ -45,63 +49,82 @@ export function SplitPageCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`relative cursor-grab overflow-hidden rounded-xl border bg-cream shadow-eco transition-all duration-200 hover:-translate-y-0.5 hover:shadow-eco-lg active:cursor-grabbing ${
+      onClick={(event) => {
+        if (event.target instanceof HTMLElement && event.target.closest("button")) return;
+        if (selectionEnabled) onToggleSelect(page.id);
+      }}
+      className={`${PAGE_CARD_BASE} cursor-grab active:cursor-grabbing ${
         selectionEnabled && selected
-          ? "border-4 border-sage ring-2 ring-sage/30"
+          ? PAGE_CARD_SELECTED
           : isBlank
-            ? "border-4 border-amber-400 ring-2 ring-amber-200"
-            : "border-moss/70"
-      } ${isDragging ? "z-10 rotate-1 shadow-eco-lg" : ""}`}
+            ? "border-amber-400"
+            : PAGE_CARD_DEFAULT
+      } ${isDragging ? "dragging z-10" : ""}`}
       aria-label={`Drag to reorder page ${pageNumber}`}
+      aria-pressed={selectionEnabled ? selected : undefined}
     >
-      <button
-        type="button"
-        onClick={() => selectionEnabled && onToggleSelect(page.id)}
-        disabled={!selectionEnabled}
-        className={`block w-full ${selectionEnabled ? "cursor-pointer" : "cursor-default"} relative`}
-        aria-pressed={selectionEnabled ? selected : undefined}
-        aria-label={
-          selectionEnabled ? `Toggle selection for page ${pageNumber}` : `Page ${pageNumber}`
-        }
-      >
+      <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden bg-cream-200/40 p-3.5">
         <ThumbnailPreview
           src={page.thumbnail}
           alt={`Page ${pageNumber}`}
           loading={!page.thumbnail}
         />
+
+        <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 bg-ink/60 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+          <button
+            type="button"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              onRotate(page.id);
+            }}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-cream-300 bg-white text-forest-700 shadow-sm transition-colors hover:bg-cream-100"
+            aria-label={`Rotate page ${pageNumber}`}
+            title={page.rotation ? `Rotated ${page.rotation}°` : "Turn right"}
+          >
+            <RotateCw className="h-3.5 w-3.5" aria-hidden />
+          </button>
+          <button
+            type="button"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              onRemove(page.id);
+            }}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 shadow-sm transition-colors hover:bg-rose-100"
+            aria-label={`Remove page ${pageNumber}`}
+            title="Delete page"
+          >
+            <Trash2 className="h-3.5 w-3.5" aria-hidden />
+          </button>
+        </div>
+
+        {selectionEnabled ? (
+          <div
+            className={`absolute left-3 top-3 z-10 flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
+              selected
+                ? "border-forest-500 bg-forest-700 text-cream-100"
+                : "border-cream-300 bg-white/90 text-transparent"
+            }`}
+          >
+            <Check className="h-2.5 w-2.5 font-extrabold" aria-hidden />
+          </div>
+        ) : null}
+
+        <div className="absolute bottom-3 right-3 rounded border border-cream-300 bg-cream-100/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-forest-700">
+          Page {pageNumber}
+        </div>
+
         {page.rotation ? (
-          <span className="absolute bottom-1 left-1 rounded bg-cream/90 px-1 text-[10px] font-semibold text-forest">
+          <span className="absolute bottom-3 left-3 rounded border border-cream-300 bg-cream-100/90 px-1.5 py-0.5 text-[9px] font-bold text-forest-700">
             {page.rotation}°
           </span>
         ) : null}
-      </button>
-
-      <div className="border-t border-moss/70 px-2 py-2">
-        <p className="text-xs font-semibold text-forest">Page {pageNumber}</p>
-        <p className="truncate text-[11px] text-sand-light">{sourceName}</p>
       </div>
 
-      <button
-        type="button"
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={() => onRotate(page.id)}
-        className="absolute left-2 top-2 z-10 rounded-full border border-moss/70 bg-cream p-1 shadow-eco transition-colors hover:bg-forest hover:text-cream"
-        aria-label={`Rotate page ${pageNumber}`}
-        title={page.rotation ? `Rotated ${page.rotation}°` : "Rotate 90°"}
-      >
-        <RotateCw className="h-3 w-3" />
-      </button>
-
-      <button
-        type="button"
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={() => onRemove(page.id)}
-        className="absolute right-2 top-2 z-10 rounded-full border border-moss/70 bg-cream p-1 shadow-eco transition-colors hover:bg-forest hover:text-cream"
-        aria-label={`Remove page ${pageNumber}`}
-        title="Remove page"
-      >
-        <Trash2 className="h-3 w-3" />
-      </button>
+      <div className="border-t border-cream-300 px-2 py-2">
+        <p className="truncate text-[11px] text-ink/50">{sourceName}</p>
+      </div>
     </div>
   );
 }

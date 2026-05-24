@@ -33,8 +33,8 @@ export default function QrToolsTool() {
           <QrTypeSelector onSelect={switchType} />
         ) : (
           <div className="space-y-3 text-center">
-            <h2 className="font-serif text-xl font-semibold text-forest">Scan a QR code</h2>
-            <p className="text-sm text-sand">
+            <h2 className="font-serif text-xl font-semibold text-forest-700">Scan a QR code</h2>
+            <p className="text-sm text-ink/60">
               Use your device camera to read any QR code. Switch back to Create mode in the sidebar
               to generate a new one.
             </p>

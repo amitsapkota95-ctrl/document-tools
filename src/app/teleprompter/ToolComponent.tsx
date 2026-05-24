@@ -409,7 +409,7 @@ export default function TeleprompterTool() {
       sidebarLabel="Teleprompter options"
       upload={
         <div className="flex w-full flex-col gap-3">
-          <p className="text-sm font-semibold text-forest">Your script</p>
+          <p className="text-sm font-semibold text-forest-700">Your script</p>
           <ScriptEditor script={script} onChange={setScript} minHeight="32rem" />
           <ReadingStats script={script} targetWpm={settings.targetWpm} />
         </div>
@@ -425,7 +425,7 @@ export default function TeleprompterTool() {
           <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
             <div className="flex min-h-[24rem] min-w-0 flex-1 flex-col lg:min-h-0">
               <TypographyControls settings={settings} onChange={updateSettings} />
-              <p className="mb-1 text-sm font-semibold text-forest">Your script</p>
+              <p className="mb-1 text-sm font-semibold text-forest-700">Your script</p>
               <ScriptEditor
                 script={script}
                 onChange={setScript}
@@ -461,7 +461,7 @@ export default function TeleprompterTool() {
               max={200}
               value={settings.speed}
               onChange={(e) => updateSettings({ speed: Number(e.target.value) })}
-              className="mt-2 w-full accent-sage"
+              className="mt-2 w-full accent-forest-600"
             />
           </label>
 
@@ -473,7 +473,7 @@ export default function TeleprompterTool() {
               max={180}
               value={settings.targetWpm}
               onChange={(e) => updateSettings({ targetWpm: Number(e.target.value) })}
-              className="mt-2 w-full accent-sage"
+              className="mt-2 w-full accent-forest-600"
             />
           </label>
 
@@ -489,17 +489,17 @@ export default function TeleprompterTool() {
                 type="checkbox"
                 checked={settings.voiceTracking}
                 onChange={(e) => updateSettings({ voiceTracking: e.target.checked })}
-                className="h-4 w-4 accent-sage"
+                className="h-4 w-4 accent-forest-600"
               />
               Voice-tracking auto-scroll (Beta)
             </label>
-            <p className="text-xs text-sand-light">
+            <p className="text-xs text-ink/50">
               Experimental — uses Chrome/Edge speech recognition. If it doesn&apos;t detect your
               voice, manual scroll speed still works. Turn off to use the standard teleprompter.
             </p>
           </AdvancedToolsToggle>
 
-          <p className="text-sm text-sand">
+          <p className="text-sm text-ink/60">
             Fullscreen: Space = pause, ↑↓ = speed, E = edit, Esc = close editor, M = markers, 1–4 =
             themes.
           </p>

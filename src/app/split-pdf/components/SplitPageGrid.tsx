@@ -29,7 +29,7 @@ function DragOverlayCard({
 }) {
   return (
     <div
-      className="overflow-hidden rounded-xl border border-moss/70 bg-cream shadow-eco-lg"
+      className="overflow-hidden rounded-xl border border-cream-300 bg-cream shadow-paper-lg"
       style={{ width: cardWidthPx }}
     >
       {page.thumbnail ? (
@@ -37,15 +37,15 @@ function DragOverlayCard({
         <img
           src={page.thumbnail}
           alt=""
-          className="aspect-[3/4] w-full object-contain bg-moss-light/30 p-1"
+          className="aspect-[3/4] w-full object-contain bg-cream-200/50 p-1"
         />
       ) : (
-        <div className="flex aspect-[3/4] w-full items-center justify-center bg-moss-light/40 text-xs text-sand">
+        <div className="flex aspect-[3/4] w-full items-center justify-center bg-cream-200/60 text-xs text-ink/60">
           Loading…
         </div>
       )}
-      <div className="border-t border-moss/70 px-2 py-2">
-        <p className="truncate text-xs font-semibold text-forest">Page {pageNumber}</p>
+      <div className="border-t border-cream-300 px-2 py-2">
+        <p className="truncate text-xs font-semibold text-forest-700">Page {pageNumber}</p>
       </div>
     </div>
   );

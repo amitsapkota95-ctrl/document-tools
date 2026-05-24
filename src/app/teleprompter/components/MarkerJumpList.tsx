@@ -18,7 +18,7 @@ export function MarkerJumpList({
   if (markers.length === 0) {
     if (variant === "sidebar") {
       return (
-        <p className="text-xs text-sand-light">
+        <p className="text-xs text-ink/50">
           Add section markers with the toolbar or type <code>=== Section Name ===</code>
         </p>
       );
@@ -46,14 +46,14 @@ export function MarkerJumpList({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold uppercase tracking-wider text-sand">Section markers</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-ink/60">Section markers</p>
       <ul className="space-y-1">
         {markers.map((m) => (
           <li key={m.id}>
             <button
               type="button"
               onClick={() => onJump(m)}
-              className="w-full rounded-lg border border-moss/40 px-3 py-2 text-left text-sm font-medium text-forest transition-colors hover:bg-moss-light/50"
+              className="w-full rounded-lg border border-cream-300 px-3 py-2 text-left text-sm font-medium text-forest-700 transition-colors hover:bg-cream-200/80"
             >
               ▶ {m.label}
             </button>

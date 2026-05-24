@@ -24,14 +24,14 @@ export function QrScanPanel() {
 
   return (
     <div className="space-y-4">
-      <div id="qr-reader" className="rounded-xl border border-moss/70 shadow-eco" />
+      <div id="qr-reader" className="rounded-xl border border-cream-300 shadow-paper" />
       {scanResult ? (
-        <div className={`${CARD_CLASS} bg-moss-light/50 p-4`}>
+        <div className={`${CARD_CLASS} bg-cream-200/80 p-4`}>
           <p className="text-sm font-semibold">Scanned result</p>
           <p className="mt-1 break-all text-sm">{scanResult}</p>
         </div>
       ) : (
-        <p className="text-sm text-sand">Point your camera at a QR code</p>
+        <p className="text-sm text-ink/60">Point your camera at a QR code</p>
       )}
     </div>
   );

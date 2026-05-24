@@ -195,7 +195,7 @@ export default function InvoiceBuilderTool() {
         <section className={INVOICE_BUILDER_EDIT_PANEL} aria-label="Build invoice">
           <p
             aria-live="polite"
-            className={`mb-4 text-xs font-semibold text-sand-light transition-opacity ${
+            className={`mb-4 text-xs font-semibold text-ink/50 transition-opacity ${
               savedVisible ? "opacity-100" : "opacity-0"
             }`}
           >
@@ -231,8 +231,8 @@ export default function InvoiceBuilderTool() {
             </AdvancedToolsToggle>
           </div>
 
-          <div className="mt-5 rounded-xl border border-moss-dark/40 bg-moss-light/30 p-4 text-xs text-sand">
-            <p className="font-bold text-forest">Suite shortcuts</p>
+          <div className="mt-5 rounded-xl border border-cream-300 bg-cream-200/50 p-4 text-xs text-ink/60">
+            <p className="font-bold text-forest-700">Suite shortcuts</p>
             <ul className="mt-2 space-y-1">
               <li>
                 <Link href="/fill-and-sign" className="font-semibold underline">
@@ -258,7 +258,7 @@ export default function InvoiceBuilderTool() {
 
         <section className={INVOICE_BUILDER_PREVIEW_PANEL} aria-label="Live preview">
           <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
-            <p className="text-sm font-bold text-forest">Live preview</p>
+            <p className="text-sm font-bold text-forest-700">Live preview</p>
             <ToolButton onClick={handleExportPdf} disabled={exporting} className="shrink-0">
               <FileDown className="mr-1.5 h-4 w-4" />
               {exporting ? "Exporting…" : "Download PDF"}

@@ -31,13 +31,13 @@ export function PrompterPreview({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-forest">Preview</p>
-        <label className="flex items-center gap-2 text-xs font-semibold text-forest">
+        <p className="text-sm font-semibold text-forest-700">Preview</p>
+        <label className="flex items-center gap-2 text-xs font-semibold text-forest-700">
           Theme
           <select
             value={settings.theme}
             onChange={(e) => onThemeChange(e.target.value as ThemeId)}
-            className="rounded-lg border border-moss/60 bg-cream px-2 py-1 text-xs"
+            className="rounded-lg border border-cream-300 bg-cream px-2 py-1 text-xs"
           >
             {THEME_ORDER.map((id) => (
               <option key={id} value={id}>
@@ -48,7 +48,7 @@ export function PrompterPreview({
         </label>
       </div>
       <div
-        className="flex min-h-[20rem] flex-1 flex-col overflow-hidden rounded-xl border shadow-eco lg:min-h-0"
+        className="flex min-h-[20rem] flex-1 flex-col overflow-hidden rounded-xl border shadow-paper lg:min-h-0"
         style={{ borderColor: theme.border, backgroundColor: theme.background }}
       >
         <PrompterViewport

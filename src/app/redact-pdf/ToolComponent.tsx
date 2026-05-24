@@ -12,6 +12,7 @@ import { ProgressBar } from "@/components/tools/ProgressBar";
 import { ToolButton } from "@/components/tools/ToolButton";
 import { Modal } from "@/components/ui/Modal";
 import { usePdfPasswordUnlock } from "@/hooks/usePdfPasswordUnlock";
+import { useHeroFileImport } from "@/hooks/useHeroFileImport";
 import { TOOL_SIDEBAR_CTA_CLASS } from "@/lib/ui/classes";
 import { downloadBytes, sanitizeFilename } from "@/lib/pdf/download";
 import { domBoxToPdfPoints, PDF_RENDER_SCALE } from "@/lib/pdf/coordinate-map";
@@ -132,6 +133,8 @@ export default function RedactPdfTool() {
     setPageCount(pdf.numPages);
   };
 
+  useHeroFileImport("redact-pdf", handleFile);
+
   const scanForPii = async () => {
     if (!file) return;
     setScanning(true);
@@ -237,7 +240,7 @@ export default function RedactPdfTool() {
           file ? (
             <>
               <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-                <p className="text-sm text-sand">
+                <p className="text-sm text-ink/60">
                   Draw boxes manually, or use Smart Detection to find emails, phone numbers, and
                   more on the current page.
                 </p>
@@ -248,7 +251,7 @@ export default function RedactPdfTool() {
                         type="button"
                         disabled={pageIndex === 0}
                         onClick={() => setPageIndex((page) => page - 1)}
-                        className="rounded-lg border border-moss-dark px-3 py-1 text-sm disabled:opacity-40"
+                        className="rounded-lg border border-cream-300 px-3 py-1 text-sm disabled:opacity-40"
                       >
                         ← Prev
                       </button>
@@ -259,7 +262,7 @@ export default function RedactPdfTool() {
                         type="button"
                         disabled={pageIndex >= pageCount - 1}
                         onClick={() => setPageIndex((page) => page + 1)}
-                        className="rounded-lg border border-moss-dark px-3 py-1 text-sm disabled:opacity-40"
+                        className="rounded-lg border border-cream-300 px-3 py-1 text-sm disabled:opacity-40"
                       >
                         Next →
                       </button>
@@ -272,7 +275,7 @@ export default function RedactPdfTool() {
                       onClick={() =>
                         setZoom((value) => Math.max(ZOOM_MIN, value - ZOOM_STEP))
                       }
-                      className="rounded-lg border border-moss-dark px-3 py-1 text-sm disabled:opacity-40"
+                      className="rounded-lg border border-cream-300 px-3 py-1 text-sm disabled:opacity-40"
                       aria-label="Zoom out"
                     >
                       −
@@ -286,7 +289,7 @@ export default function RedactPdfTool() {
                       onClick={() =>
                         setZoom((value) => Math.min(ZOOM_MAX, value + ZOOM_STEP))
                       }
-                      className="rounded-lg border border-moss-dark px-3 py-1 text-sm disabled:opacity-40"
+                      className="rounded-lg border border-cream-300 px-3 py-1 text-sm disabled:opacity-40"
                       aria-label="Zoom in"
                     >
                       +
@@ -295,7 +298,7 @@ export default function RedactPdfTool() {
                       type="button"
                       disabled={zoom === 1}
                       onClick={() => setZoom(1)}
-                      className="rounded-lg border border-moss-dark px-3 py-1 text-sm disabled:opacity-40"
+                      className="rounded-lg border border-cream-300 px-3 py-1 text-sm disabled:opacity-40"
                     >
                       Reset
                     </button>
@@ -328,14 +331,14 @@ export default function RedactPdfTool() {
                 />
               </div>
               <div className="shrink-0 space-y-3">
-                <p className="text-sm text-sand">
+                <p className="text-sm text-ink/60">
                   {currentPageBoxes.length} area(s) marked on this page
                   {totalMarkedAreas !== currentPageBoxes.length
                     ? ` · ${totalMarkedAreas} total across document`
                     : null}
                 </p>
                 {scanMessage ? (
-                  <p className="rounded-xl border border-moss/70 bg-moss-light/50 px-4 py-3 text-sm text-forest-muted">
+                  <p className="rounded-xl border border-cream-300 bg-cream-200/80 px-4 py-3 text-sm text-forest-600">
                     {scanMessage}
                   </p>
                 ) : null}
@@ -354,8 +357,8 @@ export default function RedactPdfTool() {
               replaceLabel="Replace PDF"
             />
 
-            <div className="space-y-4 border-t border-moss/40 pt-4">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-sand">
+            <div className="space-y-4 border-t border-cream-300 pt-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-ink/60">
                     Smart Detection
                   </h3>
                   {PII_TYPES.map((type) => (
@@ -366,7 +369,7 @@ export default function RedactPdfTool() {
                         onChange={(event) =>
                           setPiiEnabled((prev) => ({ ...prev, [type]: event.target.checked }))
                         }
-                        className="h-4 w-4 accent-sage"
+                        className="h-4 w-4 accent-forest-600"
                       />
                       {PII_LABELS[type]}
                     </label>
@@ -391,7 +394,7 @@ export default function RedactPdfTool() {
                         updateCurrentPageBoxes([]);
                         setScanMessage(null);
                       }}
-                      className="text-xs text-sand underline"
+                      className="text-xs text-ink/60 underline"
                     >
                       Clear boxes on this page
                     </button>
@@ -403,7 +406,7 @@ export default function RedactPdfTool() {
                         setRedactionsByPage({});
                         setScanMessage(null);
                       }}
-                      className="text-xs text-sand underline"
+                      className="text-xs text-ink/60 underline"
                     >
                       Clear all pages
                     </button>
@@ -442,7 +445,7 @@ export default function RedactPdfTool() {
           </button>
         }
       >
-        <p className="text-sm text-forest-muted">
+        <p className="text-sm text-forest-600">
           Warning: This permanently removes the underlying data beneath each black box on the
           pages where you marked them. It cannot be undone. Make sure you keep an unredacted copy
           if needed.

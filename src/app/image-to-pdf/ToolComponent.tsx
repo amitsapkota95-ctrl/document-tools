@@ -206,7 +206,7 @@ export default function ImageToPdfTool() {
                             ref={dragProvided.innerRef}
                             {...dragProvided.draggableProps}
                             {...dragProvided.dragHandleProps}
-                            className={`${gridConfig.cardClass} relative shrink-0 cursor-grab overflow-hidden rounded-xl border border-moss/70 bg-cream shadow-eco transition-all duration-200 hover:-translate-y-0.5 hover:shadow-eco-lg active:cursor-grabbing`}
+                            className={`${gridConfig.cardClass} relative shrink-0 cursor-grab overflow-hidden rounded-xl border border-cream-300 bg-cream shadow-paper transition-all duration-200 hover:-translate-y-0.5 hover:shadow-paper-lg active:cursor-grabbing`}
                           >
                             <ThumbnailPreview
                               src={entry.preview}
@@ -214,7 +214,7 @@ export default function ImageToPdfTool() {
                               imageStyle={{ transform: `rotate(${entry.rotation}deg)` }}
                             />
                             {entry.rotation ? (
-                              <span className="absolute bottom-8 left-1 rounded bg-cream/90 px-1 text-[10px] font-semibold text-forest">
+                              <span className="absolute bottom-8 left-1 rounded bg-cream/90 px-1 text-[10px] font-semibold text-forest-700">
                                 {entry.rotation}°
                               </span>
                             ) : null}
@@ -222,7 +222,7 @@ export default function ImageToPdfTool() {
                               type="button"
                               onPointerDown={(event) => event.stopPropagation()}
                               onClick={() => rotateImage(entry.id)}
-                              className="absolute left-2 top-2 z-10 rounded-full border border-moss/70 bg-cream p-1 shadow-eco transition-colors hover:bg-forest hover:text-cream"
+                              className="absolute left-2 top-2 z-10 rounded-full border border-cream-300 bg-cream p-1 shadow-paper transition-colors hover:bg-forest-700 hover:text-cream-100"
                               aria-label={`Rotate image ${index + 1}`}
                               title={`Rotate (${entry.rotation}° → ${nextImageRotation(entry.rotation)}°)`}
                             >
@@ -232,7 +232,7 @@ export default function ImageToPdfTool() {
                               type="button"
                               onPointerDown={(event) => event.stopPropagation()}
                               onClick={() => removeImage(entry.id)}
-                              className="absolute right-2 top-2 z-10 rounded-full border border-moss/70 bg-cream p-1 shadow-eco transition-colors hover:bg-forest hover:text-cream"
+                              className="absolute right-2 top-2 z-10 rounded-full border border-cream-300 bg-cream p-1 shadow-paper transition-colors hover:bg-forest-700 hover:text-cream-100"
                               aria-label={`Remove image ${index + 1}`}
                             >
                               <X className="h-3 w-3" />
@@ -296,7 +296,7 @@ export default function ImageToPdfTool() {
                 type="checkbox"
                 checked={scannerMagic}
                 onChange={(e) => setScannerMagic(e.target.checked)}
-                className="h-4 w-4 accent-sage"
+                className="h-4 w-4 accent-forest-600"
               />
               Scanner Magic — auto-deskew, trim borders, high-contrast B&amp;W
             </label>

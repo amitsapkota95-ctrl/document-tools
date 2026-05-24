@@ -120,8 +120,8 @@ export function InvoiceEditor() {
         </label>
       </div>
 
-      <fieldset className="space-y-3 rounded-xl border border-moss-dark/50 bg-moss-light/20 p-4">
-        <legend className="px-1 text-sm font-bold text-forest">Your business</legend>
+      <fieldset className="space-y-3 rounded-xl border border-cream-300/50 bg-cream-200/20 p-4">
+        <legend className="px-1 text-sm font-bold text-forest-700">Your business</legend>
         <label className="block text-sm font-semibold">
           Business name
           <input
@@ -176,8 +176,8 @@ export function InvoiceEditor() {
         </label>
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-xl border border-moss-dark/50 bg-moss-light/20 p-4">
-        <legend className="px-1 text-sm font-bold text-forest">Client</legend>
+      <fieldset className="space-y-3 rounded-xl border border-cream-300/50 bg-cream-200/20 p-4">
+        <legend className="px-1 text-sm font-bold text-forest-700">Client</legend>
         <label className="block text-sm font-semibold">
           Client name
           <input
@@ -223,8 +223,8 @@ export function InvoiceEditor() {
         </div>
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-xl border border-moss-dark/50 bg-moss-light/20 p-4">
-        <legend className="px-1 text-sm font-bold text-forest">Dates & reference</legend>
+      <fieldset className="space-y-3 rounded-xl border border-cream-300/50 bg-cream-200/20 p-4">
+        <legend className="px-1 text-sm font-bold text-forest-700">Dates & reference</legend>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block text-sm font-semibold">
             Issue date
@@ -277,10 +277,10 @@ export function InvoiceEditor() {
         ) : null}
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-xl border border-moss-dark/50 bg-moss-light/20 p-4">
-        <legend className="px-1 text-sm font-bold text-forest">Line items</legend>
+      <fieldset className="space-y-3 rounded-xl border border-cream-300/50 bg-cream-200/20 p-4">
+        <legend className="px-1 text-sm font-bold text-forest-700">Line items</legend>
         {draft.items.map((item) => (
-          <div key={item.id} className="flex items-end gap-2 rounded-lg border border-moss/60 bg-cream p-3">
+          <div key={item.id} className="flex items-end gap-2 rounded-lg border border-cream-300 bg-cream p-3">
             <label className="min-w-0 flex-1 text-xs font-semibold">
               Description
               <input
@@ -326,13 +326,13 @@ export function InvoiceEditor() {
         <AdvancedToolsToggle label="Line item options">
           {savedItems.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              <p className="w-full text-xs font-semibold text-sand">Saved catalog</p>
+              <p className="w-full text-xs font-semibold text-ink/60">Saved catalog</p>
               {savedItems.map((si) => (
                 <button
                   key={si.id}
                   type="button"
                   onClick={() => applySavedItem(si)}
-                  className="rounded-lg border border-moss-dark bg-cream px-2 py-1 text-xs font-semibold hover:bg-moss-light"
+                  className="rounded-lg border border-cream-300 bg-cream px-2 py-1 text-xs font-semibold hover:bg-cream-200"
                 >
                   + {si.description}
                 </button>
@@ -341,8 +341,8 @@ export function InvoiceEditor() {
           ) : null}
 
           {draft.items.map((item, idx) => (
-            <div key={item.id} className="space-y-2 rounded-lg border border-moss/60 bg-cream p-3">
-              <p className="text-xs font-bold text-forest">
+            <div key={item.id} className="space-y-2 rounded-lg border border-cream-300 bg-cream p-3">
+              <p className="text-xs font-bold text-forest-700">
                 Line {idx + 1}
                 {item.description ? `: ${item.description}` : ""}
               </p>
@@ -350,7 +350,7 @@ export function InvoiceEditor() {
                 <select
                   value={item.type}
                   onChange={(e) => updateItem(item.id, "type", e.target.value)}
-                  className="rounded border border-moss-dark bg-cream px-2 py-1 text-xs font-semibold"
+                  className="rounded border border-cream-300 bg-cream px-2 py-1 text-xs font-semibold"
                 >
                   <option value="standard">Standard</option>
                   <option value="time">Time (hours)</option>
@@ -359,7 +359,7 @@ export function InvoiceEditor() {
                   type="button"
                   onClick={() => reorderItem(item.id, "up")}
                   disabled={idx === 0}
-                  className="rounded px-2 py-1 text-xs font-semibold hover:bg-moss-light disabled:opacity-30"
+                  className="rounded px-2 py-1 text-xs font-semibold hover:bg-cream-200 disabled:opacity-30"
                 >
                   Move up
                 </button>
@@ -367,7 +367,7 @@ export function InvoiceEditor() {
                   type="button"
                   onClick={() => reorderItem(item.id, "down")}
                   disabled={idx === draft.items.length - 1}
-                  className="rounded px-2 py-1 text-xs font-semibold hover:bg-moss-light disabled:opacity-30"
+                  className="rounded px-2 py-1 text-xs font-semibold hover:bg-cream-200 disabled:opacity-30"
                 >
                   Move down
                 </button>
@@ -427,7 +427,7 @@ export function InvoiceEditor() {
               <button
                 type="button"
                 onClick={() => saveLineToCatalog(item.description, item.rate)}
-                className="text-xs font-semibold text-forest-muted underline"
+                className="text-xs font-semibold text-forest-600 underline"
               >
                 Save to catalog
               </button>
@@ -436,8 +436,8 @@ export function InvoiceEditor() {
         </AdvancedToolsToggle>
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-xl border border-moss-dark/50 bg-moss-light/20 p-4">
-        <legend className="px-1 text-sm font-bold text-forest">Tax</legend>
+      <fieldset className="space-y-3 rounded-xl border border-cream-300/50 bg-cream-200/20 p-4">
+        <legend className="px-1 text-sm font-bold text-forest-700">Tax</legend>
         <label className="block text-sm font-semibold">
           Tax region preset
           <select
@@ -495,7 +495,7 @@ export function InvoiceEditor() {
             type="color"
             value={business.accentColor}
             onChange={(e) => business.setField("accentColor", e.target.value)}
-            className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-moss-dark"
+            className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-cream-300"
           />
         </label>
         <div>
@@ -782,7 +782,7 @@ export function InvoiceEditor() {
           </div>
         ) : null}
 
-        <p className="text-xs text-sand-light">
+        <p className="text-xs text-ink/50">
           Clients and saved line items are stored locally in your browser. No account required.
         </p>
       </AdvancedToolsToggle>

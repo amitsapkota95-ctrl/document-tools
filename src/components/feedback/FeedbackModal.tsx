@@ -80,7 +80,7 @@ export function FeedbackModal({ open, toolSlug, onClose }: FeedbackModalProps) {
   if (submitted) {
     return (
       <Modal open={open} title="Thank you" onClose={onClose}>
-        <p className="text-sm leading-relaxed text-sand">
+        <p className="text-sm leading-relaxed text-ink/60">
           Thanks — we read every note.
         </p>
       </Modal>
@@ -104,7 +104,7 @@ export function FeedbackModal({ open, toolSlug, onClose }: FeedbackModalProps) {
     >
       <div className="space-y-4">
         <div>
-          <p className="mb-3 text-sm font-medium text-forest">How was it?</p>
+          <p className="mb-3 text-sm font-bold text-forest-700">How was it?</p>
           <div className="grid grid-cols-3 gap-2">
             {SENTIMENT_OPTIONS.map(({ value, label, icon: Icon }) => {
               const selected = sentiment === value;
@@ -115,8 +115,8 @@ export function FeedbackModal({ open, toolSlug, onClose }: FeedbackModalProps) {
                   onClick={() => setSentiment(value)}
                   className={`flex flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-xs font-semibold transition-colors ${
                     selected
-                      ? "border-sage-dark bg-sage/15 text-forest"
-                      : "border-moss-dark bg-moss-light/50 text-sand hover:border-sage-dark hover:bg-sage/10"
+                      ? "border-forest-500 bg-forest-50 text-forest-700"
+                      : "border-cream-300 bg-white text-ink/60 hover:border-forest-200 hover:bg-forest-50/50"
                   }`}
                 >
                   <Icon className="h-5 w-5" aria-hidden />
@@ -139,7 +139,7 @@ export function FeedbackModal({ open, toolSlug, onClose }: FeedbackModalProps) {
               placeholder={sentimentPlaceholder(sentiment)}
               rows={3}
               maxLength={1000}
-              className="w-full resize-none rounded-lg border border-moss-dark bg-white/80 px-3 py-2 text-sm text-forest placeholder:text-sand-light focus:border-sage-dark focus:outline-none focus:ring-2 focus:ring-sage/30"
+              className="w-full resize-none rounded-lg border border-cream-300 bg-white px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:border-forest-500 focus:outline-none focus:ring-1 focus:ring-forest-500/30"
             />
           </div>
         ) : null}

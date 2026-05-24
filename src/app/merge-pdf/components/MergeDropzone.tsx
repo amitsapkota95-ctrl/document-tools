@@ -31,20 +31,20 @@ export function MergeDropzone({ onFiles, disabled = false }: MergeDropzoneProps)
         disabled ? "cursor-not-allowed opacity-60" : ""
       } ${
         isDragActive
-          ? "border-sage bg-moss-light text-forest shadow-eco-lg"
-          : "border-sage bg-moss-light/30 text-forest hover:border-sage-dark hover:bg-moss-light/50 hover:shadow-eco"
+          ? "border-forest-500 bg-cream-200 text-forest-700 shadow-paper-lg"
+          : "border-forest-500 bg-cream-200/50 text-forest-700 hover:border-forest-500 hover:bg-cream-200/80 hover:shadow-paper"
       }`}
     >
       <input {...getInputProps()} />
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sage/20">
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-forest-50">
         <Upload
-          className={`h-8 w-8 ${isDragActive ? "text-sage-dark" : "text-accent"}`}
+          className={`h-8 w-8 ${isDragActive ? "text-forest-500" : "text-accent"}`}
           strokeWidth={2}
           aria-hidden
         />
       </div>
-      <p className="text-lg font-semibold text-forest">Drop PDF files here</p>
-      <p className={`mt-2 text-sm ${isDragActive ? "text-forest-muted" : "text-sand"}`}>
+      <p className="text-lg font-semibold text-forest-700">Drop PDF files here</p>
+      <p className={`mt-2 text-sm ${isDragActive ? "text-forest-600" : "text-ink/60"}`}>
         or click to choose files — drag thumbnails below to set the order
       </p>
     </div>

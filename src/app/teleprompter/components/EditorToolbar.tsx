@@ -61,7 +61,7 @@ export function EditorToolbar({ editorRef, onContentChange, onImportText }: Edit
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1 rounded-t-xl border border-b-0 border-moss/60 bg-moss-light/30 p-2">
+    <div className="flex flex-wrap items-center gap-1 rounded-t-xl border border-b-0 border-cream-300 bg-cream-200/50 p-2">
       <ToolbarButton title="Bold (Ctrl+B)" onClick={() => withEditor(applyBoldToSelection)}>
         <Bold className="h-4 w-4" />
       </ToolbarButton>
@@ -69,7 +69,7 @@ export function EditorToolbar({ editorRef, onContentChange, onImportText }: Edit
         <Underline className="h-4 w-4" />
       </ToolbarButton>
 
-      <div className="mx-1 h-6 w-px bg-moss/60" />
+      <div className="mx-1 h-6 w-px bg-cream-300" />
 
       {COLOR_SWATCHES.map((swatch) => (
         <button
@@ -77,7 +77,7 @@ export function EditorToolbar({ editorRef, onContentChange, onImportText }: Edit
           type="button"
           title={swatch.label}
           onClick={() => applyColor(swatch.value)}
-          className="h-6 w-6 rounded border border-moss/60 transition-transform hover:scale-110"
+          className="h-6 w-6 rounded border border-cream-300 transition-transform hover:scale-110"
           style={{
             backgroundColor: swatch.value || "transparent",
             backgroundImage: swatch.value
@@ -97,7 +97,7 @@ export function EditorToolbar({ editorRef, onContentChange, onImportText }: Edit
         onChange={(e) => applyColor(e.target.value)}
       />
 
-      <div className="mx-1 h-6 w-px bg-moss/60" />
+      <div className="mx-1 h-6 w-px bg-cream-300" />
 
       <ToolbarButton title="Insert section marker" onClick={insertMarker}>
         <Bookmark className="h-4 w-4" />
@@ -125,7 +125,7 @@ function ToolbarButton({
       type="button"
       title={title}
       onClick={onClick}
-      className="rounded-lg p-2 text-forest transition-colors hover:bg-moss/50 active:bg-moss/70"
+      className="rounded-lg p-2 text-forest-700 transition-colors hover:bg-cream-300/50 active:bg-cream-300/70"
     >
       {children}
     </button>

@@ -20,7 +20,7 @@ export function OcrOverlayViewer({
 }: OcrOverlayViewerProps) {
   return (
     <div
-      className={`relative w-full overflow-auto rounded-xl border-2 border-moss/70 bg-cream shadow-eco ${className}`}
+      className={`relative w-full overflow-auto rounded-xl border-2 border-cream-300 bg-cream shadow-paper ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={imageUrl} alt="Scanned page" className="block h-auto w-full" draggable={false} />
@@ -34,7 +34,7 @@ export function OcrOverlayViewer({
           return (
             <span
               key={`${word.text}-${i}`}
-              className="pointer-events-auto absolute cursor-text text-transparent selection:bg-sage/40 hover:bg-sage/20"
+              className="pointer-events-auto absolute cursor-text text-transparent selection:bg-forest-500/40 hover:bg-forest-50"
               style={{
                 left,
                 top,

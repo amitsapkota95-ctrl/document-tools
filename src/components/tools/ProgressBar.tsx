@@ -11,11 +11,11 @@ export function ProgressBar({ progress, label }: ProgressBarProps) {
   return (
     <div className="w-full">
       {label ? (
-        <p className="mb-2 text-sm font-medium text-forest">{label}</p>
+        <p className="mb-2 text-sm font-bold text-forest-700">{label}</p>
       ) : null}
-      <div className="h-3 w-full overflow-hidden rounded-full border border-moss-dark bg-moss-light/80">
+      <div className="h-3 w-full overflow-hidden rounded-full border border-cream-300 bg-cream-200">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-sage-dark to-accent-light transition-all duration-300"
+          className="h-full rounded-full bg-gradient-to-r from-forest-600 to-forest-500 transition-all duration-300"
           style={{ width: `${clamped}%` }}
           role="progressbar"
           aria-valuenow={clamped}
@@ -23,7 +23,7 @@ export function ProgressBar({ progress, label }: ProgressBarProps) {
           aria-valuemax={100}
         />
       </div>
-      <p className="mt-1 text-right text-xs text-sand">{clamped}%</p>
+      <p className="mt-1 text-right text-xs text-ink/50">{clamped}%</p>
     </div>
   );
 }

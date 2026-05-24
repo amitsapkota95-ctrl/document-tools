@@ -56,7 +56,7 @@ export function QrExportPanel({
               type="color"
               value={style.foreground}
               onChange={(e) => updateStyle("foreground", e.target.value)}
-              className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-moss-dark"
+              className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-cream-300"
             />
           </label>
           <label className="block text-sm font-semibold">
@@ -65,7 +65,7 @@ export function QrExportPanel({
               type="color"
               value={style.background}
               onChange={(e) => updateStyle("background", e.target.value)}
-              className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-moss-dark"
+              className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-cream-300"
             />
           </label>
         </div>
@@ -105,7 +105,7 @@ export function QrExportPanel({
           {copied ? "Copied!" : "Copy encoded data"}
         </ToolButton>
 
-        <p className="text-xs text-sand-light">
+        <p className="text-xs text-ink/50">
           PNG and JPG use your chosen resolution. SVG scales infinitely for print. PDF cards include
           a title and key details.
         </p>

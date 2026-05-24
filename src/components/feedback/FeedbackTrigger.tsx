@@ -20,10 +20,10 @@ export function FeedbackTrigger({
       <button
         type="button"
         onClick={ctx.openFeedback}
-        className={`fixed bottom-6 left-6 z-40 inline-flex items-center gap-2 rounded-full border border-moss-dark bg-paper/95 px-4 py-2.5 text-sm font-semibold text-forest shadow-eco-lg backdrop-blur-sm transition-colors hover:border-sage-dark hover:bg-sage/10 ${className}`}
+        className={`fixed bottom-6 left-6 z-40 inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white/95 px-4 py-2.5 text-sm font-bold text-forest-700 shadow-paper-lg backdrop-blur-sm transition-colors hover:border-forest-200 hover:bg-forest-50 ${className}`}
         aria-label="Send feedback"
       >
-        <MessageSquare className="h-4 w-4 text-sage-dark" aria-hidden />
+        <MessageSquare className="h-4 w-4 text-forest-500" aria-hidden />
         Feedback
       </button>
     );
@@ -33,7 +33,7 @@ export function FeedbackTrigger({
     <button
       type="button"
       onClick={ctx.openFeedback}
-      className={`text-sm font-medium text-sage-dark underline-offset-2 hover:underline ${className}`}
+      className={`text-sm font-semibold text-forest-500 underline-offset-2 hover:underline ${className}`}
     >
       Send feedback
     </button>

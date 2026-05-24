@@ -355,7 +355,7 @@ export function PdfCanvasEditor({
         className={
           embedded
             ? "relative h-full w-full overflow-auto"
-            : "relative h-full w-full overflow-auto rounded-xl border border-moss/70 shadow-eco"
+            : "relative h-full w-full overflow-auto rounded-xl border border-cream-300 shadow-paper"
         }
       >
         <div className="flex min-h-full min-w-full items-center justify-center">
@@ -373,7 +373,7 @@ export function PdfCanvasEditor({
         </div>
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-cream/80">
-            <p className="text-sand">Loading page…</p>
+            <p className="text-ink/60">Loading page…</p>
           </div>
         ) : null}
       </div>
@@ -381,14 +381,14 @@ export function PdfCanvasEditor({
   }
 
   return (
-    <div className="relative overflow-auto rounded-xl border border-moss/70 shadow-eco">
+    <div className="relative overflow-auto rounded-xl border border-cream-300 shadow-paper">
       <div className="relative inline-block leading-none">
         {canvasElement}
         {canvasOverlays}
       </div>
       {loading ? (
         <div className="absolute inset-0 flex items-center justify-center bg-cream/80">
-          <p className="text-sand">Loading page…</p>
+          <p className="text-ink/60">Loading page…</p>
         </div>
       ) : null}
     </div>

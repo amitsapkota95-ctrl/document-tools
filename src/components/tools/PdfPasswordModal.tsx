@@ -30,17 +30,17 @@ export function PdfPasswordModal({
           type="button"
           onClick={onSubmit}
           disabled={!password.trim()}
-          className="rounded-lg border-2 border-sage bg-sage px-4 py-2 text-sm font-bold text-forest hover:bg-sage-light disabled:opacity-50"
+          className="rounded-xl bg-forest-700 px-4 py-2 text-xs font-bold text-cream-100 hover:bg-forest-600 disabled:opacity-50"
         >
           Unlock
         </button>
       }
     >
-      <p className="text-sm font-semibold text-sand">
+      <p className="text-sm font-semibold text-ink/60">
         This file is locked. Please enter the password to process it locally.
       </p>
       {fileName ? (
-        <p className="mt-2 text-xs text-sand-light">
+        <p className="mt-2 text-xs text-ink/50">
           File: <span className="font-mono">{fileName}</span>
         </p>
       ) : null}
@@ -51,7 +51,7 @@ export function PdfPasswordModal({
         onKeyDown={(e) => {
           if (e.key === "Enter" && password.trim()) onSubmit();
         }}
-        className={`${INPUT_CLASS} mt-4 border-2 border-sage`}
+        className={`${INPUT_CLASS} mt-4`}
         placeholder="Password"
         autoFocus
       />

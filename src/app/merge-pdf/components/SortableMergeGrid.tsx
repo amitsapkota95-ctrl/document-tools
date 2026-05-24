@@ -31,7 +31,7 @@ function DragOverlayCard({
 }) {
   return (
     <div
-      className="overflow-hidden rounded-xl border border-moss/70 bg-cream shadow-eco-lg"
+      className="overflow-hidden rounded-xl border border-cream-300 bg-white shadow-paper-lg"
       style={{ width: cardWidthPx }}
     >
       {item.thumbnailDataUrl ? (
@@ -39,16 +39,18 @@ function DragOverlayCard({
         <img
           src={item.thumbnailDataUrl}
           alt=""
-          className="aspect-[3/4] w-full object-contain bg-moss-light/30 p-1"
+          className="aspect-[3/4] w-full bg-cream-200/40 object-contain p-3.5"
         />
       ) : (
-        <div className="flex aspect-[3/4] w-full items-center justify-center bg-moss-light/40 text-xs text-sand">
+        <div className="flex aspect-[3/4] w-full items-center justify-center bg-cream-200/40 text-xs text-ink/50">
           Loading…
         </div>
       )}
-      <div className="border-t border-moss/70 px-2 py-2">
-        <p className="truncate text-xs font-semibold text-forest">{item.label}</p>
-      </div>
+      {item.kind === "document" ? (
+        <div className="border-t border-cream-300 px-2 py-2">
+          <p className="truncate text-xs font-bold text-forest-700">{item.label}</p>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -60,6 +62,9 @@ interface SortableMergeGridProps {
   onRotate?: (id: string) => void;
   onRename?: (id: string, name: string) => void;
   onThumbnailLoaded?: (id: string, dataUrl: string) => void;
+  selectedIds?: Set<string>;
+  selectionEnabled?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 export function SortableMergeGrid({
@@ -69,6 +74,9 @@ export function SortableMergeGrid({
   onRotate,
   onRename,
   onThumbnailLoaded,
+  selectedIds,
+  selectionEnabled = false,
+  onToggleSelect,
 }: SortableMergeGridProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const gridConfig = getCanvasGridConfig(items.length);
@@ -87,6 +95,8 @@ export function SortableMergeGrid({
     onRotate,
     onRename,
     onThumbnailLoaded,
+    selectionEnabled,
+    onToggleSelect,
   };
 
   return (
@@ -104,7 +114,11 @@ export function SortableMergeGrid({
         <WorkspaceCanvas pageCount={items.length}>
           {items.map((item) => (
             <div key={item.id} className={`${gridConfig.cardClass} shrink-0`}>
-              <GridCard item={item} {...cardProps} />
+              <GridCard
+                item={item}
+                selected={selectedIds?.has(item.id)}
+                {...cardProps}
+              />
             </div>
           ))}
         </WorkspaceCanvas>

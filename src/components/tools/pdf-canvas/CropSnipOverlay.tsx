@@ -164,7 +164,7 @@ export function CropSnipOverlay({
       />
 
       <div
-        className="pointer-events-auto absolute box-border border-2 border-sage shadow-[0_0_0_1px_rgba(255,255,255,0.85)_inset]"
+        className="pointer-events-auto absolute box-border border-2 border-forest-500 shadow-[0_0_0_1px_rgba(255,255,255,0.85)_inset]"
         style={{
           left: `${xPct}%`,
           top: `${yPct}%`,
@@ -184,13 +184,13 @@ export function CropSnipOverlay({
         {HANDLES.map((handle) => (
           <div
             key={handle.id}
-            className={`pointer-events-auto absolute h-3 w-3 rounded-sm border-2 border-sage bg-cream shadow-eco ${handle.className}`}
+            className={`pointer-events-auto absolute h-3 w-3 rounded-sm border-2 border-forest-500 bg-cream shadow-paper ${handle.className}`}
             style={{ cursor: handle.cursor }}
             onPointerDown={(event) => startDrag(event, handle.id)}
           />
         ))}
 
-        <div className="pointer-events-none absolute -top-7 left-0 rounded-md bg-forest px-2 py-0.5 text-[11px] font-semibold text-cream shadow-eco">
+        <div className="pointer-events-none absolute -top-7 left-0 rounded-md bg-forest px-2 py-0.5 text-[11px] font-semibold text-cream shadow-paper">
           {Math.round(box.width)} × {Math.round(box.height)} px
         </div>
       </div>

@@ -29,11 +29,11 @@ export function ToolSidebarDocumentList({
         {documents.map((doc) => (
           <li
             key={doc.id}
-            className="flex items-center gap-2 rounded-lg border border-moss/70 bg-cream/80 px-3 py-2"
+            className="flex items-center gap-2 rounded-lg border border-cream-300 bg-white px-3 py-2 shadow-paper"
           >
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-forest">{doc.displayName}</p>
-              <p className="text-xs text-sand-light">
+              <p className="truncate text-sm font-bold text-forest-700">{doc.displayName}</p>
+              <p className="text-xs text-ink/50">
                 {doc.pageCount} page{doc.pageCount !== 1 ? "s" : ""}
               </p>
             </div>
@@ -41,7 +41,7 @@ export function ToolSidebarDocumentList({
               type="button"
               onClick={() => onRemove(doc.id)}
               disabled={disabled}
-              className="shrink-0 rounded-full border border-moss/70 bg-cream p-1 text-forest transition-colors hover:bg-forest hover:text-cream disabled:cursor-not-allowed disabled:opacity-50"
+              className="shrink-0 rounded-full border border-cream-300 bg-cream-100 p-1 text-forest-700 transition-colors hover:bg-cream-200 disabled:cursor-not-allowed disabled:opacity-50"
               aria-label={`Remove ${doc.displayName}`}
               title="Remove this file"
             >

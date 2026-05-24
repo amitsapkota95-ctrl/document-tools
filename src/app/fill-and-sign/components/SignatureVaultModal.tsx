@@ -134,28 +134,28 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-forest/50 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm">
       <div
-        className="eco-card w-full max-w-2xl rounded-xl shadow-eco-lg"
+        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-paper-lg"
         role="dialog"
         aria-modal
         aria-labelledby="signature-vault-title"
       >
-        <div className="flex items-center justify-between border-b border-moss/70 px-5 py-4">
-          <h2 id="signature-vault-title" className="font-serif text-2xl font-bold text-forest">
-            Signature Vault
+        <div className="flex items-center justify-between border-b border-cream-300 bg-cream-100 px-5 py-4">
+          <h2 id="signature-vault-title" className="font-serif text-lg font-bold text-forest-700">
+            Draw your signature
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-moss-dark bg-moss-light/80 p-1.5 text-forest transition-colors hover:bg-moss-light"
+            className="flex h-6 w-6 items-center justify-center rounded-full text-ink/40 transition-colors hover:bg-cream-300 hover:text-ink"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-2 border-b border-moss/70 px-5 py-3">
+        <div className="flex flex-wrap gap-2 border-b border-cream-300 px-5 py-3">
           {(
             [
               ["type", "Type"],
@@ -178,7 +178,7 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
         <div className="space-y-4 px-5 py-5">
           {tab === "type" ? (
             <>
-              <label className="block text-sm font-semibold text-forest">
+              <label className="block text-sm font-bold text-forest-700">
                 Type your name
                 <input
                   value={typedName}
@@ -189,7 +189,7 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
               </label>
 
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-forest">Text color</p>
+                <p className="text-sm font-bold text-forest-700">Text color</p>
                 <div className="flex flex-wrap gap-2">
                   {SIGNATURE_COLORS.map((color) => (
                     <button
@@ -198,12 +198,12 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
                       onClick={() => setSelectedColorId(color.id)}
                       className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-shadow ${
                         selectedColorId === color.id
-                          ? "border-sage-dark bg-cream shadow-eco"
-                          : "border-moss/70 bg-moss-light/30 hover:bg-moss-light/50"
+                          ? "border-forest-500 bg-forest-50 shadow-paper"
+                          : "border-cream-300 bg-white hover:border-forest-200 hover:bg-forest-50/50"
                       }`}
                     >
                       <span
-                        className="h-4 w-4 rounded-full border border-moss/70"
+                        className="h-4 w-4 rounded-full border border-cream-300"
                         style={{ backgroundColor: color.value }}
                         aria-hidden
                       />
@@ -214,7 +214,7 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-forest">Choose a style</p>
+                <p className="text-sm font-bold text-forest-700">Choose a style</p>
                 <div className="grid gap-3 md:grid-cols-3">
                   {SIGNATURE_FONTS.map((font) => (
                     <button
@@ -223,11 +223,11 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
                       onClick={() => setSelectedFontId(font.id)}
                       className={`min-h-24 rounded-xl border px-3 py-4 text-left transition-shadow ${
                         selectedFontId === font.id
-                          ? "border-sage-dark bg-cream shadow-eco"
-                          : "border-moss/70 bg-moss-light/30 hover:bg-moss-light/50"
+                          ? "border-forest-500 bg-forest-50 shadow-paper"
+                          : "border-cream-300 bg-white hover:border-forest-200 hover:bg-forest-50/50"
                       }`}
                     >
-                      <span className="block text-xs font-semibold uppercase tracking-wide text-sand-light">
+                      <span className="block text-xs font-semibold uppercase tracking-wide text-ink/50">
                         {font.label}
                       </span>
                       <span
@@ -250,7 +250,7 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
           {tab === "draw" ? (
             <>
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-forest">Pen color</p>
+                <p className="text-sm font-bold text-forest-700">Pen color</p>
                 <div className="flex flex-wrap gap-2">
                   {SIGNATURE_COLORS.map((color) => (
                     <button
@@ -259,12 +259,12 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
                       onClick={() => setPenColor(color.value)}
                       className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-shadow ${
                         penColor === color.value
-                          ? "border-sage-dark bg-cream shadow-eco"
-                          : "border-moss/70 bg-moss-light/30 hover:bg-moss-light/50"
+                          ? "border-forest-500 bg-forest-50 shadow-paper"
+                          : "border-cream-300 bg-white hover:border-forest-200 hover:bg-forest-50/50"
                       }`}
                     >
                       <span
-                        className="h-4 w-4 rounded-full border border-moss/70"
+                        className="h-4 w-4 rounded-full border border-cream-300"
                         style={{ backgroundColor: color.value }}
                         aria-hidden
                       />
@@ -273,8 +273,8 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
                   ))}
                 </div>
               </div>
-              <div className="relative overflow-hidden rounded-xl border border-moss/70 bg-cream">
-                <div className="pointer-events-none absolute inset-x-8 bottom-10 border-b border-moss-dark/40" />
+              <div className="relative overflow-hidden rounded-xl border border-cream-300 bg-cream-100">
+                <div className="pointer-events-none absolute inset-x-8 bottom-10 border-b border-cream-400/60" />
                 <SignatureCanvas
                   ref={signatureRef}
                   penColor={penColor}
@@ -298,22 +298,22 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
               {...getRootProps()}
               className={`cursor-pointer rounded-xl border-2 border-dashed px-8 py-12 text-center transition-colors ${
                 isDragActive
-                  ? "border-sage bg-moss-light text-forest shadow-eco-lg"
-                  : "border-sage bg-moss-light/30 text-forest hover:border-sage-dark hover:bg-moss-light/50 hover:shadow-eco"
+                  ? "border-forest-500 bg-forest-50 text-forest-700 shadow-paper"
+                  : "border-cream-300 bg-white text-forest-700 hover:border-forest-500 hover:bg-forest-50/50 hover:shadow-paper"
               }`}
             >
               <input {...getInputProps()} />
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sage/20">
-                <Upload className="h-5 w-5 text-accent" strokeWidth={2} aria-hidden />
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-cream-200">
+                <Upload className="h-5 w-5 text-forest-500" strokeWidth={2} aria-hidden />
               </div>
-              <p className="font-semibold text-forest">Drop PNG or JPG signature</p>
-              <p className="mt-1 text-sm text-sand">Transparent PNG recommended</p>
+              <p className="font-bold text-forest-700">Drop PNG or JPG signature</p>
+              <p className="mt-1 text-sm text-ink/50">Transparent PNG recommended</p>
             </div>
           ) : null}
 
           {tab === "stamps" ? (
             <>
-              <p className="text-sm text-sand">
+              <p className="text-sm text-ink/50">
                 Place a stamp on the current page, or save it to your vault for reuse.
               </p>
               <div className="grid gap-3 sm:grid-cols-3">
@@ -322,7 +322,7 @@ export function SignatureVaultModal({ open, onClose, onCreated }: SignatureVault
                   return (
                     <div
                       key={stamp.id}
-                      className="flex flex-col items-center gap-3 rounded-xl border border-moss/70 bg-cream p-4 shadow-eco"
+                      className="flex flex-col items-center gap-3 rounded-xl border border-cream-300 bg-white p-4 shadow-paper"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={dataUrl} alt={stamp.label} className="h-14 w-full object-contain" />

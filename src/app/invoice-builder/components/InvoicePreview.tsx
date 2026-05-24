@@ -20,7 +20,7 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
 
   const themeClasses = {
     classic: "font-serif",
-    minimal: "border border-moss-dark/40",
+    minimal: "border border-cream-300",
     bold: "border-t-4",
   }[draft.templateTheme];
 
@@ -31,7 +31,7 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
 
   return (
     <div
-      className={`${themeClasses} eco-card rounded-xl bg-cream p-6 shadow-eco sm:p-8`}
+      className={`${themeClasses} paper-card rounded-xl bg-cream p-6 shadow-paper sm:p-8`}
       style={headerStyle}
     >
       <div className="grid gap-6 sm:grid-cols-2 sm:items-start">
@@ -45,14 +45,14 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
             />
           ) : null}
           <div className="min-w-0">
-            <h2 className="break-words font-serif text-xl font-bold text-forest sm:text-2xl">
+            <h2 className="break-words font-serif text-xl font-bold text-forest-700 sm:text-2xl">
               {business.businessName}
             </h2>
             {business.address ? (
-              <p className="mt-1 break-words whitespace-pre-line text-xs text-sand">{business.address}</p>
+              <p className="mt-1 break-words whitespace-pre-line text-xs text-ink/60">{business.address}</p>
             ) : null}
             {[business.email, business.phone, business.website].filter(Boolean).map((line) => (
-              <p key={line} className="break-all text-xs text-sand-light">
+              <p key={line} className="break-all text-xs text-ink/50">
                 {line}
               </p>
             ))}
@@ -63,55 +63,55 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
           <p className="break-words text-2xl font-bold" style={{ color: accent }}>
             {docTitle}
           </p>
-          <p className="mt-1 break-all text-sm font-semibold text-forest">{draft.documentNumber}</p>
-          <span className="mt-2 inline-block rounded-full bg-moss-light px-2.5 py-0.5 text-xs font-semibold text-forest-muted">
+          <p className="mt-1 break-all text-sm font-semibold text-forest-700">{draft.documentNumber}</p>
+          <span className="mt-2 inline-block rounded-full bg-cream-200 px-2.5 py-0.5 text-xs font-semibold text-forest-600">
             {strings.status[draft.status]}
           </span>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 border-t border-moss/70 pt-6 sm:grid-cols-2">
+      <div className="mt-6 grid gap-6 border-t border-cream-300 pt-6 sm:grid-cols-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-sand-light">{strings.billTo}</p>
-          <p className="mt-1 font-semibold text-forest">{draft.clientName || "—"}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-ink/50">{strings.billTo}</p>
+          <p className="mt-1 font-semibold text-forest-700">{draft.clientName || "—"}</p>
           {draft.clientAddress ? (
-            <p className="mt-1 whitespace-pre-line text-xs text-sand">{draft.clientAddress}</p>
+            <p className="mt-1 whitespace-pre-line text-xs text-ink/60">{draft.clientAddress}</p>
           ) : null}
-          {draft.clientEmail ? <p className="text-xs text-sand-light">{draft.clientEmail}</p> : null}
-          {draft.clientTaxId ? <p className="text-xs text-sand-light">{draft.clientTaxId}</p> : null}
+          {draft.clientEmail ? <p className="text-xs text-ink/50">{draft.clientEmail}</p> : null}
+          {draft.clientTaxId ? <p className="text-xs text-ink/50">{draft.clientTaxId}</p> : null}
         </div>
 
         <div className="space-y-1 text-sm sm:text-right">
           <p>
-            <span className="font-semibold text-sand">{strings.issueDate}: </span>
+            <span className="font-semibold text-ink/60">{strings.issueDate}: </span>
             {formatDate(draft.issueDate, draft.locale)}
           </p>
           {draft.documentType === "estimate" ? (
             <p>
-              <span className="font-semibold text-sand">{strings.validUntil}: </span>
+              <span className="font-semibold text-ink/60">{strings.validUntil}: </span>
               {formatDate(draft.validUntil, draft.locale)}
             </p>
           ) : (
             <p>
-              <span className="font-semibold text-sand">{strings.dueDate}: </span>
+              <span className="font-semibold text-ink/60">{strings.dueDate}: </span>
               {formatDate(draft.dueDate, draft.locale)}
             </p>
           )}
           {draft.paymentTerms ? (
             <p>
-              <span className="font-semibold text-sand">{strings.paymentTerms}: </span>
+              <span className="font-semibold text-ink/60">{strings.paymentTerms}: </span>
               {draft.paymentTerms}
             </p>
           ) : null}
           {draft.referenceNumber ? (
             <p>
-              <span className="font-semibold text-sand">{strings.reference}: </span>
+              <span className="font-semibold text-ink/60">{strings.reference}: </span>
               {draft.referenceNumber}
             </p>
           ) : null}
           {draft.relatedDocumentNumber ? (
             <p>
-              <span className="font-semibold text-sand">{strings.relatedDocument}: </span>
+              <span className="font-semibold text-ink/60">{strings.relatedDocument}: </span>
               {draft.relatedDocumentNumber}
             </p>
           ) : null}
@@ -119,7 +119,7 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
       </div>
 
       {draft.documentType === "estimate" ? (
-        <p className="mt-4 text-xs italic text-sand-light">{strings.notTaxInvoice}</p>
+        <p className="mt-4 text-xs italic text-ink/50">{strings.notTaxInvoice}</p>
       ) : null}
 
       <div className="mt-6 overflow-x-auto">
@@ -140,16 +140,16 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
             {draft.items.map((item, idx) => {
               const calc = totals.lineCalculations[idx];
               return (
-                <tr key={item.id} className="border-b border-moss/50">
+                <tr key={item.id} className="border-b border-cream-300">
                   <td className="px-2 py-2">
                     <span>{item.description}</span>
                     {item.expenseReference ? (
-                      <span className="ml-1 text-xs text-sand-light">
+                      <span className="ml-1 text-xs text-ink/50">
                         ({strings.expenseRef}: {item.expenseReference})
                       </span>
                     ) : null}
                     {item.taxExempt ? (
-                      <span className="ml-2 text-xs text-sand-light">({strings.taxExempt})</span>
+                      <span className="ml-2 text-xs text-ink/50">({strings.taxExempt})</span>
                     ) : null}
                   </td>
                   <td className="px-2 py-2">{item.quantity}</td>
@@ -166,29 +166,29 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
       <div className="mt-6 flex flex-wrap justify-end gap-8">
         <div className="min-w-[220px] space-y-1 text-sm">
           <div className="flex justify-between gap-4">
-            <span className="text-sand">{strings.subtotal}</span>
+            <span className="text-ink/60">{strings.subtotal}</span>
             <span>{money(totals.subtotalNet)}</span>
           </div>
           {totals.lineDiscountTotal > 0 ? (
-            <div className="flex justify-between gap-4 text-sand-light">
+            <div className="flex justify-between gap-4 text-ink/50">
               <span>{strings.discount} (lines)</span>
               <span>-{money(totals.lineDiscountTotal)}</span>
             </div>
           ) : null}
           {totals.documentDiscount > 0 ? (
-            <div className="flex justify-between gap-4 text-sand-light">
+            <div className="flex justify-between gap-4 text-ink/50">
               <span>{strings.discount}</span>
               <span>-{money(totals.documentDiscount)}</span>
             </div>
           ) : null}
 
           {draft.reverseCharge ? (
-            <p className="text-xs italic text-sand-light">{strings.reverseCharge}</p>
+            <p className="text-xs italic text-ink/50">{strings.reverseCharge}</p>
           ) : (
             totals.taxBreakdown.map((t) =>
               t.rate > 0 ? (
                 <div key={t.id} className="flex justify-between gap-4">
-                  <span className="text-sand">
+                  <span className="text-ink/60">
                     {t.label} ({t.rate}%)
                   </span>
                   <span>{money(t.amount)}</span>
@@ -198,13 +198,13 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
           )}
 
           {draft.zeroRatedNote ? (
-            <p className="text-xs text-sand-light">
+            <p className="text-xs text-ink/50">
               {strings.zeroRated}: {draft.zeroRatedNote}
             </p>
           ) : null}
 
           <div
-            className="flex justify-between gap-4 border-t border-moss pt-2 text-base font-bold"
+            className="flex justify-between gap-4 border-t border-cream-300 pt-2 text-base font-bold"
             style={{ color: accent }}
           >
             <span>{strings.grandTotal}</span>
@@ -213,7 +213,7 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
 
           {draft.depositAmount > 0 ? (
             <div className="flex justify-between gap-4">
-              <span className="text-sand">
+              <span className="text-ink/60">
                 {draft.depositPaid ? strings.deposit : strings.depositDue}
               </span>
               <span>{money(draft.depositAmount)}</span>
@@ -221,7 +221,7 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
           ) : null}
           {draft.amountPaid > 0 ? (
             <div className="flex justify-between gap-4">
-              <span className="text-sand">{strings.amountPaid}</span>
+              <span className="text-ink/60">{strings.amountPaid}</span>
               <span>{money(draft.amountPaid)}</span>
             </div>
           ) : null}
@@ -235,7 +235,7 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
       </div>
 
       {(business.taxRegistrations || draft.taxComponents.some((t) => t.registrationNumber)) && (
-        <div className="mt-4 space-y-0.5 text-xs text-sand-light">
+        <div className="mt-4 space-y-0.5 text-xs text-ink/50">
           {business.taxRegistrations ? <p>{business.taxRegistrations}</p> : null}
           {draft.taxComponents.map(
             (t) =>
@@ -249,8 +249,8 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
       )}
 
       {(business.bankDetails.accountName || business.bankDetails.iban) && (
-        <div className="mt-4 rounded-lg bg-moss-light/40 p-3 text-xs">
-          <p className="font-bold text-forest">{strings.bankDetails}</p>
+        <div className="mt-4 rounded-lg bg-cream-200/60 p-3 text-xs">
+          <p className="font-bold text-forest-700">{strings.bankDetails}</p>
           {business.bankDetails.accountName ? (
             <p>
               {strings.accountName}: {business.bankDetails.accountName}
@@ -292,7 +292,7 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
             {strings.payNow} →
           </a>
           {draft.showPaymentQr ? (
-            <div className="rounded-lg border border-moss bg-white p-2">
+            <div className="rounded-lg border border-cream-300 bg-white p-2">
               <QRCodeSVG value={draft.paymentLink} size={88} />
             </div>
           ) : null}
@@ -300,7 +300,7 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
       ) : null}
 
       {draft.isRecurringTemplate && draft.recurringFrequency ? (
-        <p className="mt-4 text-center text-xs text-sand-light">
+        <p className="mt-4 text-center text-xs text-ink/50">
           {strings.recurring}: {draft.recurringFrequency}
           {draft.recurringNextDate
             ? ` — ${strings.nextIssue}: ${formatDate(draft.recurringNextDate, draft.locale)}`
@@ -309,16 +309,16 @@ export function InvoicePreview({ draft, business }: InvoicePreviewProps) {
       ) : null}
 
       {draft.notes ? (
-        <div className="mt-4 border-t border-moss/50 pt-4">
-          <p className="text-xs font-bold text-sand">{strings.notes}</p>
-          <p className="mt-1 whitespace-pre-line text-sm text-sand">{draft.notes}</p>
+        <div className="mt-4 border-t border-cream-300 pt-4">
+          <p className="text-xs font-bold text-ink/60">{strings.notes}</p>
+          <p className="mt-1 whitespace-pre-line text-sm text-ink/60">{draft.notes}</p>
         </div>
       ) : null}
 
       {draft.terms ? (
-        <div className="mt-4 border-t border-moss/50 pt-4">
-          <p className="text-xs font-bold text-sand">{strings.terms}</p>
-          <p className="mt-1 whitespace-pre-line text-xs text-sand-light">{draft.terms}</p>
+        <div className="mt-4 border-t border-cream-300 pt-4">
+          <p className="text-xs font-bold text-ink/60">{strings.terms}</p>
+          <p className="mt-1 whitespace-pre-line text-xs text-ink/50">{draft.terms}</p>
         </div>
       ) : null}
     </div>

@@ -37,21 +37,21 @@ function QrPreviewInner({ encoded, errorCorrectionLevel, style }: QrPreviewProps
             ) : null}
           </>
         ) : (
-          <div className="flex h-[256px] w-[256px] flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-moss-dark/50 bg-moss-light/30 px-6 text-center">
-            <p className="text-sm font-semibold text-forest-muted">QR preview</p>
-            <p className="text-sm text-sand">{encoded.hint}</p>
+          <div className="flex h-[256px] w-[256px] flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-cream-300/50 bg-cream-200/50 px-6 text-center">
+            <p className="text-sm font-semibold text-forest-600">QR preview</p>
+            <p className="text-sm text-ink/60">{encoded.hint}</p>
           </div>
         )}
       </div>
 
       <div className="max-w-md space-y-1 text-center">
         {encoded.title ? (
-          <p className="text-sm font-semibold text-forest">{encoded.title}</p>
+          <p className="text-sm font-semibold text-forest-700">{encoded.title}</p>
         ) : null}
         {encoded.isValid ? (
           <>
-            <p className="text-xs text-sand">Scan this code with any QR reader app.</p>
-            <p className="text-xs text-sand-light">
+            <p className="text-xs text-ink/60">Scan this code with any QR reader app.</p>
+            <p className="text-xs text-ink/50">
               {charCount} character{charCount === 1 ? "" : "s"}
               {charCount > 800 ? " — approaching capacity for dense codes" : ""}
             </p>

@@ -35,10 +35,10 @@ export function ImageCompareSlider({ beforeUrl, afterUrl, className = "" }: Imag
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <p className="text-sm font-semibold text-forest">Before / After Preview</p>
+      <p className="text-sm font-semibold text-forest-700">Before / After Preview</p>
       <div
         ref={containerRef}
-        className="relative aspect-square max-h-[500px] w-full max-w-[500px] overflow-hidden rounded-xl border-2 border-forest shadow-eco-lg select-none"
+        className="relative aspect-square max-h-[500px] w-full max-w-[500px] overflow-hidden rounded-xl border-2 border-forest shadow-paper-lg select-none"
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
@@ -57,11 +57,11 @@ export function ImageCompareSlider({ beforeUrl, afterUrl, className = "" }: Imag
           />
         </div>
         <div
-          className="absolute inset-y-0 z-10 w-1 cursor-ew-resize bg-sage shadow-[0_0_8px_#22c55e]"
+          className="absolute inset-y-0 z-10 w-1 cursor-ew-resize bg-forest-500 shadow-[0_0_8px_#22c55e]"
           style={{ left: `${position}%`, transform: "translateX(-50%)" }}
           onPointerDown={handlePointerDown}
         >
-          <div className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-sage bg-forest text-xs font-bold text-sage">
+          <div className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-forest-500 bg-forest text-xs font-bold text-forest-500">
             ↔
           </div>
         </div>

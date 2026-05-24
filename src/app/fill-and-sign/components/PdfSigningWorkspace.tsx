@@ -30,7 +30,7 @@ export function PdfSigningWorkspace({
   if (loadingPages && pages.length === 0) {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center p-6">
-        <div className="rounded-xl border border-moss/70 bg-moss-light/50 px-6 py-16 text-center text-sm text-forest-muted shadow-eco">
+        <div className="rounded-xl border border-cream-300 bg-white px-6 py-16 text-center text-sm font-semibold text-forest-600 shadow-paper">
           Rendering PDF pages…
         </div>
       </div>
@@ -44,7 +44,7 @@ export function PdfSigningWorkspace({
   return (
     <div className="relative min-h-0 flex-1">
       {loadingPages ? (
-        <p className="absolute left-0 right-0 top-0 z-10 shrink-0 bg-moss-light/20 px-4 py-2 text-sm text-forest-muted">
+        <p className="absolute left-0 right-0 top-0 z-10 shrink-0 bg-cream-200/80 px-4 py-2 text-sm font-semibold text-forest-600">
           Loading additional pages…
         </p>
       ) : null}
@@ -52,7 +52,7 @@ export function PdfSigningWorkspace({
         className={`absolute inset-0 overflow-y-auto overscroll-y-contain p-3 sm:p-5 ${loadingPages ? "pt-10" : ""}`}
       >
         <div
-          className="mx-auto w-full rounded-2xl border border-dashed border-moss/50 bg-cream/90 p-4 shadow-eco backdrop-blur-sm sm:p-6 md:p-8"
+          className="mx-auto w-full rounded-2xl border border-dashed border-cream-300 bg-white/80 p-4 shadow-paper backdrop-blur-sm sm:p-6 md:p-8"
           style={{ maxWidth: SIGN_PAGE_MAX_WIDTH + 96 }}
         >
           <div className="mx-auto flex flex-col items-center gap-10 pb-6">
@@ -66,7 +66,7 @@ export function PdfSigningWorkspace({
                   key={`${page.sourceDocId}-${page.sourcePageIndex}`}
                   ref={(node) => registerPageRef(page.pageIndex, node)}
                   data-page-index={page.pageIndex}
-                  className="relative shrink-0 overflow-hidden rounded-lg border border-moss/70 bg-cream shadow-eco"
+                  className="relative shrink-0 overflow-hidden rounded-xl border border-cream-300 bg-white shadow-paper"
                   style={{
                     width: page.displayWidth,
                     height: page.displayHeight,
@@ -78,7 +78,7 @@ export function PdfSigningWorkspace({
                   <img
                     src={page.dataUrl}
                     alt={`Page ${page.pageIndex + 1}`}
-                    className="block h-full w-full select-none object-contain"
+                    className="h-full w-full object-contain"
                     draggable={false}
                   />
 
@@ -97,7 +97,7 @@ export function PdfSigningWorkspace({
                     />
                   ))}
 
-                  <div className="absolute bottom-2 right-2 rounded-md border border-moss/70 bg-cream/95 px-2 py-0.5 text-[11px] font-semibold text-forest-muted shadow-eco">
+                  <div className="pointer-events-none absolute bottom-3 right-3 rounded border border-cream-300 bg-cream-100/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-forest-700">
                     Page {page.pageIndex + 1}
                   </div>
                 </div>

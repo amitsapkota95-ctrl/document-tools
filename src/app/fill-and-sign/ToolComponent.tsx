@@ -1,17 +1,20 @@
 "use client";
 
+import { FileText, PenLine, Stamp } from "lucide-react";
 import { ToolWorkflowLayout } from "@/components/layout/ToolWorkflowLayout";
 import { ToolSidebarDocumentList } from "@/components/layout/ToolSidebarDocumentList";
 import { ToolSidebarFileControls } from "@/components/layout/ToolSidebarFileControls";
 import { FileUploader } from "@/components/tools/FileUploader";
 import { ProgressBar } from "@/components/tools/ProgressBar";
 import { ToolButton } from "@/components/tools/ToolButton";
+import { SidebarAccordion } from "@/components/ui/SidebarAccordion";
 import { PdfSigningWorkspace } from "@/app/fill-and-sign/components/PdfSigningWorkspace";
 import { SavedSignaturesRow } from "@/app/fill-and-sign/components/SavedSignaturesRow";
 import { SignatureVaultModal } from "@/app/fill-and-sign/components/SignatureVaultModal";
 import { useFillAndSignState } from "@/app/fill-and-sign/useFillAndSignState";
 import { usePdfPasswordUnlock } from "@/hooks/usePdfPasswordUnlock";
-import { TOOL_SIDEBAR_CTA_CLASS, TOOL_THUMBNAIL_WORKSPACE } from "@/lib/ui/classes";
+import { useHeroFileImport } from "@/hooks/useHeroFileImport";
+import { SIDEBAR_FOOTER, TOOL_SIDEBAR_CTA_CLASS, TOOL_THUMBNAIL_WORKSPACE } from "@/lib/ui/classes";
 import { downloadBytes, sanitizeFilename } from "@/lib/pdf/download";
 import {
   DEFAULT_STAMP_HEIGHT,
@@ -71,6 +74,8 @@ export default function FillAndSignTool() {
     await addFiles(files);
   };
 
+  useHeroFileImport("fill-and-sign", handleInitialUpload);
+
   const handleApplyAllPages = (id: string) => {
     const pageCount = applySignatureToAllPages(id);
     if (pageCount > 0) {
@@ -120,6 +125,11 @@ export default function FillAndSignTool() {
     }
   };
 
+  const workspaceTitle =
+    documents.length === 1
+      ? `${documents[0].displayName}.pdf`
+      : `${documents.length} PDFs ready to sign`;
+
   return (
     <>
       <ToolWorkflowLayout
@@ -131,13 +141,19 @@ export default function FillAndSignTool() {
             onFiles={handleInitialUpload}
             accept={{ "application/pdf": [".pdf"] }}
             multiple
-            label="Drop PDF files here"
-            hint="Add one or more PDFs, place signatures on any page, then download a merged signed file"
+            label="Drop your PDF files here"
+            hint="Add one or more PDFs, place signatures on any page, then download a merged signed file."
           />
         }
         workspace={
           documents.length > 0 ? (
             <div className={`${TOOL_THUMBNAIL_WORKSPACE} h-full`}>
+              <div className="mb-4 shrink-0 border-b border-cream-300 pb-4">
+                <h2 className="font-serif text-2xl font-bold text-forest-700">{workspaceTitle}</h2>
+                <p className="mt-1 text-xs font-semibold text-ink/65">
+                  Click a signature to select it. Drag to reposition, resize from the corners.
+                </p>
+              </div>
               <PdfSigningWorkspace
                 pages={pages}
                 placedSignatures={placedSignatures}
@@ -154,66 +170,98 @@ export default function FillAndSignTool() {
         }
         sidebar={
           documents.length > 0 ? (
-            <>
-              <ToolSidebarFileControls
-                mode="multi"
-                accept={{ "application/pdf": [".pdf"] }}
-                onAdd={addFiles}
-                onReplace={async (files) => {
-                  resetWorkspace();
-                  reset();
-                  await addFiles(files);
-                }}
-                disabled={status === "processing" || loadingPages}
-                addLabel="Add PDF"
-                addHint="Append another PDF to sign and merge"
-                replaceLabel="Replace all"
-                replaceHint="Clear everything and start with new PDFs"
-              />
+            <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+              <SidebarAccordion
+                id="marks-signatures"
+                title="Marks & Signatures"
+                icon={<Stamp className="h-3.5 w-3.5 text-forest-500" aria-hidden />}
+                defaultOpen
+              >
+                <SavedSignaturesRow
+                  signatures={signatures}
+                  onSelect={(signature) => {
+                    const isStamp = STAMP_PRESETS.some((stamp) => stamp.label === signature.label);
+                    placeSignature(
+                      signature.dataUrl,
+                      signature.label,
+                      isStamp
+                        ? { width: DEFAULT_STAMP_WIDTH, height: DEFAULT_STAMP_HEIGHT }
+                        : undefined,
+                    );
+                  }}
+                  onRemove={removeVaultSignature}
+                  onAddSignature={() => setShowVaultModal(true)}
+                  onPlaceAsset={(dataUrl, label, size) => placeSignature(dataUrl, label, size)}
+                />
+              </SidebarAccordion>
 
-              <ToolSidebarDocumentList
-                documents={documents.map((doc) => ({
-                  id: doc.id,
-                  displayName: doc.displayName,
-                  pageCount: doc.pageCount,
-                }))}
-                onRemove={removeDocument}
-                disabled={status === "processing" || loadingPages}
-              />
+              <SidebarAccordion
+                id="documents"
+                title="Documents"
+                icon={<FileText className="h-3.5 w-3.5 text-forest-500" aria-hidden />}
+                defaultOpen
+              >
+                <ToolSidebarFileControls
+                  mode="multi"
+                  accept={{ "application/pdf": [".pdf"] }}
+                  onAdd={addFiles}
+                  onReplace={async (files) => {
+                    resetWorkspace();
+                    reset();
+                    await addFiles(files);
+                  }}
+                  disabled={status === "processing" || loadingPages}
+                  addLabel="Add PDF"
+                  addHint="Append another PDF to sign and merge"
+                  replaceLabel="Replace all"
+                  replaceHint="Clear everything and start with new PDFs"
+                />
 
-              <SavedSignaturesRow
-                signatures={signatures}
-                onSelect={(signature) => {
-                  const isStamp = STAMP_PRESETS.some((stamp) => stamp.label === signature.label);
-                  placeSignature(
-                    signature.dataUrl,
-                    signature.label,
-                    isStamp
-                      ? { width: DEFAULT_STAMP_WIDTH, height: DEFAULT_STAMP_HEIGHT }
-                      : undefined,
-                  );
-                }}
-                onRemove={removeVaultSignature}
-                onAddSignature={() => setShowVaultModal(true)}
-                onPlaceAsset={(dataUrl, label, size) => placeSignature(dataUrl, label, size)}
-              />
+                <ToolSidebarDocumentList
+                  documents={documents.map((doc) => ({
+                    id: doc.id,
+                    displayName: doc.displayName,
+                    pageCount: doc.pageCount,
+                  }))}
+                  onRemove={removeDocument}
+                  disabled={status === "processing" || loadingPages}
+                />
+              </SidebarAccordion>
 
-              {status === "processing" ? (
-                <ProgressBar progress={progress} label={message} />
-              ) : null}
+              <SidebarAccordion
+                id="download"
+                title="Download"
+                icon={<PenLine className="h-3.5 w-3.5 text-forest-500" aria-hidden />}
+                defaultOpen
+              >
+                {status === "processing" ? (
+                  <ProgressBar progress={progress} label={message} />
+                ) : null}
 
-              <div className={`flex flex-col gap-3 ${TOOL_SIDEBAR_CTA_CLASS}`}>
-                <ToolButton
-                  onClick={downloadSignedPdf}
-                  disabled={
-                    status === "processing" || loadingPages || placedSignatures.length === 0
-                  }
-                  className="w-full"
-                >
-                  Download Signed PDF
-                </ToolButton>
+                <div className={`flex flex-col gap-3 ${TOOL_SIDEBAR_CTA_CLASS}`}>
+                  <ToolButton
+                    onClick={downloadSignedPdf}
+                    disabled={
+                      status === "processing" || loadingPages || placedSignatures.length === 0
+                    }
+                    className="w-full"
+                  >
+                    Download Signed PDF
+                  </ToolButton>
+                </div>
+              </SidebarAccordion>
+
+              <div className={SIDEBAR_FOOTER}>
+                <div className="flex justify-between">
+                  <span>Pages:</span>
+                  <span className="font-extrabold text-forest-700">{pages.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Signatures placed:</span>
+                  <span className="font-extrabold text-forest-700">{placedSignatures.length}</span>
+                </div>
               </div>
-            </>
+            </div>
           ) : null
         }
       />

@@ -17,13 +17,13 @@ const EditorToolbar = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-10 rounded-t-xl border border-b-0 border-moss/60 bg-moss-light/30" aria-hidden />
+      <div className="h-10 rounded-t-xl border border-b-0 border-cream-300 bg-cream-200/50" aria-hidden />
     ),
   },
 );
 
 const EDITOR_SURFACE_CLASS =
-  "mt-1 block w-full rounded-lg border px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-sage/40 min-h-0 flex-1 overflow-y-auto rounded-t-none text-base leading-relaxed empty:before:pointer-events-none empty:before:opacity-60 empty:before:content-[attr(data-placeholder)]";
+  "mt-1 block w-full rounded-lg border px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-forest-500/40 min-h-0 flex-1 overflow-y-auto rounded-t-none text-base leading-relaxed empty:before:pointer-events-none empty:before:opacity-60 empty:before:content-[attr(data-placeholder)]";
 
 interface ScriptEditorProps {
   script: string;
@@ -55,7 +55,7 @@ export function ScriptEditor({
   const surfaceClass =
     variant === "dark"
       ? `${EDITOR_SURFACE_CLASS} border-white/20 bg-black/40 text-white placeholder:text-white/50 focus:border-yellow-400/60 focus:ring-yellow-400/20`
-      : `${EDITOR_SURFACE_CLASS} border-moss-dark bg-cream text-forest placeholder:text-sand-light focus:border-sage-dark`;
+      : `${EDITOR_SURFACE_CLASS} border-cream-300 bg-cream text-forest-700 placeholder:text-ink/50 focus:border-forest-500`;
 
   const syncFromProp = useCallback(() => {
     const el = editorRef.current;

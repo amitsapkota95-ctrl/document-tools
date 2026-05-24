@@ -78,7 +78,7 @@ export function QrFormFields({ form, updateField }: QrFormFieldsProps) {
               type="checkbox"
               checked={form.fields.hidden}
               onChange={(e) => updateField("hidden", e.target.checked)}
-              className="rounded border-moss-dark"
+              className="rounded border-cream-300"
             />
             Hidden network
           </label>

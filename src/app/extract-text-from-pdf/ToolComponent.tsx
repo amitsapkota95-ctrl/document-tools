@@ -8,6 +8,7 @@ import { OcrOverlayViewer, type OcrWord } from "@/components/tools/OcrOverlayVie
 import { ProgressBar } from "@/components/tools/ProgressBar";
 import { ToolButton } from "@/components/tools/ToolButton";
 import { usePdfPasswordUnlock } from "@/hooks/usePdfPasswordUnlock";
+import { useHeroFileImport } from "@/hooks/useHeroFileImport";
 import { INPUT_CLASS, TOOL_SIDEBAR_CTA_CLASS } from "@/lib/ui/classes";
 import { exportTextToDocx } from "@/lib/pdf/docx-export";
 import { downloadBlob } from "@/lib/pdf/download";
@@ -93,6 +94,8 @@ export default function ExtractTextTool() {
     setActivePage(0);
     reset();
   };
+
+  useHeroFileImport("extract-text-from-pdf", handleFile);
 
   const scan = async () => {
     if (!file) return;
@@ -201,11 +204,11 @@ export default function ExtractTextTool() {
               <div className="flex min-h-[calc(100vh-7rem)] flex-col gap-4">
                 <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-bold text-forest">Extracted text</h2>
+                    <h2 className="text-lg font-bold text-forest-700">Extracted text</h2>
                     {extractionNote ? (
-                      <p className="mt-1 text-sm text-sand">{extractionNote}</p>
+                      <p className="mt-1 text-sm text-ink/60">{extractionNote}</p>
                     ) : (
-                      <p className="mt-1 text-sm text-sand">
+                      <p className="mt-1 text-sm text-ink/60">
                         Edit the text below, then copy or export your changes to Word.
                       </p>
                     )}
@@ -238,16 +241,16 @@ export default function ExtractTextTool() {
             ) : (
               <div className="flex min-h-[calc(100vh-7rem)] flex-col items-center justify-center gap-6 px-4 py-8">
                 <div className="max-w-lg text-center">
-                  <p className="text-lg font-bold text-forest">Your PDF is ready to scan</p>
-                  <p className="mt-2 text-sm text-sand">
+                  <p className="text-lg font-bold text-forest-700">Your PDF is ready to scan</p>
+                  <p className="mt-2 text-sm text-ink/60">
                     Choose the document language in the sidebar, then scan to extract the text.
                   </p>
                 </div>
 
                 {pagePreviewLoading ? (
-                  <p className="text-sm text-sand">Loading preview…</p>
+                  <p className="text-sm text-ink/60">Loading preview…</p>
                 ) : pagePreviewUrl ? (
-                  <div className="w-full max-w-xs overflow-hidden rounded-xl border border-moss/70 bg-cream shadow-eco sm:max-w-sm">
+                  <div className="w-full max-w-xs overflow-hidden rounded-xl border border-cream-300 bg-cream shadow-paper sm:max-w-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={pagePreviewUrl}
@@ -256,12 +259,12 @@ export default function ExtractTextTool() {
                     />
                   </div>
                 ) : (
-                  <p className="text-sm text-sand">Preview unavailable for this PDF.</p>
+                  <p className="text-sm text-ink/60">Preview unavailable for this PDF.</p>
                 )}
 
                 <div className="max-w-sm text-center">
-                  <p className="truncate text-sm font-semibold text-forest">{file.name}</p>
-                  <p className="mt-1 text-xs text-sand-light">{formatSize(file.size)}</p>
+                  <p className="truncate text-sm font-semibold text-forest-700">{file.name}</p>
+                  <p className="mt-1 text-xs text-ink/50">{formatSize(file.size)}</p>
                 </div>
               </div>
             )
@@ -271,12 +274,12 @@ export default function ExtractTextTool() {
           file ? (
             <>
               {hasExtractedText ? (
-                <div className="space-y-3 border-b border-moss/40 pb-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-sand">
+                <div className="space-y-3 border-b border-cream-300 pb-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink/60">
                     Source document
                   </p>
-                  <p className="truncate text-sm font-semibold text-forest">{file.name}</p>
-                  <p className="text-xs text-sand-light">{formatSize(file.size)}</p>
+                  <p className="truncate text-sm font-semibold text-forest-700">{file.name}</p>
+                  <p className="text-xs text-ink/50">{formatSize(file.size)}</p>
 
                   {overlays.length > 1 ? (
                     <div className="flex flex-wrap gap-1.5">
@@ -288,7 +291,7 @@ export default function ExtractTextTool() {
                           className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                             activePage === index
                               ? "border border-forest bg-forest text-cream"
-                              : "border border-moss-dark bg-moss-light/80 text-forest"
+                              : "border border-cream-300 bg-cream-200 text-forest-700"
                           }`}
                         >
                           Page {index + 1}
@@ -306,7 +309,7 @@ export default function ExtractTextTool() {
                         className="max-h-52 border shadow-none"
                       />
                     ) : (
-                      <div className="overflow-hidden rounded-lg border border-moss/70 bg-cream">
+                      <div className="overflow-hidden rounded-lg border border-cream-300 bg-cream">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={sourcePreviewUrl}
@@ -317,7 +320,7 @@ export default function ExtractTextTool() {
                     )
                   ) : null}
 
-                  <p className="text-[11px] leading-relaxed text-sand-light">
+                  <p className="text-[11px] leading-relaxed text-ink/50">
                     Reference only — highlight text here to double-check the scan.
                   </p>
                 </div>

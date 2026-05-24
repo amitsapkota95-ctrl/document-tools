@@ -11,6 +11,7 @@ import { FileUploader } from "@/components/tools/FileUploader";
 import { ProgressBar } from "@/components/tools/ProgressBar";
 import { ToolButton } from "@/components/tools/ToolButton";
 import { usePdfPasswordUnlock } from "@/hooks/usePdfPasswordUnlock";
+import { useHeroFileImport } from "@/hooks/useHeroFileImport";
 import {
   TAB_ACTIVE,
   TAB_INACTIVE,
@@ -52,6 +53,8 @@ export default function SplitPdfTool() {
 
   const selectionEnabled = mode === "extract";
 
+  useHeroFileImport("split-pdf", replaceDocuments);
+
   return (
     <>
       <ToolWorkflowLayout
@@ -68,7 +71,7 @@ export default function SplitPdfTool() {
         workspace={
           hasPdf ? (
             <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-              <p className="shrink-0 text-sm text-sand">
+              <p className="shrink-0 text-sm text-ink/60">
                 {mode === "extract"
                   ? "Drag thumbnails to reorder, use the icons to rotate or remove pages, and click thumbnails to select pages for extraction."
                   : documents.length > 1
@@ -94,11 +97,11 @@ export default function SplitPdfTool() {
               {status === "processing" ? (
                 <ProgressBar progress={progress} label={message} />
               ) : (
-                <p className="text-sm text-sand">Loading page previews…</p>
+                <p className="text-sm text-ink/60">Loading page previews…</p>
               )}
             </div>
           ) : (
-            <p className="py-12 text-center text-sm text-sand">
+            <p className="py-12 text-center text-sm text-ink/60">
               All pages were removed. Add a PDF from the sidebar to continue.
             </p>
           )
@@ -157,7 +160,7 @@ export default function SplitPdfTool() {
                 ) : null}
 
                 <AdvancedToolsToggle variant="sidebar" label="Advanced Tools">
-                  <p className="text-sm text-sand">
+                  <p className="text-sm text-ink/60">
                     Smart Split detects completely blank pages and suggests natural chapter breaks.
                   </p>
                   <ToolButton

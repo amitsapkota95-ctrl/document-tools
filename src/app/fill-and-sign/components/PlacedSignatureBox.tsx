@@ -51,14 +51,14 @@ export function PlacedSignatureBox({
         }}
         className={`group z-10 ${isActive ? "z-20" : ""}`}
         style={{
-          border: isActive ? "2px dashed #16a34a" : "2px dashed #86efac",
-          background: "rgba(246, 254, 248, 0.12)",
+          border: isActive ? "2px dashed #395938" : "2px dashed #cce0cc",
+          background: "rgba(250, 248, 245, 0.12)",
         }}
         resizeHandleClasses={{
-          topLeft: "h-3 w-3 rounded-sm border border-sage-dark bg-cream",
-          topRight: "h-3 w-3 rounded-sm border border-sage-dark bg-cream",
-          bottomLeft: "h-3 w-3 rounded-sm border border-sage-dark bg-cream",
-          bottomRight: "h-3 w-3 rounded-sm border border-sage-dark bg-cream",
+          topLeft: "h-3 w-3 rounded-sm border border-forest-500 bg-cream-100",
+          topRight: "h-3 w-3 rounded-sm border border-forest-500 bg-cream-100",
+          bottomLeft: "h-3 w-3 rounded-sm border border-forest-500 bg-cream-100",
+          bottomRight: "h-3 w-3 rounded-sm border border-forest-500 bg-cream-100",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -72,7 +72,7 @@ export function PlacedSignatureBox({
 
       {isActive ? (
         <div
-          className="absolute z-30 flex gap-1 rounded-lg border border-moss/70 bg-cream p-1 shadow-eco"
+          className="absolute z-30 flex gap-1 rounded-lg border border-cream-300 bg-white p-1 shadow-paper"
           style={{
             left: signature.x,
             top: Math.max(8, signature.y - 44),
@@ -84,7 +84,7 @@ export function PlacedSignatureBox({
           <button
             type="button"
             onClick={onDelete}
-            className="rounded-md border border-moss/70 bg-moss-light/50 p-1.5 text-forest transition-colors hover:bg-forest hover:text-cream"
+            className="rounded-md border border-cream-300 bg-cream-200/50 p-1.5 text-forest-700 transition-colors hover:bg-forest-700 hover:text-cream-100"
             aria-label="Delete signature"
           >
             <Trash2 className="h-4 w-4" />
@@ -93,7 +93,7 @@ export function PlacedSignatureBox({
             <button
               type="button"
               onClick={onApplyAll}
-              className="inline-flex items-center gap-1 rounded-md border border-moss/70 bg-moss-light/50 px-2 py-1.5 text-xs font-semibold text-forest transition-colors hover:bg-forest hover:text-cream"
+              className="inline-flex items-center gap-1 rounded-md border border-cream-300 bg-cream-200/50 px-2 py-1.5 text-xs font-bold text-forest-700 transition-colors hover:bg-forest-700 hover:text-cream-100"
               aria-label="Apply to all pages"
             >
               <Copy className="h-4 w-4" />

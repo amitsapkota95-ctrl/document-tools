@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ToolWorkflowLayout } from "@/components/layout/ToolWorkflowLayout";
 import { ToolSidebarFileControls } from "@/components/layout/ToolSidebarFileControls";
 import {
@@ -13,6 +13,7 @@ import { FileUploader } from "@/components/tools/FileUploader";
 import { ToolButton } from "@/components/tools/ToolButton";
 import { PdfEditorWorkspace } from "@/components/tools/PdfEditorWorkspace";
 import { usePdfPasswordUnlock } from "@/hooks/usePdfPasswordUnlock";
+import { useHeroFileImport } from "@/hooks/useHeroFileImport";
 import { TOOL_SIDEBAR_CTA_CLASS } from "@/lib/ui/classes";
 import { detectContentBounds } from "@/lib/image/scanner-filter";
 import { downloadBytes, sanitizeFilename } from "@/lib/pdf/download";
@@ -79,6 +80,20 @@ export default function CropPdfTool() {
     setCanvasSize({ width: viewport.width, height: viewport.height });
   };
 
+  const loadPdf = useCallback(
+    async (files: File[]) => {
+      const unlocked = await tryUnlock(files[0]);
+      if (!unlocked) return;
+      setFile(unlocked.file);
+      setPdfPassword(unlocked.password);
+      setCropBox(null);
+      reset();
+    },
+    [reset, tryUnlock],
+  );
+
+  useHeroFileImport("crop-pdf", loadPdf);
+
   return (
     <>
       <ToolWorkflowLayout
@@ -86,14 +101,7 @@ export default function CropPdfTool() {
         sidebarLabel="Crop options"
         upload={
           <FileUploader
-            onFiles={async (files) => {
-              const unlocked = await tryUnlock(files[0]);
-              if (!unlocked) return;
-              setFile(unlocked.file);
-              setPdfPassword(unlocked.password);
-              setCropBox(null);
-              reset();
-            }}
+            onFiles={loadPdf}
             accept={{ "application/pdf": [".pdf"] }}
             label="Drop PDF files here"
             hint="Drag a box around the area to keep"
@@ -102,7 +110,7 @@ export default function CropPdfTool() {
         workspace={
           file ? (
             <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-              <p className="shrink-0 text-sm text-sand">
+              <p className="shrink-0 text-sm text-ink/60">
                 Drag to select the area to keep. Everything outside is dimmed. Drag inside the box
                 to move it, or use the handles for snipping-tool precision.
               </p>
@@ -153,7 +161,7 @@ export default function CropPdfTool() {
                   <ToolButton variant="secondary" onClick={autoTrim}>
                     Auto-Trim Margins
                   </ToolButton>
-                  <p className="text-xs text-sand-light">
+                  <p className="text-xs text-ink/50">
                     Snaps the crop box to the exact edges of content, removing scanner borders.
                   </p>
                 </AdvancedToolsToggle>

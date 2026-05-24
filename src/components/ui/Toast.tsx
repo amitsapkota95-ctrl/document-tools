@@ -1,12 +1,27 @@
 "use client";
 
-import { X } from "lucide-react";
+import { CheckCircle2, CircleAlert, Info, X } from "lucide-react";
 import { useToastStore, type ToastType } from "@/stores/toast-store";
 
-const TYPE_STYLES: Record<ToastType, string> = {
-  success: "border-sage bg-forest text-cream",
-  error: "border-red-400 bg-red-950 text-red-50",
-  info: "border-moss-dark bg-forest-muted text-cream",
+const TYPE_STYLES: Record<ToastType, { frame: string; icon: typeof CheckCircle2 }> = {
+  success: {
+    frame: "border-forest-200 bg-white text-ink",
+    icon: CheckCircle2,
+  },
+  error: {
+    frame: "border-rose-200 bg-rose-50/95 text-ink",
+    icon: CircleAlert,
+  },
+  info: {
+    frame: "border-cream-300 bg-white text-ink",
+    icon: Info,
+  },
+};
+
+const ICON_COLORS: Record<ToastType, string> = {
+  success: "text-forest-600",
+  error: "text-rose-600",
+  info: "text-forest-500",
 };
 
 export function ToastProvider() {
@@ -17,27 +32,33 @@ export function ToastProvider() {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-4 right-4 z-[100] flex max-w-sm flex-col gap-3"
+      className="pointer-events-none fixed top-6 right-6 z-[100] flex max-w-sm flex-col gap-3"
       aria-live="polite"
       aria-relevant="additions"
     >
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`pointer-events-auto animate-fade-up flex items-start gap-3 rounded-lg border-2 px-4 py-3 shadow-eco-lg ${TYPE_STYLES[toast.type]}`}
-          role="status"
-        >
-          <p className="flex-1 text-sm font-semibold leading-snug">{toast.message}</p>
-          <button
-            type="button"
-            onClick={() => dismissToast(toast.id)}
-            className="shrink-0 rounded border border-current/30 p-0.5 opacity-80 hover:opacity-100"
-            aria-label="Dismiss notification"
+      {toasts.map((toast) => {
+        const style = TYPE_STYLES[toast.type];
+        const Icon = style.icon;
+
+        return (
+          <div
+            key={toast.id}
+            className={`pointer-events-auto animate-slide-in-right flex items-start gap-3 rounded-xl border px-4 py-3 shadow-paper ${style.frame}`}
+            role="status"
           >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      ))}
+            <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${ICON_COLORS[toast.type]}`} aria-hidden />
+            <p className="flex-1 text-xs font-semibold leading-relaxed">{toast.message}</p>
+            <button
+              type="button"
+              onClick={() => dismissToast(toast.id)}
+              className="shrink-0 rounded-full p-0.5 text-ink/40 transition-colors hover:bg-cream-200 hover:text-ink"
+              aria-label="Dismiss notification"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

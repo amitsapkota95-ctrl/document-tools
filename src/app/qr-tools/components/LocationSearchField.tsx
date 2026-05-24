@@ -90,7 +90,7 @@ export function LocationSearchField({ fields, onSelect, updateField }: LocationS
         Search for a place
         <div ref={containerRef} className="relative mt-1">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sand"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/60"
             aria-hidden
           />
           <input
@@ -117,7 +117,7 @@ export function LocationSearchField({ fields, onSelect, updateField }: LocationS
               role="listbox"
             >
               {loading ? (
-                <p className="flex items-center gap-2 px-3 py-2 text-sm text-sand">
+                <p className="flex items-center gap-2 px-3 py-2 text-sm text-ink/60">
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   Searching…
                 </p>
@@ -128,7 +128,7 @@ export function LocationSearchField({ fields, onSelect, updateField }: LocationS
               ) : null}
 
               {!loading && !error && results.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-sand">No places found. Try a different search.</p>
+                <p className="px-3 py-2 text-sm text-ink/60">No places found. Try a different search.</p>
               ) : null}
 
               {!loading
@@ -138,9 +138,9 @@ export function LocationSearchField({ fields, onSelect, updateField }: LocationS
                       type="button"
                       role="option"
                       onClick={() => handleSelect(place)}
-                      className="flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-moss-light/80"
+                      className="flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-cream-200"
                     >
-                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-sage-dark" aria-hidden />
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-forest-500" aria-hidden />
                       <span>{place.label}</span>
                     </button>
                   ))
@@ -150,20 +150,20 @@ export function LocationSearchField({ fields, onSelect, updateField }: LocationS
         </div>
       </label>
 
-      <p className="text-xs text-sand-light">
+      <p className="text-xs text-ink/50">
         Place search uses OpenStreetMap data via Photon — free, no account required.
       </p>
 
       {hasCoordinates ? (
-        <div className={`${CARD_CLASS} bg-moss-light/40 p-3 text-sm`}>
-          <p className="font-semibold text-forest">{fields.label || "Selected location"}</p>
-          <p className="mt-1 text-sand">
+        <div className={`${CARD_CLASS} bg-cream-200/60 p-3 text-sm`}>
+          <p className="font-semibold text-forest-700">{fields.label || "Selected location"}</p>
+          <p className="mt-1 text-ink/60">
             {fields.latitude}, {fields.longitude}
           </p>
           <button
             type="button"
             onClick={clearSelection}
-            className="mt-2 text-xs font-semibold text-sage-dark hover:underline"
+            className="mt-2 text-xs font-semibold text-forest-500 hover:underline"
           >
             Clear and search again
           </button>

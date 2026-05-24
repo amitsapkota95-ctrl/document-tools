@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Merriweather } from "next/font/google";
+import { Lora, Plus_Jakarta_Sans } from "next/font/google";
 import { ClientProviders } from "@/components/layout/ClientProviders";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo/site";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const merriweather = Merriweather({
-  variable: "--font-merriweather",
+const lora = Lora({
+  variable: "--font-lora",
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
@@ -43,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${merriweather.variable} h-full`}
+      className={`${plusJakartaSans.variable} ${lora.variable} h-full`}
     >
       <body className="flex min-h-full flex-col antialiased">
         <SiteHeader />

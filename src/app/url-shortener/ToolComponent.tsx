@@ -92,10 +92,10 @@ export default function UrlShortenerTool() {
           {statsUrl ? (
             <div>
               <p className="text-sm font-semibold">Analytics dashboard</p>
-              <a href={statsUrl} className="mt-1 block break-all text-sm text-forest underline">
+              <a href={statsUrl} className="mt-1 block break-all text-sm text-forest-700 underline">
                 {statsUrl}
               </a>
-              <p className="mt-1 text-xs text-sand-light">
+              <p className="mt-1 text-xs text-ink/50">
                 Privacy-first click analytics — country and referer only, processed at the edge.
               </p>
             </div>
