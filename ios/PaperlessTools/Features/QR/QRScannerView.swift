@@ -4,27 +4,34 @@ import UIKit
 
 struct QRScannerView: View {
     @State private var scannedCode: String?
-    @State private var cameraPermissionDenied = false
     @State private var triggerHaptic = false
+    @State private var scannerResetTrigger = 0
 
     var body: some View {
         VStack(spacing: 20) {
-            if cameraPermissionDenied {
-                cameraDeniedView
-            } else {
-                QRScannerRepresentable { code in
-                    scannedCode = code
-                    triggerHaptic.toggle()
-                }
+            CameraPermissionGate(deniedMessage: "Camera access is required to scan QR codes.") {
+                QRScannerRepresentable(
+                    resetTrigger: scannerResetTrigger,
+                    onCodeScanned: { code in
+                        scannedCode = code
+                        triggerHaptic.toggle()
+                    }
+                )
                 .frame(maxWidth: .infinity)
                 .frame(height: 320)
                 .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
                 .padding(.horizontal, 20)
             }
+            .frame(height: 320)
+            .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+            .padding(.horizontal, 20)
 
             if let scannedCode {
-                ScannedResultCard(payload: scannedCode)
-                    .padding(.horizontal, 20)
+                ScannedResultCard(payload: scannedCode) {
+                    self.scannedCode = nil
+                    scannerResetTrigger += 1
+                }
+                .padding(.horizontal, 20)
             } else {
                 VStack(spacing: 8) {
                     Text("Point your camera at a QR code")
@@ -40,48 +47,13 @@ struct QRScannerView: View {
         .background(Color.paper.ignoresSafeArea())
         .navigationTitle("Scan QR")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            checkCameraPermission()
-        }
         .sensoryFeedback(.success, trigger: triggerHaptic)
-    }
-
-    private var cameraDeniedView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "camera.fill")
-                .font(.largeTitle)
-                .foregroundStyle(Color.sandLight)
-            Text("Camera access is required to scan QR codes.")
-                .font(.bodyText)
-                .multilineTextAlignment(.center)
-            Button("Open Settings") {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
-            }
-            .foregroundStyle(Color.forest)
-        }
-        .padding(24)
-    }
-
-    private func checkCameraPermission() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            cameraPermissionDenied = false
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                DispatchQueue.main.async {
-                    cameraPermissionDenied = !granted
-                }
-            }
-        default:
-            cameraPermissionDenied = true
-        }
     }
 }
 
 struct ScannedResultCard: View {
     let payload: String
+    let onScanAgain: () -> Void
     @State private var copied = false
 
     var body: some View {
@@ -100,6 +72,12 @@ struct ScannedResultCard: View {
                     copied = true
                 } label: {
                     Label(copied ? "Copied" : "Copy", systemImage: copied ? "checkmark" : "doc.on.doc")
+                        .font(.captionText.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+
+                Button(action: onScanAgain) {
+                    Label("Scan Again", systemImage: "qrcode.viewfinder")
                         .font(.captionText.weight(.semibold))
                 }
                 .buttonStyle(.bordered)
@@ -136,6 +114,7 @@ struct ScannedResultCard: View {
 }
 
 struct QRScannerRepresentable: UIViewControllerRepresentable {
+    let resetTrigger: Int
     let onCodeScanned: (String) -> Void
 
     func makeUIViewController(context: Context) -> QRScannerViewController {
@@ -144,19 +123,33 @@ struct QRScannerRepresentable: UIViewControllerRepresentable {
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: QRScannerViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: QRScannerViewController, context: Context) {
+        if context.coordinator.lastResetTrigger != resetTrigger {
+            context.coordinator.lastResetTrigger = resetTrigger
+            uiViewController.resetScan()
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    final class Coordinator {
+        var lastResetTrigger = 0
+    }
 }
 
 final class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     var onCodeScanned: ((String) -> Void)?
+
     private var captureSession: AVCaptureSession?
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private var lastScannedCode: String?
+    private var isSessionConfigured = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
-        setupCamera()
     }
 
     override func viewDidLayoutSubviews() {
@@ -164,16 +157,32 @@ final class QRScannerViewController: UIViewController, AVCaptureMetadataOutputOb
         previewLayer?.frame = view.bounds
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        configureCameraIfNeeded()
+        startSessionIfNeeded()
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         captureSession?.stopRunning()
     }
 
-    private func setupCamera() {
+    func resetScan() {
+        lastScannedCode = nil
+        startSessionIfNeeded()
+    }
+
+    private func configureCameraIfNeeded() {
+        guard !isSessionConfigured else { return }
+        guard CameraPermissionChecker.currentState() == .authorized else { return }
+
         let session = AVCaptureSession()
         guard let device = AVCaptureDevice.default(for: .video),
               let input = try? AVCaptureDeviceInput(device: device),
-              session.canAddInput(input) else { return }
+              session.canAddInput(input) else {
+            return
+        }
 
         session.addInput(input)
 
@@ -190,9 +199,13 @@ final class QRScannerViewController: UIViewController, AVCaptureMetadataOutputOb
 
         captureSession = session
         previewLayer = preview
+        isSessionConfigured = true
+    }
 
+    private func startSessionIfNeeded() {
+        guard let captureSession, !captureSession.isRunning else { return }
         DispatchQueue.global(qos: .userInitiated).async {
-            session.startRunning()
+            captureSession.startRunning()
         }
     }
 
@@ -206,6 +219,7 @@ final class QRScannerViewController: UIViewController, AVCaptureMetadataOutputOb
               let value = object.stringValue,
               value != lastScannedCode else { return }
         lastScannedCode = value
+        captureSession?.stopRunning()
         onCodeScanned?(value)
     }
 }

@@ -2,6 +2,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct MergePDFView: View {
+    var initialPDFURLs: [URL] = []
+
     @State private var pdfURLs: [URL] = []
     @State private var showPicker = false
     @State private var isProcessing = false
@@ -59,6 +61,13 @@ struct MergePDFView: View {
                 ProcessingOverlay(message: "Merging PDFs…")
             }
         }
+        .onAppear {
+            if pdfURLs.isEmpty, !initialPDFURLs.isEmpty {
+                pdfURLs = initialPDFURLs
+            } else if pdfURLs.isEmpty, let sharedURLs = SharedPDFImportStore.consumeSharedPDFURLs().nilIfEmpty {
+                pdfURLs = sharedURLs
+            }
+        }
     }
 
     private var emptyState: some View {
@@ -110,7 +119,10 @@ struct MergePDFView: View {
         defer { isProcessing = false }
 
         do {
-            let data = try PDFService.mergePDFs(from: pdfURLs)
+            let urls = pdfURLs
+            let data = try await Task.detached(priority: .userInitiated) {
+                try PDFService.mergePDFs(from: urls)
+            }.value
             exportedURL = try PDFService.writeTemporaryPDF(data, filename: "merged-document")
             showShareSheet = true
         } catch {
@@ -147,5 +159,11 @@ struct DocumentPicker: UIViewControllerRepresentable {
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
             onPick(urls)
         }
+    }
+}
+
+private extension Array {
+    var nilIfEmpty: Self? {
+        isEmpty ? nil : self
     }
 }

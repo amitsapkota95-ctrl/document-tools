@@ -84,6 +84,11 @@ struct SplitPDFView: View {
                 ProcessingOverlay(message: "Splitting PDF…")
             }
         }
+        .onAppear {
+            if pdfDocument == nil, let sharedURL = SharedPDFImportStore.consumeSharedPDFURL() {
+                loadPDF(from: sharedURL)
+            }
+        }
     }
 
     private var emptyState: some View {
@@ -297,23 +302,32 @@ struct SplitPDFView: View {
         errorMessage = nil
         defer { isProcessing = false }
 
-        let baseName = pdfURL.deletingPathExtension().lastPathComponent
-
         do {
-            let entries: [(name: String, data: Data)]
+            let document = pdfDocument
+            let sourceURL = pdfURL
+            let mode = splitMode
+            let pageInterval = interval
+            let selected = selectedPages
+            let baseName = sourceURL.deletingPathExtension().lastPathComponent
 
-            switch splitMode {
-            case .everyPage:
-                entries = try PDFService.splitEveryPage(from: pdfDocument, baseName: baseName)
-            case .byInterval:
-                entries = try PDFService.splitByInterval(from: pdfDocument, interval: interval, baseName: baseName)
-            case .selectedPages:
-                let data = try PDFService.extractPages(from: pdfDocument, indices: Array(selectedPages))
-                let suffix = selectedPages.count == 1 ? "page-\(selectedPages.sorted().first! + 1)" : "selected-pages"
-                entries = [(name: "\(baseName)-\(suffix).pdf", data: data)]
-            }
+            let exportURL = try await Task.detached(priority: .userInitiated) {
+                let entries: [(name: String, data: Data)]
 
-            exportedURL = try PDFService.exportFiles(named: "\(baseName)-split", entries: entries)
+                switch mode {
+                case .everyPage:
+                    entries = try PDFService.splitEveryPage(from: document, baseName: baseName)
+                case .byInterval:
+                    entries = try PDFService.splitByInterval(from: document, interval: pageInterval, baseName: baseName)
+                case .selectedPages:
+                    let data = try PDFService.extractPages(from: document, indices: Array(selected))
+                    let suffix = selected.count == 1 ? "page-\(selected.sorted().first! + 1)" : "selected-pages"
+                    entries = [(name: "\(baseName)-\(suffix).pdf", data: data)]
+                }
+
+                return try PDFService.exportFiles(named: "\(baseName)-split", entries: entries)
+            }.value
+
+            exportedURL = exportURL
             showShareSheet = true
         } catch {
             errorMessage = error.localizedDescription

@@ -51,13 +51,23 @@ struct DocumentScannerView: View {
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showScanner) {
             if autoCaptureEnabled {
-                DocumentScannerRepresentable { images in
-                    scannedImages.append(contentsOf: images)
-                }
+                DocumentScannerRepresentable(
+                    onScanComplete: { images in
+                        scannedImages.append(contentsOf: images)
+                    },
+                    onScanError: { message in
+                        errorMessage = message
+                    }
+                )
             } else {
-                ManualDocumentCameraView { images in
-                    scannedImages.append(contentsOf: images)
-                }
+                ManualDocumentCameraView(
+                    onComplete: { images in
+                        scannedImages.append(contentsOf: images)
+                    },
+                    onError: { message in
+                        errorMessage = message
+                    }
+                )
             }
         }
         .sheet(isPresented: $showShareSheet) {
@@ -133,7 +143,10 @@ struct DocumentScannerView: View {
         defer { isProcessing = false }
 
         do {
-            let data = try PDFService.scannedPagesToPDF(scannedImages)
+            let images = scannedImages
+            let data = try await Task.detached(priority: .userInitiated) {
+                try PDFService.scannedPagesToPDF(images)
+            }.value
             exportedURL = try PDFService.writeTemporaryPDF(data, filename: "scanned-document")
             showShareSheet = true
         } catch {
@@ -144,6 +157,7 @@ struct DocumentScannerView: View {
 
 struct DocumentScannerRepresentable: UIViewControllerRepresentable {
     let onScanComplete: ([UIImage]) -> Void
+    let onScanError: (String) -> Void
     @Environment(\.dismiss) private var dismiss
 
     func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
@@ -155,15 +169,17 @@ struct DocumentScannerRepresentable: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: VNDocumentCameraViewController, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onScanComplete: onScanComplete, dismiss: dismiss)
+        Coordinator(onScanComplete: onScanComplete, onScanError: onScanError, dismiss: dismiss)
     }
 
     final class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
         let onScanComplete: ([UIImage]) -> Void
+        let onScanError: (String) -> Void
         let dismiss: DismissAction
 
-        init(onScanComplete: @escaping ([UIImage]) -> Void, dismiss: DismissAction) {
+        init(onScanComplete: @escaping ([UIImage]) -> Void, onScanError: @escaping (String) -> Void, dismiss: DismissAction) {
             self.onScanComplete = onScanComplete
+            self.onScanError = onScanError
             self.dismiss = dismiss
         }
 
@@ -181,6 +197,7 @@ struct DocumentScannerRepresentable: UIViewControllerRepresentable {
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
+            onScanError(error.localizedDescription)
             dismiss()
         }
     }
@@ -190,18 +207,30 @@ struct DocumentScannerRepresentable: UIViewControllerRepresentable {
 
 struct ManualDocumentCameraView: View {
     let onComplete: ([UIImage]) -> Void
+    let onError: (String) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var capturedImages: [UIImage] = []
     @State private var isProcessingCapture = false
     @State private var captureTrigger = 0
+    @State private var cameraErrorMessage: String?
 
     var body: some View {
         ZStack {
-            ManualCameraPreview(captureTrigger: $captureTrigger, isProcessing: $isProcessingCapture) { image in
-                Task { await handleCapture(image) }
+            CameraPermissionGate(deniedMessage: "Camera access is required to capture documents.") {
+                ManualCameraPreview(
+                    captureTrigger: $captureTrigger,
+                    isProcessing: $isProcessingCapture,
+                    onPhotoCaptured: { image in
+                        Task { await handleCapture(image) }
+                    },
+                    onSetupFailed: { message in
+                        cameraErrorMessage = message
+                        onError(message)
+                    }
+                )
+                .ignoresSafeArea()
             }
-            .ignoresSafeArea()
 
             VStack {
                 HStack {
@@ -254,6 +283,15 @@ struct ManualDocumentCameraView: View {
                     .font(.captionText)
                     .foregroundStyle(.white.opacity(0.85))
                     .padding(.bottom, 20)
+
+                if let cameraErrorMessage {
+                    Text(cameraErrorMessage)
+                        .font(.captionText)
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 12)
+                }
             }
         }
         .background(Color.black.ignoresSafeArea())
@@ -273,10 +311,12 @@ private struct ManualCameraPreview: UIViewControllerRepresentable {
     @Binding var captureTrigger: Int
     @Binding var isProcessing: Bool
     let onPhotoCaptured: (UIImage) -> Void
+    let onSetupFailed: (String) -> Void
 
     func makeUIViewController(context: Context) -> ManualCameraViewController {
         let controller = ManualCameraViewController()
         controller.onPhotoCaptured = onPhotoCaptured
+        controller.onSetupFailed = onSetupFailed
         context.coordinator.controller = controller
         return controller
     }
@@ -303,15 +343,16 @@ private struct ManualCameraPreview: UIViewControllerRepresentable {
 
 final class ManualCameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     var onPhotoCaptured: ((UIImage) -> Void)?
+    var onSetupFailed: ((String) -> Void)?
 
     private let session = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    private var isSessionConfigured = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
-        configureSession()
     }
 
     override func viewDidLayoutSubviews() {
@@ -321,9 +362,8 @@ final class ManualCameraViewController: UIViewController, AVCapturePhotoCaptureD
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            self?.session.startRunning()
-        }
+        configureSessionIfNeeded()
+        startSessionIfNeeded()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -341,7 +381,10 @@ final class ManualCameraViewController: UIViewController, AVCapturePhotoCaptureD
         photoOutput.capturePhoto(with: settings, delegate: self)
     }
 
-    private func configureSession() {
+    private func configureSessionIfNeeded() {
+        guard !isSessionConfigured else { return }
+        guard CameraPermissionChecker.currentState() == .authorized else { return }
+
         session.beginConfiguration()
         session.sessionPreset = .photo
 
@@ -351,6 +394,9 @@ final class ManualCameraViewController: UIViewController, AVCapturePhotoCaptureD
             session.canAddInput(input)
         else {
             session.commitConfiguration()
+            DispatchQueue.main.async { [weak self] in
+                self?.onSetupFailed?("Unable to access the camera.")
+            }
             return
         }
 
@@ -367,12 +413,29 @@ final class ManualCameraViewController: UIViewController, AVCapturePhotoCaptureD
         previewLayer.frame = view.bounds
         view.layer.insertSublayer(previewLayer, at: 0)
         self.previewLayer = previewLayer
+        isSessionConfigured = true
+    }
+
+    private func startSessionIfNeeded() {
+        guard isSessionConfigured, !session.isRunning else { return }
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.session.startRunning()
+        }
     }
 
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        guard error == nil,
-              let data = photo.fileDataRepresentation(),
+        if let error {
+            DispatchQueue.main.async { [weak self] in
+                self?.onSetupFailed?(error.localizedDescription)
+            }
+            return
+        }
+
+        guard let data = photo.fileDataRepresentation(),
               let image = UIImage(data: data) else {
+            DispatchQueue.main.async { [weak self] in
+                self?.onSetupFailed?("Unable to capture photo.")
+            }
             return
         }
 

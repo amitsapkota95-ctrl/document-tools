@@ -191,6 +191,11 @@ struct FillAndSignView: View {
                 ProcessingOverlay(message: "Applying signature…")
             }
         }
+        .onAppear {
+            if pdfDocument == nil, let sharedURL = SharedPDFImportStore.consumeSharedPDFURL() {
+                loadPDF(from: sharedURL)
+            }
+        }
     }
 
     private var emptyState: some View {
@@ -344,14 +349,23 @@ struct FillAndSignView: View {
         defer { isProcessing = false }
 
         do {
-            let signedData = try PDFService.stampSignature(
-                on: pdfData,
-                signatureImage: signatureImage,
-                pageIndex: signaturePageIndex,
-                normalizedRect: signatureNormalizedRect,
-                applyToAllPages: applyToAllPages
-            )
+            let data = pdfData
+            let signature = signatureImage
+            let pageIndex = signaturePageIndex
+            let rect = signatureNormalizedRect
+            let applyAll = applyToAllPages
             let baseName = pdfURL?.deletingPathExtension().lastPathComponent ?? "signed-document"
+
+            let signedData = try await Task.detached(priority: .userInitiated) {
+                try PDFService.stampSignature(
+                    on: data,
+                    signatureImage: signature,
+                    pageIndex: pageIndex,
+                    normalizedRect: rect,
+                    applyToAllPages: applyAll
+                )
+            }.value
+
             exportedURL = try PDFService.writeTemporaryPDF(signedData, filename: "\(baseName)-signed")
             showShareSheet = true
         } catch {

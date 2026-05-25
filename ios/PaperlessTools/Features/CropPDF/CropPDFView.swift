@@ -65,14 +65,15 @@ struct CropPDFView: View {
         .overlay {
             if isProcessing { ProcessingOverlay(message: "Cropping PDF…") }
         }
+        .onAppear {
+            if pdfDocument == nil, let sharedURL = SharedPDFImportStore.consumeSharedPDFURL() {
+                loadPDF(sharedURL)
+            }
+        }
     }
 
     private var editorContent: some View {
-        GeometryReader { geometry in
-            let bottomBarHeight: CGFloat = 132
-            let chromeHeight: CGFloat = 88
-            let canvasHeight = max(geometry.size.height - bottomBarHeight - chromeHeight, 280)
-
+        ScrollView {
             VStack(spacing: 12) {
                 if let pdfDocument, let page = pdfDocument.page(at: currentPage) {
                     compactToolbar(pageCount: pdfDocument.pageCount)
@@ -83,7 +84,7 @@ struct CropPDFView: View {
                         boxes: cropBoxesBinding
                     )
                     .id(currentPage)
-                    .frame(height: canvasHeight)
+                    .frame(minHeight: 280)
                     .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
 
                     Text(cropInstructionText)
@@ -91,8 +92,6 @@ struct CropPDFView: View {
                         .foregroundStyle(Color.sandLight)
                         .multilineTextAlignment(.center)
                 }
-
-                Spacer(minLength: 0)
 
                 VStack(spacing: 12) {
                     if let errorMessage {
@@ -245,13 +244,21 @@ struct CropPDFView: View {
         defer { isProcessing = false }
 
         do {
-            let data = try PDFService.cropPDF(
-                from: pdfURL,
-                cropBoxesByPage: cropBoxesByPage,
-                applyToAllPages: applyToAllPages,
-                sourcePageIndex: sharedCropSourcePage
-            )
-            let base = pdfURL.deletingPathExtension().lastPathComponent
+            let sourceURL = pdfURL
+            let boxes = cropBoxesByPage
+            let applyAll = applyToAllPages
+            let sourcePage = sharedCropSourcePage
+
+            let data = try await Task.detached(priority: .userInitiated) {
+                try PDFService.cropPDF(
+                    from: sourceURL,
+                    cropBoxesByPage: boxes,
+                    applyToAllPages: applyAll,
+                    sourcePageIndex: sourcePage
+                )
+            }.value
+
+            let base = sourceURL.deletingPathExtension().lastPathComponent
             exportedURL = try PDFService.writeTemporaryPDF(data, filename: "\(base)-cropped")
             showShareSheet = true
         } catch {

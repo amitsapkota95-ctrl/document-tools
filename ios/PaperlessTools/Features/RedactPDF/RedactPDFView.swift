@@ -57,14 +57,15 @@ struct RedactPDFView: View {
         .overlay {
             if isProcessing { ProcessingOverlay(message: "Applying redactions…") }
         }
+        .onAppear {
+            if pdfDocument == nil, let sharedURL = SharedPDFImportStore.consumeSharedPDFURL() {
+                loadPDF(sharedURL)
+            }
+        }
     }
 
     private var editorContent: some View {
-        GeometryReader { geometry in
-            let bottomBarHeight: CGFloat = 132
-            let chromeHeight: CGFloat = 88
-            let canvasHeight = max(geometry.size.height - bottomBarHeight - chromeHeight, 280)
-
+        ScrollView {
             VStack(spacing: 12) {
                 if let pdfDocument, let page = pdfDocument.page(at: currentPage) {
                     compactToolbar(pageCount: pdfDocument.pageCount)
@@ -78,7 +79,7 @@ struct RedactPDFView: View {
                         resetZoomTrigger: resetZoomTrigger
                     )
                     .id(currentPage)
-                    .frame(height: canvasHeight)
+                    .frame(minHeight: 280)
                     .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
                     .accessibilityLabel("Document page")
                     .accessibilityHint("Pinch to zoom. One finger draws redaction boxes.")
@@ -88,8 +89,6 @@ struct RedactPDFView: View {
                         .foregroundStyle(Color.sandLight)
                         .multilineTextAlignment(.center)
                 }
-
-                Spacer(minLength: 0)
 
                 VStack(spacing: 12) {
                     if let errorMessage {
@@ -252,13 +251,21 @@ struct RedactPDFView: View {
         defer { isProcessing = false }
 
         do {
-            let data = try PDFService.redactPDF(
-                from: pdfURL,
-                boxesByPage: boxesByPage,
-                applyToAllPages: applyToAllPages,
-                sourcePageIndex: sharedRedactionSourcePage
-            )
-            let base = pdfURL.deletingPathExtension().lastPathComponent
+            let sourceURL = pdfURL
+            let boxes = boxesByPage
+            let applyAll = applyToAllPages
+            let sourcePage = sharedRedactionSourcePage
+
+            let data = try await Task.detached(priority: .userInitiated) {
+                try PDFService.redactPDF(
+                    from: sourceURL,
+                    boxesByPage: boxes,
+                    applyToAllPages: applyAll,
+                    sourcePageIndex: sourcePage
+                )
+            }.value
+
+            let base = sourceURL.deletingPathExtension().lastPathComponent
             exportedURL = try PDFService.writeTemporaryPDF(data, filename: "\(base)-redacted")
             showShareSheet = true
         } catch {

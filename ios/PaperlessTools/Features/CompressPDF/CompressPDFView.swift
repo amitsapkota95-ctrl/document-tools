@@ -56,6 +56,11 @@ struct CompressPDFView: View {
         .onDisappear {
             estimateTask?.cancel()
         }
+        .onAppear {
+            if pdfURL == nil, let sharedURL = SharedPDFImportStore.consumeSharedPDFURL() {
+                loadPDF(sharedURL)
+            }
+        }
         .sheet(isPresented: $showPicker) {
             DocumentPicker(contentTypes: [.pdf], allowsMultipleSelection: false) { urls in
                 if let url = urls.first { loadPDF(url) }
@@ -237,16 +242,23 @@ struct CompressPDFView: View {
         defer { isProcessing = false }
 
         do {
-            let data: Data
-            if isPassthrough {
-                data = originalData
-            } else {
-                data = try PDFService.compressPDF(
-                    from: pdfDocument,
-                    quality: quality,
-                    originalData: originalData
+            let document = pdfDocument
+            let original = originalData
+            let sourceURL = pdfURL
+            let compressionQuality = quality
+            let passthrough = isPassthrough
+
+            let data = try await Task.detached(priority: .userInitiated) {
+                if passthrough {
+                    return original
+                }
+                return try PDFService.compressPDF(
+                    from: document,
+                    quality: compressionQuality,
+                    originalData: original
                 )
-            }
+            }.value
+
             compressedSize = data.count
             let base = pdfURL.deletingPathExtension().lastPathComponent
             exportedURL = try PDFService.writeTemporaryPDF(data, filename: "\(base)-smaller")

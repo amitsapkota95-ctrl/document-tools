@@ -2,6 +2,8 @@ import SafariServices
 import SwiftUI
 
 struct URLShortenerView: View {
+    var initialURL: String = ""
+
     @State private var url = ""
     @State private var shortUrl = ""
     @State private var statsUrl = ""
@@ -49,6 +51,11 @@ struct URLShortenerView: View {
         .background(Color.paper.ignoresSafeArea())
         .navigationTitle("Shorten Link")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            if url.isEmpty, !initialURL.isEmpty {
+                url = initialURL
+            }
+        }
         .sheet(isPresented: $showStats) {
             if let statsURL = URL(string: statsUrl) {
                 SafariView(url: statsURL)

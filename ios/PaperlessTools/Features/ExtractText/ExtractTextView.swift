@@ -75,6 +75,13 @@ struct ExtractTextView: View {
         .overlay {
             if isProcessing { ProcessingOverlay(message: "Reading document…") }
         }
+        .onAppear {
+            if pdfURL == nil, let sharedURL = SharedPDFImportStore.consumeSharedPDFURL() {
+                pdfURL = sharedURL
+                extractedText = ""
+                errorMessage = nil
+            }
+        }
     }
 
     private var emptyState: some View {

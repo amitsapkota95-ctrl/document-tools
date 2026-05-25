@@ -4,6 +4,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ImageToPDFView: View {
+    var initialImageURLs: [URL] = []
+
     private let maxImageCount = 20
 
     @State private var pickerSelection: [PhotosPickerItem] = []
@@ -105,6 +107,10 @@ struct ImageToPDFView: View {
                 ProcessingOverlay(message: "Creating PDF…")
             }
         }
+        .task {
+            guard images.isEmpty, !initialImageURLs.isEmpty else { return }
+            await loadImages(from: initialImageURLs)
+        }
     }
 
     private var loadingMessage: String {
@@ -123,6 +129,27 @@ struct ImageToPDFView: View {
                     .frame(height: 100)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
+        }
+    }
+
+    @MainActor
+    private func loadImages(from urls: [URL]) async {
+        isLoadingImages = true
+        errorMessage = nil
+        defer { isLoadingImages = false }
+
+        let loaded = await Task.detached(priority: .userInitiated) {
+            urls.compactMap { url -> UIImage? in
+                guard let data = try? Data(contentsOf: url) else { return nil }
+                return UIImage(data: data)
+            }
+        }.value
+
+        let remainingCapacity = max(0, maxImageCount - images.count)
+        images.append(contentsOf: loaded.prefix(remainingCapacity))
+
+        if loaded.count > remainingCapacity {
+            errorMessage = "Maximum of \(maxImageCount) images reached."
         }
     }
 
@@ -180,7 +207,11 @@ struct ImageToPDFView: View {
         defer { isProcessing = false }
 
         do {
-            let data = try PDFService.imagesToPDF(images: images, pageSize: pageSize)
+            let selectedImages = images
+            let selectedPageSize = pageSize
+            let data = try await Task.detached(priority: .userInitiated) {
+                try PDFService.imagesToPDF(images: selectedImages, pageSize: selectedPageSize)
+            }.value
             exportedURL = try PDFService.writeTemporaryPDF(data, filename: "images-document")
             showShareSheet = true
         } catch {
