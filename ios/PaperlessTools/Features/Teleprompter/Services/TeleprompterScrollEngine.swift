@@ -7,18 +7,14 @@ final class TeleprompterScrollEngine: NSObject, ObservableObject {
     @Published private(set) var offset: CGFloat = 0
     @Published private(set) var isRunning = false
 
-    var scrollMode: TeleprompterScrollMode = .manual
     var scrollSpeed: Double = 40
-    var voiceLerpFactor: Double = 0.06
     var cuePosition: Double = 0.35
 
     var contentHeight: CGFloat = 1
     var viewportHeight: CGFloat = 1
     var topPadding: CGFloat = 0
 
-    var targetWordIndex: Int = 0
     var wordPositions: [Int: CGFloat] = [:]
-    var voiceScrollActive = false
 
     private var displayLink: CADisplayLink?
     private var lastTimestamp: CFTimeInterval = 0
@@ -43,29 +39,17 @@ final class TeleprompterScrollEngine: NSObject, ObservableObject {
         offset = 0
     }
 
-    func jumpToWord(_ index: Int, animated: Bool = false) {
+    func jumpToWord(_ index: Int) {
         guard let y = wordPositions[index] else { return }
-        let target = max(0, y - cueLineY)
-        if animated {
-            offset = target
-        } else {
-            offset = target
-        }
-        targetWordIndex = index
+        offset = clampedOffset(max(0, y - cueLineY))
     }
 
     func jumpToMarker(_ marker: TeleprompterScriptMarker) {
         jumpToWord(marker.wordIndex)
     }
 
-    func scrub(by delta: CGFloat) {
-        offset = clampedOffset(offset + delta)
-    }
-
-    func nearestWordIndex(at offset: CGFloat) -> Int {
-        let cueY = offset + cueLineY
-        guard !wordPositions.isEmpty else { return 0 }
-        return wordPositions.min(by: { abs($0.value - cueY) < abs($1.value - cueY) })?.key ?? 0
+    func setOffset(_ value: CGFloat) {
+        offset = clampedOffset(value)
     }
 
     private var cueLineY: CGFloat {
@@ -74,10 +58,6 @@ final class TeleprompterScrollEngine: NSObject, ObservableObject {
 
     private var maxOffset: CGFloat {
         max(0, contentHeight - viewportHeight)
-    }
-
-    func setOffset(_ value: CGFloat) {
-        offset = clampedOffset(value)
     }
 
     private func clampedOffset(_ value: CGFloat) -> CGFloat {
@@ -92,20 +72,6 @@ final class TeleprompterScrollEngine: NSObject, ObservableObject {
 
         let delta = link.timestamp - lastTimestamp
         lastTimestamp = link.timestamp
-
-        if scrollMode == .voice, voiceScrollActive, let wordY = wordPositions[targetWordIndex] {
-            let targetOffset = max(0, wordY - cueLineY)
-            let diff = targetOffset - offset
-            if abs(diff) > 0.5 {
-                offset += diff * voiceLerpFactor
-            } else {
-                offset = targetOffset
-            }
-            offset = clampedOffset(offset)
-            return
-        }
-
-        guard scrollMode == .manual else { return }
         offset = clampedOffset(offset + scrollSpeed * delta)
     }
 }

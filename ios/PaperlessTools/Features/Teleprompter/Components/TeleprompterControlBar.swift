@@ -3,12 +3,10 @@ import SwiftUI
 struct TeleprompterControlBar: View {
     let theme: TeleprompterTheme
     let isRunning: Bool
-    let scrollMode: TeleprompterScrollMode
     let onClose: () -> Void
     let onPlayPause: () -> Void
     let onSpeedDown: () -> Void
     let onSpeedUp: () -> Void
-    let onToggleVoice: () -> Void
     let onMarkers: () -> Void
     let onSettings: () -> Void
 
@@ -19,10 +17,8 @@ struct TeleprompterControlBar: View {
                     .font(.body.weight(.semibold))
             }
 
-            if scrollMode == .manual {
-                Button(action: onSpeedDown) {
-                    Image(systemName: "minus")
-                }
+            Button(action: onSpeedDown) {
+                Image(systemName: "minus")
             }
 
             Button(action: onPlayPause) {
@@ -33,14 +29,8 @@ struct TeleprompterControlBar: View {
                     .clipShape(Circle())
             }
 
-            if scrollMode == .manual {
-                Button(action: onSpeedUp) {
-                    Image(systemName: "plus")
-                }
-            }
-
-            Button(action: onToggleVoice) {
-                Image(systemName: scrollMode == .voice ? "waveform.circle.fill" : "waveform.circle")
+            Button(action: onSpeedUp) {
+                Image(systemName: "plus")
             }
 
             Button(action: onMarkers) {

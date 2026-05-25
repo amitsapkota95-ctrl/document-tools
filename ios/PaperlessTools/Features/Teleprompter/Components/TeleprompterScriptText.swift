@@ -4,8 +4,6 @@ struct TeleprompterScriptText: View {
     let script: TeleprompterScript
     let theme: TeleprompterTheme
     let fontSize: Double
-    let activeWordIndex: Int
-    let highlightEnabled: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -50,7 +48,7 @@ struct TeleprompterScriptText: View {
                 let index = wordStartIndex + offset
                 Text(word)
                     .font(.system(size: fontSize, weight: .medium))
-                    .foregroundStyle(color(for: index))
+                    .foregroundStyle(theme.text)
                     .background(
                         GeometryReader { proxy in
                             Color.clear.preference(
@@ -64,17 +62,6 @@ struct TeleprompterScriptText: View {
                     )
             }
         }
-    }
-
-    private func color(for index: Int) -> Color {
-        guard highlightEnabled else { return theme.text }
-        if index < activeWordIndex {
-            return theme.text.opacity(0.5)
-        }
-        if index == activeWordIndex {
-            return theme.accent
-        }
-        return theme.text
     }
 }
 

@@ -56,10 +56,8 @@
 		A100000053 /* TeleprompterScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000053 /* TeleprompterScript.swift */; };
 		A100000054 /* TeleprompterScriptParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000054 /* TeleprompterScriptParser.swift */; };
 		A100000055 /* TeleprompterScrollEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000055 /* TeleprompterScrollEngine.swift */; };
-		A100000056 /* TeleprompterVoiceTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000056 /* TeleprompterVoiceTracker.swift */; };
 		A100000057 /* TeleprompterScriptText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000057 /* TeleprompterScriptText.swift */; };
 		A100000058 /* TeleprompterCueLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000058 /* TeleprompterCueLine.swift */; };
-		A100000059 /* TeleprompterVoiceBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000059 /* TeleprompterVoiceBar.swift */; };
 		A100000060 /* TeleprompterControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000060 /* TeleprompterControlBar.swift */; };
 		A100000061 /* TeleprompterPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000061 /* TeleprompterPlayerView.swift */; };
 		A100000062 /* TeleprompterSettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000062 /* TeleprompterSettingsSheet.swift */; };
@@ -118,10 +116,8 @@
 		A200000053 /* TeleprompterScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterScript.swift; sourceTree = "<group>"; };
 		A200000054 /* TeleprompterScriptParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterScriptParser.swift; sourceTree = "<group>"; };
 		A200000055 /* TeleprompterScrollEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterScrollEngine.swift; sourceTree = "<group>"; };
-		A200000056 /* TeleprompterVoiceTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterVoiceTracker.swift; sourceTree = "<group>"; };
 		A200000057 /* TeleprompterScriptText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterScriptText.swift; sourceTree = "<group>"; };
 		A200000058 /* TeleprompterCueLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterCueLine.swift; sourceTree = "<group>"; };
-		A200000059 /* TeleprompterVoiceBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterVoiceBar.swift; sourceTree = "<group>"; };
 		A200000060 /* TeleprompterControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterControlBar.swift; sourceTree = "<group>"; };
 		A200000061 /* TeleprompterPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterPlayerView.swift; sourceTree = "<group>"; };
 		A200000062 /* TeleprompterSettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterSettingsSheet.swift; sourceTree = "<group>"; };
@@ -447,7 +443,6 @@
 			children = (
 				A200000054 /* TeleprompterScriptParser.swift */,
 				A200000055 /* TeleprompterScrollEngine.swift */,
-				A200000056 /* TeleprompterVoiceTracker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -457,7 +452,6 @@
 			children = (
 				A200000057 /* TeleprompterScriptText.swift */,
 				A200000058 /* TeleprompterCueLine.swift */,
-				A200000059 /* TeleprompterVoiceBar.swift */,
 				A200000060 /* TeleprompterControlBar.swift */,
 			);
 			path = Components;
@@ -607,10 +601,8 @@
 				A100000053 /* TeleprompterScript.swift in Sources */,
 				A100000054 /* TeleprompterScriptParser.swift in Sources */,
 				A100000055 /* TeleprompterScrollEngine.swift in Sources */,
-				A100000056 /* TeleprompterVoiceTracker.swift in Sources */,
 				A100000057 /* TeleprompterScriptText.swift in Sources */,
 				A100000058 /* TeleprompterCueLine.swift in Sources */,
-				A100000059 /* TeleprompterVoiceBar.swift in Sources */,
 				A100000060 /* TeleprompterControlBar.swift in Sources */,
 				A100000061 /* TeleprompterPlayerView.swift in Sources */,
 				A100000062 /* TeleprompterSettingsSheet.swift in Sources */,

@@ -25,12 +25,16 @@ struct TeleprompterSettingsSheet: View {
                 }
 
                 Section("Cue line") {
-                    Slider(value: $settings.cuePosition, in: 0.2...0.45, step: 0.01) {
-                        Text("Cue position")
-                    }
-                    Picker("Cue style", selection: $settings.cueStyle) {
-                        ForEach(TeleprompterCueStyle.allCases) { style in
-                            Text(style.label).tag(style)
+                    Toggle("Show cue line", isOn: $settings.showCueLine)
+
+                    if settings.showCueLine {
+                        Slider(value: $settings.cuePosition, in: 0.2...0.45, step: 0.01) {
+                            Text("Cue position")
+                        }
+                        Picker("Cue style", selection: $settings.cueStyle) {
+                            ForEach(TeleprompterCueStyle.allCases) { style in
+                                Text(style.label).tag(style)
+                            }
                         }
                     }
                 }
@@ -43,20 +47,12 @@ struct TeleprompterSettingsSheet: View {
                     }
                 }
 
-                if settings.scrollMode == .manual {
-                    Section("Speed") {
-                        Slider(value: $settings.scrollSpeed, in: 10...120, step: 5) {
-                            Text("Scroll speed")
-                        }
-                        Slider(value: $settings.targetWpm, in: 100...180, step: 5) {
-                            Text("Target WPM")
-                        }
+                Section("Speed") {
+                    Slider(value: $settings.scrollSpeed, in: 10...120, step: 5) {
+                        Text("Scroll speed")
                     }
-                } else {
-                    Section("Voice") {
-                        Slider(value: $settings.voiceSensitivity, in: 0...1, step: 0.05) {
-                            Text("Sensitivity")
-                        }
+                    Slider(value: $settings.targetWpm, in: 100...180, step: 5) {
+                        Text("Target WPM")
                     }
                 }
             }

@@ -24,10 +24,6 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is used to scan QR codes and capture documents.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Microphone access lets the teleprompter follow your voice while you read.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Speech recognition matches your reading to the script. Processing stays on your device when available.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save exported QR codes and PDFs to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

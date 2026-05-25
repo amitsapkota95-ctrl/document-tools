@@ -6,7 +6,6 @@ struct TeleprompterPlayerView: View {
 
     @Environment(\.dismiss) private var dismiss
     @StateObject private var scrollEngine = TeleprompterScrollEngine()
-    @StateObject private var voiceTracker = TeleprompterVoiceTracker()
 
     @State private var showControls = true
     @State private var controlsHideTask: Task<Void, Never>?
@@ -14,7 +13,6 @@ struct TeleprompterPlayerView: View {
     @State private var showMarkerSheet = false
     @State private var showExitConfirmation = false
     @State private var dragStartOffset: CGFloat = 0
-    @State private var hasVoiceMatch = false
 
     private var theme: TeleprompterTheme { settings.theme }
 
@@ -23,15 +21,15 @@ struct TeleprompterPlayerView: View {
             theme.background.ignoresSafeArea()
 
             GeometryReader { geometry in
-                let topPadding = geometry.size.height * settings.cuePosition
+                let topPadding = settings.showCueLine
+                    ? geometry.size.height * settings.cuePosition
+                    : 40.0
 
                 ScrollView {
                     TeleprompterScriptText(
                         script: script,
                         theme: theme,
-                        fontSize: settings.fontSize,
-                        activeWordIndex: voiceTracker.activeWordIndex,
-                        highlightEnabled: settings.scrollMode == .voice
+                        fontSize: settings.fontSize
                     )
                     .padding(.horizontal, geometry.size.width * 0.075)
                     .padding(.top, topPadding)
@@ -61,7 +59,6 @@ struct TeleprompterPlayerView: View {
                 }
                 .scrollDisabled(true)
                 .simultaneousGesture(dragGesture)
-                .simultaneousGesture(tapGesture)
                 .simultaneousGesture(doubleTapGesture)
                 .onAppear {
                     scrollEngine.viewportHeight = geometry.size.height
@@ -72,43 +69,28 @@ struct TeleprompterPlayerView: View {
                     scrollEngine.viewportHeight = newValue
                 }
                 .overlay {
-                    TeleprompterCueLine(
-                        theme: theme,
-                        style: settings.cueStyle,
-                        cuePosition: settings.cuePosition,
-                        isVoiceActive: settings.scrollMode == .voice && voiceTracker.isHearingAudio
-                    )
+                    if settings.showCueLine {
+                        TeleprompterCueLine(
+                            theme: theme,
+                            style: settings.cueStyle,
+                            cuePosition: settings.cuePosition
+                        )
+                    }
                 }
             }
 
             VStack(spacing: 0) {
                 topBar
-
-                if settings.scrollMode == .voice {
-                    TeleprompterVoiceBar(
-                        theme: theme,
-                        status: voiceTracker.status,
-                        currentPhrase: voiceTracker.currentPhrase,
-                        interimText: voiceTracker.interimText,
-                        isHearingAudio: voiceTracker.isHearingAudio,
-                        usesOnDeviceRecognition: voiceTracker.usesOnDeviceRecognition,
-                        statusDetail: voiceTracker.statusDetail
-                    )
-                    .padding(.top, 4)
-                }
-
                 Spacer()
 
                 if showControls {
                     TeleprompterControlBar(
                         theme: theme,
                         isRunning: scrollEngine.isRunning,
-                        scrollMode: settings.scrollMode,
                         onClose: requestExit,
                         onPlayPause: togglePlayPause,
                         onSpeedDown: { settings.scrollSpeed = max(10, settings.scrollSpeed - 5) },
                         onSpeedUp: { settings.scrollSpeed = min(120, settings.scrollSpeed + 5) },
-                        onToggleVoice: toggleVoiceMode,
                         onMarkers: { showMarkerSheet = true },
                         onSettings: { showSettingsSheet = true }
                     )
@@ -128,33 +110,11 @@ struct TeleprompterPlayerView: View {
         .onChange(of: settings.cuePosition) { _, newValue in
             scrollEngine.cuePosition = newValue
         }
-        .onChange(of: settings.voiceSensitivity) { _, newValue in
-            voiceTracker.sensitivity = newValue
-        }
-        .onChange(of: voiceTracker.activeWordIndex) { _, newValue in
-            scrollEngine.targetWordIndex = newValue
-            if settings.scrollMode == .voice {
-                hasVoiceMatch = true
-                updateVoiceScrollActive()
-            }
-        }
-        .onChange(of: voiceTracker.isPausedBySilence) { _, _ in
-            updateVoiceScrollActive()
-        }
-        .onChange(of: voiceTracker.isHearingAudio) { _, _ in
-            updateVoiceScrollActive()
-        }
-        .onChange(of: voiceTracker.status) { _, status in
-            if case .matching = status {
-                hasVoiceMatch = true
-                updateVoiceScrollActive()
-            }
-        }
-        .onChange(of: voiceTracker.interimText) { _, text in
-            if !text.isEmpty, settings.scrollMode == .voice {
-                hasVoiceMatch = true
-                updateVoiceScrollActive()
-            }
+        .onChange(of: settings.showCueLine) { _, showCueLine in
+            let topPadding = showCueLine
+                ? scrollEngine.viewportHeight * settings.cuePosition
+                : 40
+            scrollEngine.topPadding = topPadding
         }
         .sheet(isPresented: $showSettingsSheet) {
             TeleprompterSettingsSheet(settings: $settings)
@@ -162,7 +122,6 @@ struct TeleprompterPlayerView: View {
         .sheet(isPresented: $showMarkerSheet) {
             TeleprompterMarkerSheet(markers: script.markers) { marker in
                 scrollEngine.jumpToMarker(marker)
-                voiceTracker.setAnchorWordIndex(marker.wordIndex)
                 revealControls()
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             }
@@ -193,7 +152,7 @@ struct TeleprompterPlayerView: View {
             Spacer()
 
             if scrollEngine.isRunning {
-                Text(settings.scrollMode == .voice ? "Voice" : "Manual")
+                Text("Playing")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(theme.text.opacity(0.8))
                     .padding(.horizontal, 10)
@@ -218,45 +177,24 @@ struct TeleprompterPlayerView: View {
             }
             .onEnded { _ in
                 dragStartOffset = 0
-                if settings.scrollMode == .voice {
-                    let nearest = scrollEngine.nearestWordIndex(at: scrollEngine.offset)
-                    voiceTracker.setAnchorWordIndex(nearest)
-                }
             }
-    }
-
-    private var tapGesture: some Gesture {
-        TapGesture(count: 1).onEnded {
-            revealControls()
-            guard !scrollEngine.isRunning, settings.scrollMode == .voice else { return }
-            let nearest = scrollEngine.nearestWordIndex(at: scrollEngine.offset)
-            voiceTracker.setAnchorWordIndex(nearest)
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        }
     }
 
     private var doubleTapGesture: some Gesture {
         TapGesture(count: 2).onEnded {
             revealControls()
             scrollEngine.reset()
-            voiceTracker.setAnchorWordIndex(0)
-            hasVoiceMatch = false
         }
     }
 
     private func configurePlayer() {
-        voiceTracker.configure(script: script)
-        voiceTracker.sensitivity = settings.voiceSensitivity
-        scrollEngine.scrollMode = settings.scrollMode
         scrollEngine.scrollSpeed = settings.scrollSpeed
-        scrollEngine.voiceLerpFactor = 0.04 + settings.voiceSensitivity * 0.04
         scrollEngine.cuePosition = settings.cuePosition
         revealControls(permanent: true)
     }
 
     private func teardownPlayer() {
         scrollEngine.stop()
-        voiceTracker.stopListening()
         controlsHideTask?.cancel()
     }
 
@@ -265,34 +203,10 @@ struct TeleprompterPlayerView: View {
 
         if scrollEngine.isRunning {
             scrollEngine.stop()
-            voiceTracker.stopListening()
-            scrollEngine.voiceScrollActive = false
             return
         }
 
-        scrollEngine.scrollMode = settings.scrollMode
         scrollEngine.start()
-
-        if settings.scrollMode == .voice {
-            Task {
-                if voiceTracker.permissionStatus != .granted {
-                    let granted = await voiceTracker.requestPermissions()
-                    guard granted else { return }
-                }
-                voiceTracker.startListening(shouldScroll: true)
-                updateVoiceScrollActive()
-            }
-        }
-    }
-
-    private func toggleVoiceMode() {
-        revealControls()
-        settings.scrollMode = settings.scrollMode == .voice ? .manual : .voice
-        scrollEngine.scrollMode = settings.scrollMode
-        scrollEngine.stop()
-        voiceTracker.stopListening()
-        scrollEngine.voiceScrollActive = false
-        hasVoiceMatch = false
     }
 
     private func requestExit() {
@@ -306,20 +220,7 @@ struct TeleprompterPlayerView: View {
 
     private func closePlayer() {
         scrollEngine.stop()
-        voiceTracker.stopListening()
         dismiss()
-    }
-
-    private func updateVoiceScrollActive() {
-        guard settings.scrollMode == .voice, scrollEngine.isRunning else {
-            scrollEngine.voiceScrollActive = false
-            return
-        }
-
-        let hasTranscript = !voiceTracker.interimText.isEmpty
-        scrollEngine.voiceScrollActive = hasVoiceMatch
-            && !voiceTracker.isPausedBySilence
-            && (hasTranscript || voiceTracker.isHearingAudio)
     }
 
     private func revealControls(permanent: Bool = false) {

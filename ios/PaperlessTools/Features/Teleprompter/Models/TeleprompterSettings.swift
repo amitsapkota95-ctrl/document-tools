@@ -1,19 +1,5 @@
 import Foundation
 
-enum TeleprompterScrollMode: String, Codable, CaseIterable, Identifiable {
-    case manual
-    case voice
-
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .manual: return "Manual"
-        case .voice: return "Voice"
-        }
-    }
-}
-
 enum TeleprompterCueStyle: String, Codable, CaseIterable, Identifiable {
     case line
     case chevron
@@ -67,8 +53,7 @@ struct TeleprompterSettings: Equatable {
     var scrollSpeed: Double = 40
     var targetWpm: Double = 140
     var themeID: TeleprompterThemeID = .broadcastYellow
-    var scrollMode: TeleprompterScrollMode = .manual
-    var voiceSensitivity: Double = 0.5
+    var showCueLine: Bool = true
     var cuePosition: Double = 0.35
     var cueStyle: TeleprompterCueStyle = .line
     var mirrorMode: TeleprompterMirrorMode = .none

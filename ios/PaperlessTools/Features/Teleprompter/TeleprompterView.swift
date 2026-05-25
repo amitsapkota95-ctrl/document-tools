@@ -4,8 +4,6 @@ struct TeleprompterView: View {
     @State private var script = TeleprompterStorage.loadScript()
     @State private var settings = TeleprompterStorage.loadSettings()
     @State private var showPlayer = false
-    @State private var permissionStatus: TeleprompterPermissionStatus = .notDetermined
-    @StateObject private var voiceTracker = TeleprompterVoiceTracker()
 
     private var parsedScript: TeleprompterScript {
         TeleprompterScriptParser.parse(script)
@@ -17,7 +15,6 @@ struct TeleprompterView: View {
 
     private var canOpenPrompter: Bool {
         !script.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && (settings.scrollMode == .manual || permissionStatus != .denied)
     }
 
     var body: some View {
@@ -25,13 +22,10 @@ struct TeleprompterView: View {
             VStack(spacing: 20) {
                 scriptSection
                 playbackSection
-                if settings.scrollMode == .voice {
-                    voiceSection
-                }
                 websiteHint
 
                 PrimaryButton(title: "Open Teleprompter", icon: "play.fill") {
-                    Task { await openPrompter() }
+                    showPlayer = true
                 }
                 .disabled(!canOpenPrompter)
 
@@ -47,16 +41,6 @@ struct TeleprompterView: View {
         }
         .onChange(of: settings) { _, newValue in
             TeleprompterStorage.saveSettings(newValue)
-        }
-        .onAppear {
-            voiceTracker.configure(script: parsedScript)
-            permissionStatus = voiceTracker.permissionStatus
-        }
-        .onChange(of: settings.scrollMode) { _, mode in
-            if mode == .voice {
-                voiceTracker.refreshPermissionStatus()
-                permissionStatus = voiceTracker.permissionStatus
-            }
         }
         .fullScreenCover(isPresented: $showPlayer) {
             TeleprompterPlayerView(settings: $settings, script: parsedScript)
@@ -111,71 +95,34 @@ struct TeleprompterView: View {
                 }
             }
 
-            Picker("Scroll mode", selection: $settings.scrollMode) {
-                ForEach(TeleprompterScrollMode.allCases) { mode in
-                    Text(mode.label).tag(mode)
-                }
-            }
-            .pickerStyle(.segmented)
+            Toggle("Show cue line", isOn: $settings.showCueLine)
 
-            if settings.scrollMode == .manual {
-                Text("Scroll speed: \(Int(settings.scrollSpeed))")
+            if settings.showCueLine {
+                Text("Cue position")
                     .font(.bodyText.weight(.semibold))
-                Slider(value: $settings.scrollSpeed, in: 10...120, step: 5)
+                Slider(value: $settings.cuePosition, in: 0.2...0.45, step: 0.01)
 
-                HStack {
-                    Text("Target WPM: \(Int(settings.targetWpm))")
-                    Spacer()
-                    Button("Apply WPM") {
-                        applyTargetWpm()
+                Picker("Cue style", selection: $settings.cueStyle) {
+                    ForEach(TeleprompterCueStyle.allCases) { style in
+                        Text(style.label).tag(style)
                     }
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.forest)
                 }
-            } else {
-                Text("Voice sensitivity")
-                    .font(.bodyText.weight(.semibold))
-                Slider(value: $settings.voiceSensitivity, in: 0...1, step: 0.05)
+                .pickerStyle(.menu)
             }
-        }
-    }
 
-    private var voiceSection: some View {
-        formSection(title: "Voice Tracking") {
+            Text("Scroll speed: \(Int(settings.scrollSpeed))")
+                .font(.bodyText.weight(.semibold))
+            Slider(value: $settings.scrollSpeed, in: 10...120, step: 5)
+
             HStack {
-                Label(permissionLabel, systemImage: permissionIcon)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(permissionColor)
+                Text("Target WPM: \(Int(settings.targetWpm))")
                 Spacer()
-                if permissionStatus == .denied {
-                    Button("Open Settings") {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
-                        }
-                    }
-                    .font(.caption.weight(.semibold))
-                } else if permissionStatus == .notDetermined {
-                    Button("Enable") {
-                        Task {
-                            let granted = await voiceTracker.requestPermissions()
-                            permissionStatus = granted ? .granted : voiceTracker.permissionStatus
-                        }
-                    }
-                    .font(.caption.weight(.semibold))
+                Button("Apply WPM") {
+                    applyTargetWpm()
                 }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.forest)
             }
-
-            Label("Voice processed on your device", systemImage: "lock.shield.fill")
-                .font(.captionText)
-                .foregroundStyle(Color.forestMuted)
-
-            Text("Language: \(voiceTracker.localeLabel)")
-                .font(.captionText)
-                .foregroundStyle(Color.sandLight)
-
-            Text("Scroll follows your voice. Pause when you stop speaking.")
-                .font(.captionText)
-                .foregroundStyle(Color.sandLight)
         }
     }
 
@@ -210,41 +157,5 @@ struct TeleprompterView: View {
             contentHeight: estimatedHeight,
             wordCount: wordCount
         )
-    }
-
-    @MainActor
-    private func openPrompter() async {
-        if settings.scrollMode == .voice {
-            if permissionStatus != .granted {
-                let granted = await voiceTracker.requestPermissions()
-                permissionStatus = granted ? .granted : voiceTracker.permissionStatus
-                guard granted else { return }
-            }
-        }
-        showPlayer = true
-    }
-
-    private var permissionLabel: String {
-        switch permissionStatus {
-        case .notDetermined: return "Microphone not enabled"
-        case .granted: return "Microphone ready"
-        case .denied: return "Microphone denied"
-        }
-    }
-
-    private var permissionIcon: String {
-        switch permissionStatus {
-        case .granted: return "checkmark.circle.fill"
-        case .denied: return "xmark.circle.fill"
-        case .notDetermined: return "mic.slash"
-        }
-    }
-
-    private var permissionColor: Color {
-        switch permissionStatus {
-        case .granted: return Color.forest
-        case .denied: return .red
-        case .notDetermined: return Color.sandLight
-        }
     }
 }
