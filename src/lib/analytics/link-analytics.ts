@@ -15,6 +15,8 @@ export function analyticsKey(code: string): string {
   return `analytics:${code}`;
 }
 
+export const LINK_RETENTION_SECONDS = 60 * 60 * 72;
+
 export function aggregateByCountry(clicks: ClickEvent[]): Record<string, number> {
   const map: Record<string, number> = {};
   for (const c of clicks) {

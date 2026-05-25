@@ -34,10 +34,7 @@ struct ScanTabView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
 
-                PrivacyBadge()
-                    .padding(.top, 8)
-
-                Spacer()
+            Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.paper.ignoresSafeArea())

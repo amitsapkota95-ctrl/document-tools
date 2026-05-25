@@ -43,7 +43,6 @@ struct CompressPDFView: View {
                     }
                 }
 
-                PrivacyBadge()
             }
             .padding(20)
         }

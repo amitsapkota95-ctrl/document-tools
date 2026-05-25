@@ -128,8 +128,6 @@ struct RedactPDFView: View {
             PrimaryButton(title: "Choose PDF", icon: "doc") {
                 showPicker = true
             }
-
-            PrivacyBadge()
         }
         .padding(20)
     }

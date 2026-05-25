@@ -88,7 +88,6 @@ struct ImageToPDFView: View {
                         .foregroundStyle(.red)
                 }
 
-                PrivacyBadge()
             }
             .padding(20)
         }

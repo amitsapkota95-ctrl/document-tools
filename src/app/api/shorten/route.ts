@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
+import { LINK_RETENTION_SECONDS } from "@/lib/analytics/link-analytics";
 
 function generateCode(length = 5): string {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await kv.put(code, url, { expirationTtl: 60 * 60 * 24 * 365 });
+    await kv.put(code, url, { expirationTtl: LINK_RETENTION_SECONDS });
 
     const origin = new URL(request.url).origin;
     const shortUrl = `${origin}/x/${code}`;

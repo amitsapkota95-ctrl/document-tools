@@ -162,7 +162,6 @@ struct FillAndSignView: View {
             }
             .padding(.horizontal, 20)
 
-            PrivacyBadge()
             Spacer()
         }
         .padding(.top, 12)

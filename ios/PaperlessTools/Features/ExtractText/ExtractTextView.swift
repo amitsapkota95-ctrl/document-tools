@@ -53,7 +53,6 @@ struct ExtractTextView: View {
                     }
                 }
 
-                PrivacyBadge()
             }
             .padding(20)
         }

@@ -37,7 +37,6 @@ struct QRScannerView: View {
                     Text("Point your camera at a QR code")
                         .font(.bodyText)
                         .foregroundStyle(Color.ink)
-                    PrivacyBadge()
                 }
             }
 

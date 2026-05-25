@@ -52,10 +52,6 @@ struct SettingsView: View {
                     }
                 }
 
-                Section {
-                    PrivacyBadge()
-                        .listRowBackground(Color.clear)
-                }
             }
             .scrollContentBackground(.hidden)
             .background(Color.paper.ignoresSafeArea())

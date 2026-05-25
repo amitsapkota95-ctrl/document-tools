@@ -28,7 +28,6 @@ struct CompareTextView: View {
                     .disabled(originalText.isEmpty && updatedText.isEmpty)
                 }
 
-                PrivacyBadge()
             }
             .padding(20)
         }

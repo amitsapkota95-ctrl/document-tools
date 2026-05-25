@@ -65,7 +65,6 @@ struct PDFToImageView: View {
                     }
                 }
 
-                PrivacyBadge()
             }
             .padding(20)
         }

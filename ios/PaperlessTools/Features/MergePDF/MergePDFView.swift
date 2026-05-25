@@ -39,7 +39,6 @@ struct MergePDFView: View {
             }
             .padding(.horizontal, 20)
 
-            PrivacyBadge()
             Spacer()
         }
         .padding(.top, 20)

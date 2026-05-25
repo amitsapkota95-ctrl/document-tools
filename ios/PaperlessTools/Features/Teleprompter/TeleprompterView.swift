@@ -29,7 +29,6 @@ struct TeleprompterView: View {
                 }
                 .disabled(!canOpenPrompter)
 
-                PrivacyBadge()
             }
             .padding(20)
         }

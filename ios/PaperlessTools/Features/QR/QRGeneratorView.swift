@@ -125,7 +125,6 @@ struct QRGeneratorView: View {
                 }
             }
 
-            PrivacyBadge()
         }
         .frame(maxWidth: .infinity)
         .padding(16)

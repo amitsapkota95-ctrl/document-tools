@@ -12,7 +12,6 @@
 		A100000003 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000003 /* Colors.swift */; };
 		A100000004 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000004 /* Typography.swift */; };
 		A100000005 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000005 /* PrimaryButton.swift */; };
-		A100000006 /* PrivacyBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000006 /* PrivacyBadge.swift */; };
 		A100000007 /* ToolCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000007 /* ToolCard.swift */; };
 		A100000008 /* ProcessingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000008 /* ProcessingOverlay.swift */; };
 		A100000009 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000009 /* ShareSheet.swift */; };
@@ -70,6 +69,7 @@
 		A100000067 /* SharedImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000066 /* SharedImportCoordinator.swift */; };
 		A100000068 /* CameraPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000067 /* CameraPermissionView.swift */; };
 		A100000069 /* PaperlessToolsShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A300000002 /* PaperlessToolsShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A100000070 /* URLShortenerStorageNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000070 /* URLShortenerStorageNotice.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,7 +78,6 @@
 		A200000003 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		A200000004 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		A200000005 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
-		A200000006 /* PrivacyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyBadge.swift; sourceTree = "<group>"; };
 		A200000007 /* ToolCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolCard.swift; sourceTree = "<group>"; };
 		A200000008 /* ProcessingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingOverlay.swift; sourceTree = "<group>"; };
 		A200000009 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
@@ -138,6 +137,7 @@
 		A200000067 /* CameraPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPermissionView.swift; sourceTree = "<group>"; };
 		A200000068 /* PaperlessTools.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaperlessTools.entitlements; sourceTree = "<group>"; };
 		A200000069 /* PaperlessToolsShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaperlessToolsShareExtension.entitlements; sourceTree = "<group>"; };
+		A200000070 /* URLShortenerStorageNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLShortenerStorageNotice.swift; sourceTree = "<group>"; };
 		A300000001 /* PaperlessTools.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperlessTools.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A300000002 /* PaperlessToolsShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PaperlessToolsShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -279,7 +279,6 @@
 			isa = PBXGroup;
 			children = (
 				A200000005 /* PrimaryButton.swift */,
-				A200000006 /* PrivacyBadge.swift */,
 				A200000007 /* ToolCard.swift */,
 				A200000008 /* ProcessingOverlay.swift */,
 				A200000009 /* ShareSheet.swift */,
@@ -288,6 +287,7 @@
 				A200000049 /* ZoomableRedactionCanvas.swift */,
 				A200000050 /* KeyboardSafeArea.swift */,
 				A200000067 /* CameraPermissionView.swift */,
+				A200000070 /* URLShortenerStorageNotice.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -618,7 +618,6 @@
 				A100000003 /* Colors.swift in Sources */,
 				A100000004 /* Typography.swift in Sources */,
 				A100000005 /* PrimaryButton.swift in Sources */,
-				A100000006 /* PrivacyBadge.swift in Sources */,
 				A100000007 /* ToolCard.swift in Sources */,
 				A100000008 /* ProcessingOverlay.swift in Sources */,
 				A100000009 /* ShareSheet.swift in Sources */,
@@ -671,6 +670,7 @@
 				A100000065 /* AppGroupConstants.swift in Sources */,
 				A100000067 /* SharedImportCoordinator.swift in Sources */,
 				A100000068 /* CameraPermissionView.swift in Sources */,
+				A100000070 /* URLShortenerStorageNotice.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

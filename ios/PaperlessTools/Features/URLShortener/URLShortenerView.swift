@@ -44,7 +44,7 @@ struct URLShortenerView: View {
                     resultCard
                 }
 
-                PrivacyBadge()
+                URLShortenerStorageNotice(showsExpiryReminder: !shortUrl.isEmpty)
             }
             .padding(20)
         }

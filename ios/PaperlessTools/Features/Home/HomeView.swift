@@ -34,8 +34,6 @@ struct HomeView: View {
     private var heroSection: some View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 10) {
-                PrivacyBadge()
-
                 Text("\(ToolRegistry.availableTools.count) tools ready")
                     .font(.heroTitle)
                     .foregroundStyle(Color.ink)

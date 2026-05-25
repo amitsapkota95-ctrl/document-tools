@@ -84,6 +84,8 @@ Declare accurately in App Store Connect → App Privacy:
 | All on-device tools | No | — | — |
 | URL Shortener (URLs submitted to shorten) | Yes | No | App functionality |
 
+**Retention:** Short links and click stats are stored on our servers for **72 hours**, then automatically deleted.
+
 **Do not** select "Data Not Collected" — the URL shortener sends the URL to `https://paperless.tools/api/shorten`.
 
 On-device tools (PDF, scan, QR, etc.) process files locally and do not upload document content.

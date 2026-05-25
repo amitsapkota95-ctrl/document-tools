@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
-import { analyticsKey, type ClickEvent, type LinkAnalytics } from "@/lib/analytics/link-analytics";
+import { analyticsKey, LINK_RETENTION_SECONDS, type ClickEvent, type LinkAnalytics } from "@/lib/analytics/link-analytics";
 
 export async function GET(
   request: Request,
@@ -33,8 +33,10 @@ export async function GET(
     analytics.clicks.push(event);
     if (analytics.clicks.length > 5000) analytics.clicks = analytics.clicks.slice(-5000);
 
+    const expiresAt = Math.floor(analytics.createdAt / 1000) + LINK_RETENTION_SECONDS;
+
     await kv.put(analyticsKey(slug), JSON.stringify(analytics), {
-      expirationTtl: 60 * 60 * 24 * 365,
+      expiration: expiresAt,
     });
 
     return NextResponse.redirect(url, 302);

@@ -31,7 +31,6 @@ struct InvoiceBuilderView: View {
                     Task { await exportPDF() }
                 }
 
-                PrivacyBadge()
             }
             .padding(20)
         }
