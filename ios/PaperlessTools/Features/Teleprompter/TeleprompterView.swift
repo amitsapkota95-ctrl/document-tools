@@ -1,47 +1,39 @@
 import SwiftUI
 
 struct TeleprompterView: View {
-    @State private var script = ""
-    @State private var fontSize: Double = 28
-    @State private var scrollSpeed: Double = 40
+    @State private var script = TeleprompterStorage.loadScript()
+    @State private var settings = TeleprompterStorage.loadSettings()
     @State private var showPlayer = false
+    @State private var permissionStatus: TeleprompterPermissionStatus = .notDetermined
+    @StateObject private var voiceTracker = TeleprompterVoiceTracker()
+
+    private var parsedScript: TeleprompterScript {
+        TeleprompterScriptParser.parse(script)
+    }
+
+    private var wordCount: Int {
+        TeleprompterWPM.countWords(in: script)
+    }
+
+    private var canOpenPrompter: Bool {
+        !script.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && (settings.scrollMode == .manual || permissionStatus != .denied)
+    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Script")
-                        .font(.sectionTitle)
-
-                    TextEditor(text: $script)
-                        .font(.system(size: 18))
-                        .frame(minHeight: 220)
-                        .padding(12)
-                        .background(Color.cream)
-                        .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
-
-                    Text("Use `=== Section ===` lines for jump markers.")
-                        .font(.captionText)
-                        .foregroundStyle(Color.sandLight)
+                scriptSection
+                playbackSection
+                if settings.scrollMode == .voice {
+                    voiceSection
                 }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Font size: \(Int(fontSize))")
-                        .font(.bodyText.weight(.semibold))
-                    Slider(value: $fontSize, in: 18...48, step: 1)
-
-                    Text("Scroll speed: \(Int(scrollSpeed))")
-                        .font(.bodyText.weight(.semibold))
-                    Slider(value: $scrollSpeed, in: 10...120, step: 5)
-                }
-                .padding(16)
-                .background(Color.cream)
-                .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+                websiteHint
 
                 PrimaryButton(title: "Open Teleprompter", icon: "play.fill") {
-                    showPlayer = true
+                    Task { await openPrompter() }
                 }
-                .disabled(script.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(!canOpenPrompter)
 
                 PrivacyBadge()
             }
@@ -50,91 +42,209 @@ struct TeleprompterView: View {
         .background(Color.paper.ignoresSafeArea())
         .navigationTitle("Teleprompter")
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: script) { _, newValue in
+            TeleprompterStorage.saveScript(newValue)
+        }
+        .onChange(of: settings) { _, newValue in
+            TeleprompterStorage.saveSettings(newValue)
+        }
+        .onAppear {
+            voiceTracker.configure(script: parsedScript)
+            permissionStatus = voiceTracker.permissionStatus
+        }
+        .onChange(of: settings.scrollMode) { _, mode in
+            if mode == .voice {
+                voiceTracker.refreshPermissionStatus()
+                permissionStatus = voiceTracker.permissionStatus
+            }
+        }
         .fullScreenCover(isPresented: $showPlayer) {
-            TeleprompterPlayerView(
-                script: script,
-                fontSize: fontSize,
-                scrollSpeed: scrollSpeed
-            )
+            TeleprompterPlayerView(settings: $settings, script: parsedScript)
         }
     }
-}
 
-struct TeleprompterPlayerView: View {
-    let script: String
-    let fontSize: Double
-    let scrollSpeed: Double
+    private var scriptSection: some View {
+        formSection(title: "Script") {
+            TextEditor(text: $script)
+                .font(.system(size: 18))
+                .frame(minHeight: 220)
+                .padding(12)
+                .background(Color.cream)
+                .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
 
-    @Environment(\.dismiss) private var dismiss
-    @State private var offset: CGFloat = 0
-    @State private var contentHeight: CGFloat = 1
-    @State private var isRunning = false
-    @State private var timer: Timer?
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            GeometryReader { geometry in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        Text(formattedScript)
-                            .font(.system(size: fontSize, weight: .medium))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 24)
-                            .background(
-                                GeometryReader { proxy in
-                                    Color.clear.onAppear { contentHeight = proxy.size.height }
-                                }
-                            )
-                    }
-                    .padding(.top, geometry.size.height * 0.35)
-                    .padding(.bottom, geometry.size.height)
-                    .offset(y: -offset)
-                }
-                .scrollDisabled(true)
-                .overlay(alignment: .center) {
-                    Rectangle()
-                        .fill(Color.forest.opacity(0.35))
-                        .frame(height: 2)
-                        .padding(.horizontal, 16)
-                }
-            }
-
-            VStack {
-                HStack {
-                    Button("Close") { stop(); dismiss() }
-                        .foregroundStyle(.white)
-                    Spacer()
-                    Button(isRunning ? "Pause" : "Play") {
-                        isRunning ? stop() : start()
-                    }
-                    .foregroundStyle(.white)
-                }
-                .padding()
+            HStack {
+                Text("\(wordCount) words")
                 Spacer()
+                Text(TeleprompterWPM.readingTimeLabel(wordCount: wordCount))
+            }
+            .font(.captionText)
+            .foregroundStyle(Color.sandLight)
+
+            Text("Use `=== Section Name ===` lines for jump markers.")
+                .font(.captionText)
+                .foregroundStyle(Color.sandLight)
+        }
+    }
+
+    private var playbackSection: some View {
+        formSection(title: "Playback") {
+            Text("Font size: \(Int(settings.fontSize))")
+                .font(.bodyText.weight(.semibold))
+            Slider(value: $settings.fontSize, in: 18...72, step: 1)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(TeleprompterThemeID.allCases) { themeID in
+                        let theme = TeleprompterTheme.theme(for: themeID)
+                        Button {
+                            settings.themeID = themeID
+                        } label: {
+                            Text(theme.label)
+                                .font(.caption.weight(.semibold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(settings.themeID == themeID ? theme.accent.opacity(0.25) : Color.cream200)
+                                .foregroundStyle(settings.themeID == themeID ? Color.forest : Color.ink)
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
+            }
+
+            Picker("Scroll mode", selection: $settings.scrollMode) {
+                ForEach(TeleprompterScrollMode.allCases) { mode in
+                    Text(mode.label).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            if settings.scrollMode == .manual {
+                Text("Scroll speed: \(Int(settings.scrollSpeed))")
+                    .font(.bodyText.weight(.semibold))
+                Slider(value: $settings.scrollSpeed, in: 10...120, step: 5)
+
+                HStack {
+                    Text("Target WPM: \(Int(settings.targetWpm))")
+                    Spacer()
+                    Button("Apply WPM") {
+                        applyTargetWpm()
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.forest)
+                }
+            } else {
+                Text("Voice sensitivity")
+                    .font(.bodyText.weight(.semibold))
+                Slider(value: $settings.voiceSensitivity, in: 0...1, step: 0.05)
             }
         }
-        .onDisappear { stop() }
     }
 
-    private var formattedScript: AttributedString {
-        var text = AttributedString(script)
-        text.foregroundColor = .white
-        return text
-    }
+    private var voiceSection: some View {
+        formSection(title: "Voice Tracking") {
+            HStack {
+                Label(permissionLabel, systemImage: permissionIcon)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(permissionColor)
+                Spacer()
+                if permissionStatus == .denied {
+                    Button("Open Settings") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                    .font(.caption.weight(.semibold))
+                } else if permissionStatus == .notDetermined {
+                    Button("Enable") {
+                        Task {
+                            let granted = await voiceTracker.requestPermissions()
+                            permissionStatus = granted ? .granted : voiceTracker.permissionStatus
+                        }
+                    }
+                    .font(.caption.weight(.semibold))
+                }
+            }
 
-    private func start() {
-        isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
-            offset += scrollSpeed * 0.02
+            Label("Voice processed on your device", systemImage: "lock.shield.fill")
+                .font(.captionText)
+                .foregroundStyle(Color.forestMuted)
+
+            Text("Language: \(voiceTracker.localeLabel)")
+                .font(.captionText)
+                .foregroundStyle(Color.sandLight)
+
+            Text("Scroll follows your voice. Pause when you stop speaking.")
+                .font(.captionText)
+                .foregroundStyle(Color.sandLight)
         }
     }
 
-    private func stop() {
-        isRunning = false
-        timer?.invalidate()
-        timer = nil
+    private var websiteHint: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Need rich formatting?")
+                .font(.bodyText.weight(.semibold))
+            Text("Use the web teleprompter at paperless.tools for WYSIWYG editing and browser-based playback.")
+                .font(.captionText)
+                .foregroundStyle(Color.sandLight)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.forest50)
+        .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+    }
+
+    private func formSection<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title).font(.sectionTitle)
+            content()
+        }
+        .padding(16)
+        .background(Color.cream)
+        .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+    }
+
+    private func applyTargetWpm() {
+        let estimatedHeight = max(800, Double(wordCount) * settings.fontSize * 1.4)
+        settings.scrollSpeed = TeleprompterWPM.speedFromTargetWpm(
+            targetWpm: settings.targetWpm,
+            contentHeight: estimatedHeight,
+            wordCount: wordCount
+        )
+    }
+
+    @MainActor
+    private func openPrompter() async {
+        if settings.scrollMode == .voice {
+            if permissionStatus != .granted {
+                let granted = await voiceTracker.requestPermissions()
+                permissionStatus = granted ? .granted : voiceTracker.permissionStatus
+                guard granted else { return }
+            }
+        }
+        showPlayer = true
+    }
+
+    private var permissionLabel: String {
+        switch permissionStatus {
+        case .notDetermined: return "Microphone not enabled"
+        case .granted: return "Microphone ready"
+        case .denied: return "Microphone denied"
+        }
+    }
+
+    private var permissionIcon: String {
+        switch permissionStatus {
+        case .granted: return "checkmark.circle.fill"
+        case .denied: return "xmark.circle.fill"
+        case .notDetermined: return "mic.slash"
+        }
+    }
+
+    private var permissionColor: Color {
+        switch permissionStatus {
+        case .granted: return Color.forest
+        case .denied: return .red
+        case .notDetermined: return Color.sandLight
+        }
     }
 }

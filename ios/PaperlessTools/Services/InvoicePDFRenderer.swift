@@ -2,6 +2,52 @@ import Foundation
 import PDFKit
 import UIKit
 
+enum TaxType: String, Codable, CaseIterable, Identifiable {
+    case none, tax, vat, gst, custom
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .none: return "No tax"
+        case .tax: return "Tax"
+        case .vat: return "VAT"
+        case .gst: return "GST"
+        case .custom: return "Custom"
+        }
+    }
+
+    var registrationPlaceholder: String {
+        switch self {
+        case .none: return "Tax ID"
+        case .tax: return "EIN / Tax ID"
+        case .vat: return "VAT No. GB123456789"
+        case .gst: return "GST Reg No."
+        case .custom: return "Tax ID"
+        }
+    }
+
+    var defaultPricingMode: PricingMode {
+        switch self {
+        case .gst: return .inclusive
+        default: return .exclusive
+        }
+    }
+}
+
+enum PricingMode: String, Codable, CaseIterable, Identifiable {
+    case exclusive, inclusive
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .exclusive: return "Tax exclusive (add on top)"
+        case .inclusive: return "Tax inclusive (prices include tax)"
+        }
+    }
+}
+
 struct InvoiceLineItem: Identifiable, Codable {
     var id = UUID()
     var description: String = "Service"
@@ -16,21 +62,60 @@ struct InvoiceDraft: Codable {
     var issueDate: Date = .now
     var dueDate: Date = Calendar.current.date(byAdding: .day, value: 14, to: .now) ?? .now
     var notes: String = ""
+    var taxType: TaxType = .none
+    var customTaxLabel: String = ""
+    var taxRegistrationNumber: String = ""
     var taxRate: Double = 0
+    var pricingMode: PricingMode = .exclusive
     var items: [InvoiceLineItem] = [InvoiceLineItem()]
+
+    var taxLabel: String {
+        switch taxType {
+        case .none: return "Tax"
+        case .tax: return "Tax"
+        case .vat: return "VAT"
+        case .gst: return "GST"
+        case .custom: return customTaxLabel.isEmpty ? "Tax" : customTaxLabel
+        }
+    }
+
+    var hasTax: Bool {
+        taxType != .none && taxRate > 0
+    }
 }
 
 struct InvoiceTotals {
     let subtotal: Double
     let tax: Double
     let total: Double
+
+    var netSubtotal: Double { subtotal }
 }
 
 enum InvoiceCalculator {
     static func totals(for draft: InvoiceDraft) -> InvoiceTotals {
-        let subtotal = draft.items.reduce(0) { $0 + ($1.quantity * $1.rate) }
-        let tax = subtotal * (draft.taxRate / 100)
-        return InvoiceTotals(subtotal: subtotal, tax: tax, total: subtotal + tax)
+        let gross = draft.items.reduce(0) { $0 + ($1.quantity * $1.rate) }
+
+        guard draft.hasTax else {
+            return InvoiceTotals(subtotal: gross, tax: 0, total: gross)
+        }
+
+        let rate = draft.taxRate
+
+        switch draft.pricingMode {
+        case .exclusive:
+            let tax = gross * (rate / 100)
+            return InvoiceTotals(subtotal: gross, tax: tax, total: gross + tax)
+        case .inclusive:
+            let net = extractNetFromGross(gross, taxRate: rate)
+            let tax = gross - net
+            return InvoiceTotals(subtotal: net, tax: tax, total: gross)
+        }
+    }
+
+    private static func extractNetFromGross(_ gross: Double, taxRate: Double) -> Double {
+        guard taxRate > 0 else { return gross }
+        return gross / (1 + taxRate / 100)
     }
 }
 
@@ -50,6 +135,10 @@ enum InvoicePDFRenderer {
 
             drawText(businessName.isEmpty ? "Your Business" : businessName, x: 40, y: y, size: 22, weight: .bold)
             y += 28
+            if !draft.taxRegistrationNumber.isEmpty {
+                drawText(draft.taxRegistrationNumber, x: 40, y: y, size: 11, color: sandLight)
+                y += 18
+            }
             drawText("Invoice #\(draft.documentNumber)", x: 40, y: y, size: 16, weight: .semibold, color: forest)
             y += 30
 
@@ -85,18 +174,30 @@ enum InvoicePDFRenderer {
             drawText("Subtotal", x: 400, y: y, size: 12, weight: .semibold)
             drawText(formatMoney(totals.subtotal), x: 480, y: y, size: 12)
             y += 18
-            drawText("Tax (\(formatNumber(draft.taxRate))%)", x: 400, y: y, size: 12)
-            drawText(formatMoney(totals.tax), x: 480, y: y, size: 12)
-            y += 18
+
+            if draft.hasTax {
+                drawText("\(draft.taxLabel) (\(formatNumber(draft.taxRate))%)", x: 400, y: y, size: 12)
+                drawText(formatMoney(totals.tax), x: 480, y: y, size: 12)
+                y += 18
+            }
+
             drawText("Total", x: 400, y: y, size: 14, weight: .bold)
             drawText(formatMoney(totals.total), x: 480, y: y, size: 14, weight: .bold)
-            y += 30
+            y += 24
+
+            if draft.pricingMode == .inclusive && draft.hasTax {
+                drawText("Prices include tax", x: 400, y: y, size: 10, color: sandLight)
+                y += 20
+            }
 
             if !draft.notes.isEmpty {
                 drawText("Notes", x: 40, y: y, size: 12, weight: .semibold)
                 y += 18
                 drawMultiline(draft.notes, x: 40, y: &y, width: 515, size: 11)
             }
+
+            let footerY = pageRect.height - 40
+            drawText("For detailed invoices, visit paperless.tools", x: 40, y: footerY, size: 10, color: sandLight)
         }
 
         return data

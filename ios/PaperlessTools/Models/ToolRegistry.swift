@@ -178,7 +178,7 @@ enum ToolRegistry {
                 ToolDefinition(
                     slug: .teleprompter,
                     title: "Teleprompter",
-                    description: "Read scripts with auto-scroll and section markers.",
+                    description: "Read scripts with voice tracking, themes, and section markers.",
                     actionLabel: "Open Teleprompter",
                     iconName: "text.viewfinder",
                     isAvailableInMVP: true

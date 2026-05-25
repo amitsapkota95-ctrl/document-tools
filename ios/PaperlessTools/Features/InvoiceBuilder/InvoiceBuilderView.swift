@@ -20,6 +20,7 @@ struct InvoiceBuilderView: View {
                 clientSection
                 itemsSection
                 totalsSection
+                websiteCallout
                 notesSection
 
                 if let errorMessage {
@@ -111,30 +112,92 @@ struct InvoiceBuilderView: View {
 
     private var totalsSection: some View {
         formSection(title: "Tax") {
-            HStack {
-                Text("Tax rate (%)")
-                Spacer()
-                TextField("0", value: $draft.taxRate, format: .number)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 80)
+            Picker("Tax type", selection: $draft.taxType) {
+                ForEach(TaxType.allCases) { type in
+                    Text(type.label).tag(type)
+                }
             }
+            .pickerStyle(.menu)
+            .onChange(of: draft.taxType) { _, newType in
+                draft.pricingMode = newType.defaultPricingMode
+            }
+
+            if draft.taxType == .custom {
+                TextField("Custom tax label", text: $draft.customTaxLabel)
+                    .textFieldStyle(.roundedBorder)
+            }
+
+            if draft.taxType != .none {
+                TextField(draft.taxType.registrationPlaceholder, text: $draft.taxRegistrationNumber)
+                    .textFieldStyle(.roundedBorder)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Tax rate")
+                        .font(.captionText)
+                        .foregroundStyle(Color.sandLight)
+                    HStack(spacing: 8) {
+                        TextField("e.g. 20", value: $draft.taxRate, format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.decimalPad)
+                        Text("%")
+                            .font(.bodyText.weight(.semibold))
+                            .foregroundStyle(Color.forest)
+                            .frame(width: 28)
+                    }
+                }
+
+                Picker("Pricing", selection: $draft.pricingMode) {
+                    ForEach(PricingMode.allCases) { mode in
+                        Text(mode.label).tag(mode)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+
+            Divider()
+
             HStack {
                 Text("Subtotal")
                 Spacer()
                 Text(formatMoney(totals.subtotal))
             }
-            HStack {
-                Text("Tax")
-                Spacer()
-                Text(formatMoney(totals.tax))
+
+            if draft.hasTax {
+                HStack {
+                    Text("\(draft.taxLabel) (\(formatTaxRate(draft.taxRate))%)")
+                    Spacer()
+                    Text(formatMoney(totals.tax))
+                }
             }
+
             HStack {
                 Text("Total").font(.cardTitle)
                 Spacer()
                 Text(formatMoney(totals.total)).font(.cardTitle)
             }
+
+            if draft.pricingMode == .inclusive && draft.hasTax {
+                Text("Prices include tax")
+                    .font(.captionText)
+                    .foregroundStyle(Color.sandLight)
+            }
         }
+    }
+
+    private var websiteCallout: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Need a detailed invoice?")
+                .font(.bodyText.weight(.semibold))
+            Text("Create full invoices with multi-tax, discounts, and more at paperless.tools")
+                .font(.captionText)
+                .foregroundStyle(Color.sandLight)
+            Link("Go to paperless.tools", destination: URL(string: "https://paperless.tools")!)
+                .font(.bodyText.weight(.semibold))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.forest50)
+        .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
     }
 
     private var notesSection: some View {
@@ -157,6 +220,10 @@ struct InvoiceBuilderView: View {
 
     private func formatMoney(_ value: Double) -> String {
         String(format: "$%.2f", value)
+    }
+
+    private func formatTaxRate(_ value: Double) -> String {
+        value.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", value) : String(format: "%.2f", value)
     }
 
     @MainActor
