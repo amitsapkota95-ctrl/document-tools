@@ -1,0 +1,1 @@
+# PaperlessTools ProGuard rules

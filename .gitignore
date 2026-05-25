@@ -41,4 +41,10 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+# Android build
+android/PaperlessTools/.gradle/
+android/PaperlessTools/app/build/
+android/PaperlessTools/build/
+android/PaperlessTools/local.properties
+android/**/*.iml
+android/.idea/

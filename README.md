@@ -120,3 +120,13 @@ open ios/PaperlessTools/PaperlessTools.xcodeproj
 ```
 
 MVP tools: QR generator/scanner, URL shortener, document scanner, merge PDF, fill & sign, image to PDF. All processing is on-device except URL shortening (uses `/api/shorten`).
+
+## Android App
+
+Native Jetpack Compose app on branch `Android-native`. See [android/README.md](android/README.md) for setup.
+
+```bash
+open -a "Android Studio" android/PaperlessTools
+```
+
+Mirrors the iOS tool suite: 15 tools across Home, Tools, Scan, and Settings tabs. PDF operations use PDFBox Android; QR uses ZXing + ML Kit. All processing is on-device except URL shortening (uses `/api/shorten`).
