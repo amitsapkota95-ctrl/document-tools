@@ -1,5 +1,31 @@
 import SwiftUI
 
+enum QRFormField: Hashable {
+    case websiteURL
+    case wifiSSID
+    case wifiPassword
+    case contactFirstName
+    case contactLastName
+    case contactPhone
+    case contactEmail
+    case contactOrganization
+    case contactTitle
+    case contactWebsite
+    case textContent
+    case emailAddress
+    case emailSubject
+    case emailBody
+    case smsPhone
+    case smsMessage
+    case phoneNumber
+    case locationLabel
+    case locationLatitude
+    case locationLongitude
+    case eventTitle
+    case eventLocation
+    case eventDescription
+}
+
 struct QRToolsView: View {
     @State private var mode: QRMode = .create
 
@@ -35,23 +61,44 @@ struct QRGeneratorView: View {
     @State private var showShareSheet = false
     @State private var shareImage: UIImage?
     @State private var copied = false
+    @FocusState private var focusedField: QRFormField?
 
     private var encoded: QREncodeResult {
         QRPayloadEncoder.encode(form: form)
     }
 
+    private var isEditingField: Bool {
+        focusedField != nil
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                if form.contentType == .website && form.websiteURL.isEmpty {
-                    QRTypeSelector(selectedType: $form.contentType)
-                } else {
-                    qrPreviewSection
-                    formSection
-                    exportSection
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 20) {
+                    if form.contentType == .website && form.websiteURL.isEmpty {
+                        QRTypeSelector(selectedType: $form.contentType)
+                    } else {
+                        if isEditingField {
+                            compactPreviewSection
+                        } else {
+                            qrPreviewSection
+                        }
+                        formSection
+                        exportSection
+                    }
+                }
+                .padding(20)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .keyboardSafeArea()
+            .onChange(of: focusedField) { _, field in
+                guard let field else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    withAnimation {
+                        proxy.scrollTo(field, anchor: .center)
+                    }
                 }
             }
-            .padding(20)
         }
         .background(Color.paper.ignoresSafeArea())
         .sheet(isPresented: $showShareSheet) {
@@ -64,31 +111,7 @@ struct QRGeneratorView: View {
 
     private var qrPreviewSection: some View {
         VStack(spacing: 12) {
-            if encoded.isValid, let image = QRImageGenerator.generateImage(from: encoded.payload) {
-                Image(uiImage: image)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 220, height: 220)
-                    .padding(16)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.forest.opacity(0.3), lineWidth: 2)
-                    )
-            } else {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.cream200)
-                    .frame(width: 220, height: 220)
-                    .overlay {
-                        Text(encoded.hint.isEmpty ? "Fill in the form" : encoded.hint)
-                            .font(.captionText)
-                            .foregroundStyle(Color.sandLight)
-                            .multilineTextAlignment(.center)
-                            .padding()
-                    }
-            }
+            qrPreviewImage(size: 220, padding: 16, cornerRadius: 12)
 
             if !encoded.detailLines.isEmpty {
                 VStack(spacing: 4) {
@@ -108,6 +131,57 @@ struct QRGeneratorView: View {
         .padding(16)
         .background(Color.cream)
         .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+    }
+
+    private var compactPreviewSection: some View {
+        HStack(spacing: 12) {
+            qrPreviewImage(size: 44, padding: 4, cornerRadius: 6)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(encoded.title.isEmpty ? form.contentType.label : encoded.title)
+                    .font(.bodyText.weight(.semibold))
+                    .lineLimit(1)
+                Text("Editing…")
+                    .font(.caption2)
+                    .foregroundStyle(Color.sandLight)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(Color.cream)
+        .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+    }
+
+    @ViewBuilder
+    private func qrPreviewImage(size: CGFloat, padding: CGFloat, cornerRadius: CGFloat) -> some View {
+        if encoded.isValid, let image = QRImageGenerator.generateImage(from: encoded.payload) {
+            Image(uiImage: image)
+                .interpolation(.none)
+                .resizable()
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .padding(padding)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .stroke(Color.forest.opacity(0.3), lineWidth: size > 60 ? 2 : 1)
+                )
+        } else {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(Color.cream200)
+                .frame(width: size, height: size)
+                .overlay {
+                    if size > 60 {
+                        Text(encoded.hint.isEmpty ? "Fill in the form" : encoded.hint)
+                            .font(.captionText)
+                            .foregroundStyle(Color.sandLight)
+                            .multilineTextAlignment(.center)
+                            .padding(8)
+                    }
+                }
+        }
     }
 
     private var formSection: some View {
@@ -130,7 +204,7 @@ struct QRGeneratorView: View {
                 }
             }
 
-            QRFormFields(form: $form)
+            QRFormFields(form: $form, focusedField: $focusedField)
         }
         .padding(16)
         .background(Color.cream)
@@ -197,15 +271,30 @@ struct QRTypeSelector: View {
 
 struct QRFormFields: View {
     @Binding var form: QRFormState
+    var focusedField: FocusState<QRFormField?>.Binding
 
     var body: some View {
         Group {
             switch form.contentType {
             case .website:
-                FormField(title: "Website URL", text: $form.websiteURL, placeholder: "example.com")
+                labeledField(.websiteURL, title: "Website URL", text: $form.websiteURL, placeholder: "example.com")
             case .wifi:
-                FormField(title: "Network Name (SSID)", text: $form.wifiSSID, placeholder: "My WiFi")
-                FormField(title: "Password", text: $form.wifiPassword, placeholder: "Password", isSecure: form.wifiSecurity != .nopass)
+                labeledField(
+                    .wifiSSID,
+                    title: "Network Name (SSID)",
+                    text: $form.wifiSSID,
+                    placeholder: "My WiFi",
+                    submitLabel: .next
+                ) {
+                    focusedField.wrappedValue = .wifiPassword
+                }
+                labeledField(
+                    .wifiPassword,
+                    title: "Password",
+                    text: $form.wifiPassword,
+                    placeholder: "Password",
+                    isSecure: form.wifiSecurity != .nopass
+                )
                 Picker("Security", selection: $form.wifiSecurity) {
                     ForEach(WifiSecurity.allCases) { security in
                         Text(security.label).tag(security)
@@ -213,36 +302,88 @@ struct QRFormFields: View {
                 }
                 Toggle("Hidden network", isOn: $form.wifiHidden)
             case .contact:
-                FormField(title: "First Name", text: $form.contactFirstName)
-                FormField(title: "Last Name", text: $form.contactLastName)
-                FormField(title: "Phone", text: $form.contactPhone, keyboard: .phonePad)
-                FormField(title: "Email", text: $form.contactEmail, keyboard: .emailAddress)
-                FormField(title: "Organization", text: $form.contactOrganization)
-                FormField(title: "Job Title", text: $form.contactTitle)
-                FormField(title: "Website", text: $form.contactWebsite)
+                labeledField(.contactFirstName, title: "First Name", text: $form.contactFirstName, submitLabel: .next) {
+                    focusedField.wrappedValue = .contactLastName
+                }
+                labeledField(.contactLastName, title: "Last Name", text: $form.contactLastName, submitLabel: .next) {
+                    focusedField.wrappedValue = .contactPhone
+                }
+                labeledField(.contactPhone, title: "Phone", text: $form.contactPhone, keyboard: .phonePad, submitLabel: .next) {
+                    focusedField.wrappedValue = .contactEmail
+                }
+                labeledField(.contactEmail, title: "Email", text: $form.contactEmail, keyboard: .emailAddress, submitLabel: .next) {
+                    focusedField.wrappedValue = .contactOrganization
+                }
+                labeledField(.contactOrganization, title: "Organization", text: $form.contactOrganization, submitLabel: .next) {
+                    focusedField.wrappedValue = .contactTitle
+                }
+                labeledField(.contactTitle, title: "Job Title", text: $form.contactTitle, submitLabel: .next) {
+                    focusedField.wrappedValue = .contactWebsite
+                }
+                labeledField(.contactWebsite, title: "Website", text: $form.contactWebsite)
             case .text:
-                FormField(title: "Message", text: $form.textContent, placeholder: "Your message", axis: .vertical)
+                labeledField(.textContent, title: "Message", text: $form.textContent, placeholder: "Your message", axis: .vertical)
             case .email:
-                FormField(title: "Email Address", text: $form.emailAddress, keyboard: .emailAddress)
-                FormField(title: "Subject", text: $form.emailSubject)
-                FormField(title: "Body", text: $form.emailBody, axis: .vertical)
+                labeledField(.emailAddress, title: "Email Address", text: $form.emailAddress, keyboard: .emailAddress, submitLabel: .next) {
+                    focusedField.wrappedValue = .emailSubject
+                }
+                labeledField(.emailSubject, title: "Subject", text: $form.emailSubject, submitLabel: .next) {
+                    focusedField.wrappedValue = .emailBody
+                }
+                labeledField(.emailBody, title: "Body", text: $form.emailBody, axis: .vertical)
             case .sms:
-                FormField(title: "Phone Number", text: $form.smsPhone, keyboard: .phonePad)
-                FormField(title: "Message", text: $form.smsMessage, axis: .vertical)
+                labeledField(.smsPhone, title: "Phone Number", text: $form.smsPhone, keyboard: .phonePad, submitLabel: .next) {
+                    focusedField.wrappedValue = .smsMessage
+                }
+                labeledField(.smsMessage, title: "Message", text: $form.smsMessage, axis: .vertical)
             case .phone:
-                FormField(title: "Phone Number", text: $form.phoneNumber, keyboard: .phonePad)
+                labeledField(.phoneNumber, title: "Phone Number", text: $form.phoneNumber, keyboard: .phonePad)
             case .location:
-                FormField(title: "Label", text: $form.locationLabel, placeholder: "Place name")
-                FormField(title: "Latitude", text: $form.locationLatitude, keyboard: .decimalPad)
-                FormField(title: "Longitude", text: $form.locationLongitude, keyboard: .decimalPad)
+                labeledField(.locationLabel, title: "Label", text: $form.locationLabel, placeholder: "Place name", submitLabel: .next) {
+                    focusedField.wrappedValue = .locationLatitude
+                }
+                labeledField(.locationLatitude, title: "Latitude", text: $form.locationLatitude, keyboard: .decimalPad, submitLabel: .next) {
+                    focusedField.wrappedValue = .locationLongitude
+                }
+                labeledField(.locationLongitude, title: "Longitude", text: $form.locationLongitude, keyboard: .decimalPad)
             case .event:
-                FormField(title: "Event Title", text: $form.eventTitle)
+                labeledField(.eventTitle, title: "Event Title", text: $form.eventTitle, submitLabel: .next) {
+                    focusedField.wrappedValue = .eventLocation
+                }
                 DatePicker("Start", selection: $form.eventStartDate)
                 DatePicker("End", selection: $form.eventEndDate)
-                FormField(title: "Location", text: $form.eventLocation)
-                FormField(title: "Description", text: $form.eventDescription, axis: .vertical)
+                labeledField(.eventLocation, title: "Location", text: $form.eventLocation, submitLabel: .next) {
+                    focusedField.wrappedValue = .eventDescription
+                }
+                labeledField(.eventDescription, title: "Description", text: $form.eventDescription, axis: .vertical)
             }
         }
+    }
+
+    @ViewBuilder
+    private func labeledField(
+        _ field: QRFormField,
+        title: String,
+        text: Binding<String>,
+        placeholder: String = "",
+        keyboard: UIKeyboardType = .default,
+        isSecure: Bool = false,
+        axis: Axis = .horizontal,
+        submitLabel: SubmitLabel = .done,
+        onSubmit: (() -> Void)? = nil
+    ) -> some View {
+        FormField(
+            title: title,
+            text: text,
+            placeholder: placeholder,
+            keyboard: keyboard,
+            isSecure: isSecure,
+            axis: axis,
+            submitLabel: submitLabel,
+            onSubmit: onSubmit
+        )
+        .focused(focusedField, equals: field)
+        .id(field)
     }
 }
 
@@ -253,6 +394,28 @@ struct FormField: View {
     var keyboard: UIKeyboardType = .default
     var isSecure: Bool = false
     var axis: Axis = .horizontal
+    var submitLabel: SubmitLabel = .done
+    var onSubmit: (() -> Void)?
+
+    init(
+        title: String,
+        text: Binding<String>,
+        placeholder: String = "",
+        keyboard: UIKeyboardType = .default,
+        isSecure: Bool = false,
+        axis: Axis = .horizontal,
+        submitLabel: SubmitLabel = .done,
+        onSubmit: (() -> Void)? = nil
+    ) {
+        self.title = title
+        self._text = text
+        self.placeholder = placeholder
+        self.keyboard = keyboard
+        self.isSecure = isSecure
+        self.axis = axis
+        self.submitLabel = submitLabel
+        self.onSubmit = onSubmit
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -263,15 +426,21 @@ struct FormField: View {
                 TextField(placeholder, text: $text, axis: .vertical)
                     .lineLimit(3...6)
                     .textFieldStyle(PaperlessTextFieldStyle())
+                    .submitLabel(submitLabel)
+                    .onSubmit { onSubmit?() }
             } else if isSecure {
                 SecureField(placeholder, text: $text)
                     .textFieldStyle(PaperlessTextFieldStyle())
+                    .submitLabel(submitLabel)
+                    .onSubmit { onSubmit?() }
             } else {
                 TextField(placeholder, text: $text)
                     .keyboardType(keyboard)
                     .textInputAutocapitalization(keyboard == .emailAddress ? .never : .sentences)
                     .autocorrectionDisabled(keyboard == .emailAddress || keyboard == .decimalPad)
                     .textFieldStyle(PaperlessTextFieldStyle())
+                    .submitLabel(submitLabel)
+                    .onSubmit { onSubmit?() }
             }
         }
     }

@@ -331,26 +331,35 @@ enum PDFService {
 
     static func cropPDF(
         from url: URL,
-        normalizedRect: CGRect,
-        applyToAllPages: Bool
+        cropBoxesByPage: [Int: [CGRect]],
+        applyToAllPages: Bool = false,
+        sourcePageIndex: Int = 0
     ) throws -> Data {
-        let source = try loadDocument(from: url)
-        let output = PDFDocument()
+        let sourceData = try Data(contentsOf: url)
+        guard let source = PDFDocument(data: sourceData), source.pageCount > 0 else {
+            throw PDFServiceError.invalidPDF
+        }
+
+        let sharedCrop = cropBoxesByPage[sourcePageIndex]?.first
 
         for index in 0..<source.pageCount {
             guard let page = source.page(at: index) else { continue }
-            let cropRect = pdfRect(fromNormalized: normalizedRect, page: page)
-            if applyToAllPages || index == 0 {
-                guard let cropped = renderCroppedPage(page, cropRect: cropRect) else {
-                    throw PDFServiceError.cropFailed
-                }
-                output.insert(cropped, at: output.pageCount)
+
+            let normalizedRect: CGRect?
+            if applyToAllPages {
+                normalizedRect = sharedCrop
             } else {
-                output.insert(page, at: output.pageCount)
+                normalizedRect = cropBoxesByPage[index]?.first
             }
+
+            guard let normalizedRect else { continue }
+
+            let cropRect = pdfRect(fromNormalized: normalizedRect, page: page)
+            page.setBounds(cropRect, for: .cropBox)
+            page.setBounds(cropRect, for: .mediaBox)
         }
 
-        guard output.pageCount > 0, let data = output.dataRepresentation() else {
+        guard let data = source.dataRepresentation() else {
             throw PDFServiceError.cropFailed
         }
         return data
@@ -396,12 +405,6 @@ enum PDFService {
         )
     }
 
-    private static func renderCroppedPage(_ page: PDFPage, cropRect: CGRect) -> PDFPage? {
-        guard let image = renderPageRegion(page, rect: cropRect) else { return nil }
-        let newPage = PDFPage(image: image)
-        return newPage
-    }
-
     private static func renderRedactedPage(_ page: PDFPage, boxes: [CGRect]) -> PDFPage? {
         let bounds = page.bounds(for: .mediaBox)
         let scale: CGFloat = 2.0
@@ -431,23 +434,6 @@ enum PDFService {
         }
 
         return PDFPage(image: image)
-    }
-
-    private static func renderPageRegion(_ page: PDFPage, rect: CGRect) -> UIImage? {
-        let scale: CGFloat = 2.0
-        let size = CGSize(width: rect.width * scale, height: rect.height * scale)
-        guard size.width > 0, size.height > 0 else { return nil }
-
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { context in
-            UIColor.white.setFill()
-            context.fill(CGRect(origin: .zero, size: size))
-            context.cgContext.saveGState()
-            context.cgContext.translateBy(x: -rect.minX * scale, y: size.height + rect.minY * scale)
-            context.cgContext.scaleBy(x: scale, y: -scale)
-            page.draw(with: .mediaBox, to: context.cgContext)
-            context.cgContext.restoreGState()
-        }
     }
 
     private static func singlePagePDFData(from page: PDFPage) -> Data? {

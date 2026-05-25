@@ -51,6 +51,7 @@
 		A100000042 /* ExtractTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000044 /* ExtractTextView.swift */; };
 		A100000043 /* TeleprompterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000045 /* TeleprompterView.swift */; };
 		A100000044 /* InvoiceBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000046 /* InvoiceBuilderView.swift */; };
+		A100000048 /* KeyboardSafeArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000050 /* KeyboardSafeArea.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -100,6 +101,7 @@
 		A200000044 /* ExtractTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtractTextView.swift; sourceTree = "<group>"; };
 		A200000045 /* TeleprompterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterView.swift; sourceTree = "<group>"; };
 		A200000046 /* InvoiceBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceBuilderView.swift; sourceTree = "<group>"; };
+		A200000050 /* KeyboardSafeArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSafeArea.swift; sourceTree = "<group>"; };
 		A300000001 /* PaperlessTools.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperlessTools.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A300000002 /* PaperlessToolsShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PaperlessToolsShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -242,6 +244,7 @@
 				A200000009 /* ShareSheet.swift */,
 				A200000034 /* HomeToolTile.swift */,
 				A200000039 /* PageBoxOverlay.swift */,
+				A200000050 /* KeyboardSafeArea.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -539,6 +542,7 @@
 				A100000042 /* ExtractTextView.swift in Sources */,
 				A100000043 /* TeleprompterView.swift in Sources */,
 				A100000044 /* InvoiceBuilderView.swift in Sources */,
+				A100000048 /* KeyboardSafeArea.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
