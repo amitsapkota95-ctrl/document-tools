@@ -70,16 +70,19 @@ struct RedactPDFView: View {
                 if let pdfDocument, let page = pdfDocument.page(at: currentPage) {
                     compactToolbar(pageCount: pdfDocument.pageCount)
 
+                    let pageImage = page.thumbnail(of: CGSize(width: 600, height: 800), for: .mediaBox)
+
                     ZoomableRedactionCanvas(
-                        pageImage: page.thumbnail(of: CGSize(width: 600, height: 800), for: .mediaBox),
+                        pageImage: pageImage,
                         pageIndex: currentPage,
                         boxes: activeRedactionBoxes,
                         onCommitBox: commitBox,
                         zoomScale: $documentZoomScale,
                         resetZoomTrigger: resetZoomTrigger
                     )
+                    .aspectRatio(pageImage.size.width / pageImage.size.height, contentMode: .fit)
+                    .frame(maxWidth: .infinity)
                     .id(currentPage)
-                    .frame(minHeight: 280)
                     .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
                     .accessibilityLabel("Document page")
                     .accessibilityHint("Pinch to zoom. One finger draws redaction boxes.")
