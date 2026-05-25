@@ -44,9 +44,11 @@ struct ScanTabView: View {
             .navigationTitle("Scan")
             .navigationDestination(isPresented: $showQRScanner) {
                 QRScannerView()
+                    .toolbar(.hidden, for: .tabBar)
             }
             .navigationDestination(isPresented: $showDocumentScanner) {
                 DocumentScannerView()
+                    .toolbar(.hidden, for: .tabBar)
             }
         }
     }

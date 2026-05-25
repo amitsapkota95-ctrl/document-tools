@@ -4,9 +4,13 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ImageToPDFView: View {
-    @State private var selectedItems: [PhotosPickerItem] = []
+    private let maxImageCount = 20
+
+    @State private var pickerSelection: [PhotosPickerItem] = []
     @State private var images: [UIImage] = []
-    @State private var pageSize: PDFPageSize = .a4
+    @State private var loadedItemIdentifiers: Set<String> = []
+    @State private var pageSize: PDFPageSize = .fit
+    @State private var isLoadingImages = false
     @State private var isProcessing = false
     @State private var errorMessage: String?
     @State private var exportedURL: URL?
@@ -19,17 +23,42 @@ struct ImageToPDFView: View {
                     Text("Select images")
                         .font(.sectionTitle)
 
-                    PhotosPicker(selection: $selectedItems, maxSelectionCount: 20, matching: .images) {
-                        Label("Choose from Photos", systemImage: "photo.on.rectangle")
-                            .font(.buttonLabel)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .foregroundStyle(Color.forest)
-                            .background(Color.forest50)
-                            .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.buttonCornerRadius))
+                    PhotosPicker(
+                        selection: $pickerSelection,
+                        maxSelectionCount: max(1, maxImageCount - images.count),
+                        matching: .images
+                    ) {
+                        Label(
+                            images.isEmpty ? "Choose from Photos" : "Add More Photos",
+                            systemImage: "photo.on.rectangle"
+                        )
+                        .font(.buttonLabel)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .foregroundStyle(Color.forest)
+                        .background(Color.forest50)
+                        .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.buttonCornerRadius))
                     }
-                    .onChange(of: selectedItems) { _, newItems in
-                        Task { await loadImages(from: newItems) }
+                    .disabled(isLoadingImages || images.count >= maxImageCount)
+                    .onChange(of: pickerSelection) { _, newItems in
+                        guard !newItems.isEmpty else { return }
+                        Task { await appendImages(from: newItems) }
+                    }
+
+                    if !images.isEmpty {
+                        HStack {
+                            Text("\(images.count) of \(maxImageCount) images")
+                                .font(.captionText)
+                                .foregroundStyle(Color.sandLight)
+
+                            Spacer()
+
+                            Button("Clear All") {
+                                resetImages()
+                            }
+                            .font(.captionText.weight(.semibold))
+                            .foregroundStyle(Color.forest)
+                        }
                     }
 
                     Picker("Page size", selection: $pageSize) {
@@ -70,10 +99,19 @@ struct ImageToPDFView: View {
             }
         }
         .overlay {
-            if isProcessing {
+            if isLoadingImages {
+                ProcessingOverlay(message: loadingMessage)
+            } else if isProcessing {
                 ProcessingOverlay(message: "Creating PDF…")
             }
         }
+    }
+
+    private var loadingMessage: String {
+        if images.isEmpty {
+            return "Loading images…"
+        }
+        return "Adding photos…"
     }
 
     private var imagePreviewGrid: some View {
@@ -89,15 +127,50 @@ struct ImageToPDFView: View {
     }
 
     @MainActor
-    private func loadImages(from items: [PhotosPickerItem]) async {
-        var loaded: [UIImage] = []
+    private func appendImages(from items: [PhotosPickerItem]) async {
+        guard !items.isEmpty else { return }
+
+        isLoadingImages = true
+        errorMessage = nil
+        defer {
+            isLoadingImages = false
+            pickerSelection = []
+        }
+
+        var addedCount = 0
+
         for item in items {
-            if let data = try? await item.loadTransferable(type: Data.self),
-               let image = UIImage(data: data) {
-                loaded.append(image)
+            guard images.count < maxImageCount else { break }
+
+            if let identifier = item.itemIdentifier, loadedItemIdentifiers.contains(identifier) {
+                continue
+            }
+
+            guard let data = try? await item.loadTransferable(type: Data.self),
+                  let image = UIImage(data: data) else {
+                continue
+            }
+
+            images.append(image)
+            addedCount += 1
+
+            if let identifier = item.itemIdentifier {
+                loadedItemIdentifiers.insert(identifier)
             }
         }
-        images = loaded
+
+        if addedCount == 0, !items.isEmpty {
+            errorMessage = "Could not load the selected photos."
+        } else if images.count >= maxImageCount {
+            errorMessage = "Maximum of \(maxImageCount) images reached."
+        }
+    }
+
+    private func resetImages() {
+        images = []
+        loadedItemIdentifiers = []
+        pickerSelection = []
+        errorMessage = nil
     }
 
     @MainActor

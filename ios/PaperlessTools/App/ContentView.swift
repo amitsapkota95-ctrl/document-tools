@@ -35,40 +35,43 @@ struct ContentView: View {
 
 @ViewBuilder
 func destinationView(for destination: ToolDestination) -> some View {
-    switch destination {
-    case .qrTools:
-        QRToolsView()
-    case .urlShortener:
-        URLShortenerView()
-    case .documentScanner:
-        DocumentScannerView()
-    case .mergePdf:
-        MergePDFView()
-    case .splitPdf:
-        SplitPDFView()
-    case .compressPdf:
-        CompressPDFView()
-    case .pdfToImage:
-        PDFToImageView()
-    case .fillAndSign:
-        FillAndSignView()
-    case .imageToPdf:
-        ImageToPDFView()
-    case .redactPdf:
-        RedactPDFView()
-    case .cropPdf:
-        CropPDFView()
-    case .extractText:
-        ExtractTextView()
-    case .compareText:
-        CompareTextView()
-    case .invoiceBuilder:
-        InvoiceBuilderView()
-    case .teleprompter:
-        TeleprompterView()
-    case .qrScanner:
-        QRScannerView()
+    Group {
+        switch destination {
+        case .qrTools:
+            QRToolsView()
+        case .urlShortener:
+            URLShortenerView()
+        case .documentScanner:
+            DocumentScannerView()
+        case .mergePdf:
+            MergePDFView()
+        case .splitPdf:
+            SplitPDFView()
+        case .compressPdf:
+            CompressPDFView()
+        case .pdfToImage:
+            PDFToImageView()
+        case .fillAndSign:
+            FillAndSignView()
+        case .imageToPdf:
+            ImageToPDFView()
+        case .redactPdf:
+            RedactPDFView()
+        case .cropPdf:
+            CropPDFView()
+        case .extractText:
+            ExtractTextView()
+        case .compareText:
+            CompareTextView()
+        case .invoiceBuilder:
+            InvoiceBuilderView()
+        case .teleprompter:
+            TeleprompterView()
+        case .qrScanner:
+            QRScannerView()
+        }
     }
+    .toolbar(.hidden, for: .tabBar)
 }
 
 func destination(for slug: ToolSlug) -> ToolDestination? {

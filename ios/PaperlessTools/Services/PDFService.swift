@@ -3,9 +3,9 @@ import PDFKit
 import UIKit
 
 enum PDFPageSize: String, CaseIterable, Identifiable {
+    case fit
     case a4
     case letter
-    case fit
 
     var id: String { rawValue }
 
@@ -84,6 +84,11 @@ enum PDFServiceError: LocalizedError {
     }
 }
 
+struct CompressSizeEstimate {
+    let estimatedBytes: Int
+    let mayIncrease: Bool
+}
+
 enum PDFService {
     static func mergePDFs(from urls: [URL]) throws -> Data {
         let merged = PDFDocument()
@@ -138,20 +143,30 @@ enum PDFService {
         on pdfData: Data,
         signatureImage: UIImage,
         pageIndex: Int,
-        rect: CGRect
+        normalizedRect: CGRect,
+        applyToAllPages: Bool
     ) throws -> Data {
-        guard let document = PDFDocument(data: pdfData),
-              pageIndex >= 0,
-              pageIndex < document.pageCount,
-              let page = document.page(at: pageIndex) else {
+        guard let document = PDFDocument(data: pdfData) else {
             throw PDFServiceError.invalidPDF
         }
 
-        let annotation = PDFAnnotation(bounds: rect, forType: .stamp, withProperties: nil)
-        if let cgImage = signatureImage.cgImage {
-            annotation.setValue(cgImage, forAnnotationKey: .appearanceDictionary)
+        guard pageIndex >= 0, pageIndex < document.pageCount else {
+            throw PDFServiceError.invalidPDF
         }
-        page.addAnnotation(annotation)
+
+        let targetPages: [Int]
+        if applyToAllPages {
+            targetPages = Array(0..<document.pageCount)
+        } else {
+            targetPages = [pageIndex]
+        }
+
+        for index in targetPages {
+            guard let page = document.page(at: index) else { continue }
+            let pdfRect = pdfRect(fromNormalized: normalizedRect, page: page)
+            let annotation = ImageStampAnnotation(image: signatureImage, bounds: pdfRect)
+            page.addAnnotation(annotation)
+        }
 
         guard let data = document.dataRepresentation() else {
             throw PDFServiceError.exportFailed
@@ -303,30 +318,107 @@ enum PDFService {
         return try ZipService.createArchive(filename: archiveName, entries: entries)
     }
 
-    static func compressPDF(from url: URL, quality: CGFloat, dpi: CGFloat) throws -> Data {
+    static func compressPDF(from url: URL, quality: CGFloat) throws -> Data {
         let document = try loadDocument(from: url)
-        let scale = max(0.5, dpi / 72.0)
-        let jpegQuality = max(0.1, min(1.0, 0.3 + quality * 0.7))
-        let pdfData = NSMutableData()
-        var pageRect = CGRect.zero
-        UIGraphicsBeginPDFContextToData(pdfData, pageRect, nil)
+        let originalData = try Data(contentsOf: url)
+        return try compressPDF(from: document, quality: quality, originalData: originalData)
+    }
 
-        for index in 0..<document.pageCount {
-            guard let page = document.page(at: index),
-                  let image = renderPageForExport(page, scale: scale),
-                  let jpegData = image.jpegData(compressionQuality: jpegQuality),
-                  let compressedImage = UIImage(data: jpegData) else {
-                throw PDFServiceError.compressFailed
+    static func compressPDF(
+        from document: PDFDocument,
+        quality: CGFloat,
+        originalData: Data? = nil
+    ) throws -> Data {
+        var dpi = effectiveCompressionDPI(forQuality: quality)
+        var jpegQuality = compressionJpegQuality(quality: quality)
+        var best = try compressPDF(from: document, dpi: dpi, jpegQuality: jpegQuality)
+
+        guard let originalData else { return best }
+
+        let targetBytes = compressionTargetSize(originalSize: originalData.count, quality: quality)
+
+        while best.count > targetBytes {
+            if dpi > 36 {
+                dpi = max(36, dpi - 8)
+            } else if jpegQuality > 0.21 {
+                jpegQuality = max(0.2, jpegQuality - 0.05)
+            } else {
+                break
             }
 
-            let bounds = page.bounds(for: .mediaBox)
-            pageRect = CGRect(origin: .zero, size: bounds.size)
-            UIGraphicsBeginPDFPageWithInfo(pageRect, nil)
-            compressedImage.draw(in: pageRect)
+            let attempt = try compressPDF(from: document, dpi: dpi, jpegQuality: jpegQuality)
+            if attempt.count < best.count {
+                best = attempt
+            }
+            if best.count <= targetBytes {
+                break
+            }
         }
 
-        UIGraphicsEndPDFContext()
-        return pdfData as Data
+        return best
+    }
+
+    static func compressionTargetSize(originalSize: Int, quality: CGFloat) -> Int {
+        max(1, Int(Double(originalSize) * quality))
+    }
+
+    static func effectiveCompressionDPI(forQuality quality: CGFloat) -> CGFloat {
+        let clamped = max(0.1, min(0.99, quality))
+        let t = (clamped - 0.1) / 0.9
+        return 36 + t * 36
+    }
+
+    static func estimateCompressedSize(
+        from document: PDFDocument,
+        originalSize: Int,
+        quality: CGFloat
+    ) -> CompressSizeEstimate {
+        let targetBytes = compressionTargetSize(originalSize: originalSize, quality: quality)
+        let minEstimate = minimumRasterEstimate(for: document)
+        let mayIncrease = minEstimate > targetBytes
+
+        return CompressSizeEstimate(estimatedBytes: targetBytes, mayIncrease: mayIncrease)
+    }
+
+    private static func minimumRasterEstimate(for document: PDFDocument) -> Int {
+        let dpi: CGFloat = 36
+        let jpegQuality: CGFloat = 0.2
+        let scale = compressionRenderScale(dpi: dpi)
+        let samples = compressionSampleIndices(pageCount: document.pageCount)
+        guard !samples.isEmpty else { return Int.max }
+
+        var sampledJpegBytes = 0
+        for index in samples {
+            guard let page = document.page(at: index),
+                  let image = renderPageForExport(page, scale: scale),
+                  let jpegData = image.jpegData(compressionQuality: jpegQuality) else {
+                continue
+            }
+            sampledJpegBytes += jpegData.count
+        }
+
+        guard sampledJpegBytes > 0 else { return Int.max }
+
+        let avgJpegBytes = sampledJpegBytes / samples.count
+        return avgJpegBytes * document.pageCount + estimatePdfWrapperOverhead(pageCount: document.pageCount)
+    }
+
+    private static func compressPDF(
+        from document: PDFDocument,
+        dpi: CGFloat,
+        jpegQuality: CGFloat
+    ) throws -> Data {
+        let scale = compressionRenderScale(dpi: dpi)
+        var pages: [JpegPDFPage] = []
+
+        for index in 0..<document.pageCount {
+            guard let page = document.page(at: index) else {
+                throw PDFServiceError.compressFailed
+            }
+            pages.append(try jpegPage(from: page, scale: scale, jpegQuality: jpegQuality))
+        }
+
+        return try buildPDFFromJpegPages(pages)
     }
 
     static func cropPDF(
@@ -365,13 +457,25 @@ enum PDFService {
         return data
     }
 
-    static func redactPDF(from url: URL, boxesByPage: [Int: [CGRect]]) throws -> Data {
+    static func redactPDF(
+        from url: URL,
+        boxesByPage: [Int: [CGRect]],
+        applyToAllPages: Bool = false,
+        sourcePageIndex: Int = 0
+    ) throws -> Data {
         let source = try loadDocument(from: url)
         let output = PDFDocument()
+        let sharedBoxes = boxesByPage[sourcePageIndex] ?? []
 
         for index in 0..<source.pageCount {
             guard let page = source.page(at: index) else { continue }
-            let boxes = boxesByPage[index] ?? []
+            let boxes = applyToAllPages ? sharedBoxes : (boxesByPage[index] ?? [])
+
+            if boxes.isEmpty {
+                output.insert(page, at: output.pageCount)
+                continue
+            }
+
             guard let redacted = renderRedactedPage(page, boxes: boxes) else {
                 throw PDFServiceError.redactFailed
             }
@@ -407,7 +511,7 @@ enum PDFService {
 
     private static func renderRedactedPage(_ page: PDFPage, boxes: [CGRect]) -> PDFPage? {
         let bounds = page.bounds(for: .mediaBox)
-        let scale: CGFloat = 2.0
+        let scale: CGFloat = 3.0
         let size = CGSize(width: bounds.width * scale, height: bounds.height * scale)
 
         let renderer = UIGraphicsImageRenderer(size: size)
@@ -420,20 +524,34 @@ enum PDFService {
             page.draw(with: .mediaBox, to: context.cgContext)
             context.cgContext.restoreGState()
 
+            context.cgContext.setShouldAntialias(false)
+            context.cgContext.setBlendMode(.copy)
             UIColor.black.setFill()
+
             for normalized in boxes {
-                let pdfRect = pdfRect(fromNormalized: normalized, page: page)
+                let padded = paddedNormalizedRect(normalized)
+                let pdfRect = pdfRect(fromNormalized: padded, page: page)
                 let viewRect = CGRect(
                     x: (pdfRect.minX - bounds.minX) * scale,
                     y: (bounds.maxY - pdfRect.maxY) * scale,
                     width: pdfRect.width * scale,
                     height: pdfRect.height * scale
-                )
-                context.fill(viewRect)
+                ).insetBy(dx: -2, dy: -2)
+
+                context.cgContext.fill(viewRect)
+                context.cgContext.fill(viewRect)
             }
         }
 
         return PDFPage(image: image)
+    }
+
+    private static func paddedNormalizedRect(_ normalized: CGRect, padding: CGFloat = 0.006) -> CGRect {
+        let x = max(0, normalized.minX - padding)
+        let y = max(0, normalized.minY - padding)
+        let maxX = min(1, normalized.maxX + padding)
+        let maxY = min(1, normalized.maxY + padding)
+        return CGRect(x: x, y: y, width: maxX - x, height: maxY - y)
     }
 
     private static func singlePagePDFData(from page: PDFPage) -> Data? {
@@ -459,7 +577,7 @@ enum PDFService {
         }
     }
 
-    private static func aspectFitRect(for imageSize: CGSize, in container: CGRect) -> CGRect {
+    fileprivate static func aspectFitRect(for imageSize: CGSize, in container: CGRect) -> CGRect {
         guard imageSize.width > 0, imageSize.height > 0 else { return .zero }
         let widthRatio = container.width / imageSize.width
         let heightRatio = container.height / imageSize.height
@@ -470,5 +588,152 @@ enum PDFService {
             y: container.midY - size.height / 2
         )
         return CGRect(origin: origin, size: size)
+    }
+
+    private struct JpegPDFPage {
+        let jpegData: Data
+        let pageWidth: CGFloat
+        let pageHeight: CGFloat
+        let imageWidth: Int
+        let imageHeight: Int
+    }
+
+    private static func compressionRenderScale(dpi: CGFloat) -> CGFloat {
+        max(0.5, dpi / 72.0)
+    }
+
+    private static func compressionJpegQuality(quality: CGFloat) -> CGFloat {
+        max(0.2, min(1.0, 0.15 + quality * 0.85))
+    }
+
+    private static func estimatePdfWrapperOverhead(pageCount: Int) -> Int {
+        4096 + pageCount * 900
+    }
+
+    private static func compressionSampleIndices(pageCount: Int) -> [Int] {
+        if pageCount <= 0 { return [] }
+        if pageCount == 1 { return [0] }
+        if pageCount == 2 { return [0, 1] }
+        return [0, (pageCount - 1) / 2, pageCount - 1]
+    }
+
+    private static func jpegPage(from page: PDFPage, scale: CGFloat, jpegQuality: CGFloat) throws -> JpegPDFPage {
+        guard let image = renderPageForExport(page, scale: scale),
+              let jpegData = image.jpegData(compressionQuality: jpegQuality) else {
+            throw PDFServiceError.compressFailed
+        }
+
+        let bounds = page.bounds(for: .mediaBox)
+        return JpegPDFPage(
+            jpegData: jpegData,
+            pageWidth: bounds.width * scale,
+            pageHeight: bounds.height * scale,
+            imageWidth: max(1, Int(image.size.width.rounded())),
+            imageHeight: max(1, Int(image.size.height.rounded()))
+        )
+    }
+
+    private static func buildPDFFromJpegPages(_ pages: [JpegPDFPage]) throws -> Data {
+        guard !pages.isEmpty else { throw PDFServiceError.compressFailed }
+
+        let pdf = NSMutableData()
+        var xrefOffsets: [Int] = []
+
+        func appendASCII(_ string: String) {
+            guard let data = string.data(using: .ascii) else { return }
+            pdf.append(data)
+        }
+
+        func beginObject(_ number: Int) {
+            while xrefOffsets.count <= number {
+                xrefOffsets.append(0)
+            }
+            xrefOffsets[number] = pdf.length
+            appendASCII("\(number) 0 obj\n")
+        }
+
+        func endObject() {
+            appendASCII("endobj\n")
+        }
+
+        appendASCII("%PDF-1.4\n")
+
+        beginObject(1)
+        appendASCII("<< /Type /Catalog /Pages 2 0 R >>\n")
+        endObject()
+
+        let kids = pages.indices.map { index in "\(3 + index * 3) 0 R" }.joined(separator: " ")
+        beginObject(2)
+        appendASCII("<< /Type /Pages /Kids [ \(kids) ] /Count \(pages.count) >>\n")
+        endObject()
+
+        for (index, page) in pages.enumerated() {
+            let pageObject = 3 + index * 3
+            let contentObject = pageObject + 1
+            let imageObject = pageObject + 2
+            let content = "q \(formatPDFNumber(page.pageWidth)) 0 0 \(formatPDFNumber(page.pageHeight)) 0 0 cm /Im1 Do Q"
+            guard let contentData = content.data(using: .ascii) else {
+                throw PDFServiceError.compressFailed
+            }
+
+            beginObject(pageObject)
+            appendASCII("""
+            << /Type /Page /Parent 2 0 R /MediaBox [0 0 \(formatPDFNumber(page.pageWidth)) \(formatPDFNumber(page.pageHeight)) ] /Contents \(contentObject) 0 R /Resources << /XObject << /Im1 \(imageObject) 0 R >> >> >>
+            
+            """)
+            endObject()
+
+            beginObject(contentObject)
+            appendASCII("<< /Length \(contentData.count) >>\nstream\n")
+            pdf.append(contentData)
+            appendASCII("\nendstream\n")
+            endObject()
+
+            beginObject(imageObject)
+            appendASCII("""
+            << /Type /XObject /Subtype /Image /Width \(page.imageWidth) /Height \(page.imageHeight) /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length \(page.jpegData.count) >>
+            stream\n
+            """)
+            pdf.append(page.jpegData)
+            appendASCII("\nendstream\n")
+            endObject()
+        }
+
+        let xrefStart = pdf.length
+        let objectCount = xrefOffsets.count
+        appendASCII("xref\n0 \(objectCount)\n")
+        appendASCII("0000000000 65535 f \n")
+        for objectNumber in 1..<objectCount {
+            appendASCII(String(format: "%010d 00000 n \n", xrefOffsets[objectNumber]))
+        }
+        appendASCII("trailer\n<< /Size \(objectCount) /Root 1 0 R >>\n")
+        appendASCII("startxref\n\(xrefStart)\n")
+        appendASCII("%%EOF\n")
+
+        return pdf as Data
+    }
+
+    private static func formatPDFNumber(_ value: CGFloat) -> String {
+        String(format: "%.4f", Double(value))
+    }
+}
+
+private final class ImageStampAnnotation: PDFAnnotation {
+    private let stampImage: UIImage
+
+    init(image: UIImage, bounds: CGRect) {
+        stampImage = image
+        super.init(bounds: bounds, forType: .stamp, withProperties: nil)
+        backgroundColor = .clear
+    }
+
+    required init?(coder: NSCoder) {
+        nil
+    }
+
+    override func draw(with box: PDFDisplayBox, in context: CGContext) {
+        guard let cgImage = stampImage.cgImage else { return }
+        let drawRect = PDFService.aspectFitRect(for: stampImage.size, in: bounds)
+        context.draw(cgImage, in: drawRect)
     }
 }

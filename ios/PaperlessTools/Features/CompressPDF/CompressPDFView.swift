@@ -4,9 +4,15 @@ import UniformTypeIdentifiers
 
 struct CompressPDFView: View {
     @State private var pdfURL: URL?
+    @State private var pdfDocument: PDFDocument?
+    @State private var originalData: Data?
     @State private var originalSize: Int = 0
-    @State private var quality: Double = 0.75
-    @State private var dpi: Double = 120
+    @State private var compressedSize: Int?
+    @State private var estimatedSize: Int?
+    @State private var estimateMayIncrease = false
+    @State private var isEstimating = false
+    @State private var estimateTask: Task<Void, Never>?
+    @State private var quality: Double = 1.0
     @State private var showPicker = false
     @State private var isProcessing = false
     @State private var errorMessage: String?
@@ -44,6 +50,12 @@ struct CompressPDFView: View {
         .background(Color.paper.ignoresSafeArea())
         .navigationTitle("Compress PDF")
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: quality) { _, _ in
+            refreshEstimate()
+        }
+        .onDisappear {
+            estimateTask?.cancel()
+        }
         .sheet(isPresented: $showPicker) {
             DocumentPicker(contentTypes: [.pdf], allowsMultipleSelection: false) { urls in
                 if let url = urls.first { loadPDF(url) }
@@ -77,9 +89,39 @@ struct CompressPDFView: View {
                 Text(pdfURL?.lastPathComponent ?? "Document")
                     .font(.bodyText.weight(.semibold))
                     .lineLimit(1)
-                Text(formatBytes(originalSize))
+                Text("Original: \(formatBytes(originalSize))")
                     .font(.captionText)
                     .foregroundStyle(Color.sandLight)
+                if isEstimating {
+                    Text("Calculating expected size…")
+                        .font(.captionText)
+                        .foregroundStyle(Color.sandLight)
+                } else if let estimatedSize {
+                    if isPassthrough {
+                        Text("Expected: \(formatBytes(estimatedSize))")
+                            .font(.captionText)
+                            .foregroundStyle(Color.sandLight)
+                    } else if estimateMayIncrease {
+                        Text("Expected: ~\(formatBytes(estimatedSize)) (\(Int(quality * 100))% of original) — may not reach target on text-only PDFs")
+                            .font(.captionText)
+                            .foregroundStyle(Color.sandLight)
+                    } else {
+                        Text("Expected: ~\(formatBytes(estimatedSize)) (\(Int(quality * 100))% of original)")
+                            .font(.captionText)
+                            .foregroundStyle(Color.forest)
+                    }
+                }
+                if let compressedSize {
+                    if compressedSize <= PDFService.compressionTargetSize(originalSize: originalSize, quality: quality) || compressedSize < originalSize {
+                        Text("Compressed to \(formatBytes(compressedSize))")
+                            .font(.captionText)
+                            .foregroundStyle(Color.forest)
+                    } else {
+                        Text("Compressed to \(formatBytes(compressedSize))")
+                            .font(.captionText)
+                            .foregroundStyle(Color.sandLight)
+                    }
+                }
             }
             Spacer()
         }
@@ -91,14 +133,15 @@ struct CompressPDFView: View {
     private var controls: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Quality: \(Int(quality * 100))%")
+                Text("Target size: \(Int(quality * 100))%")
                     .font(.bodyText.weight(.semibold))
                 Slider(value: $quality, in: 0.1...1.0)
             }
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Image DPI: \(Int(dpi))")
-                    .font(.bodyText.weight(.semibold))
-                Slider(value: $dpi, in: 72...150, step: 1)
+
+            if isPassthrough {
+                Text("Lower target size to compress.")
+                    .font(.captionText)
+                    .foregroundStyle(Color.sandLight)
             }
         }
         .padding(16)
@@ -106,10 +149,80 @@ struct CompressPDFView: View {
         .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
     }
 
+    private var isPassthrough: Bool {
+        quality >= 1.0
+    }
+
     private func loadPDF(_ url: URL) {
-        pdfURL = url
-        originalSize = (try? Data(contentsOf: url).count) ?? 0
         errorMessage = nil
+        compressedSize = nil
+        estimatedSize = nil
+        estimateMayIncrease = false
+        estimateTask?.cancel()
+        quality = 1.0
+
+        do {
+            let data = try Data(contentsOf: url)
+            guard let document = PDFDocument(data: data), document.pageCount > 0 else {
+                throw PDFServiceError.invalidPDF
+            }
+            pdfDocument = document
+            originalData = data
+            originalSize = data.count
+            pdfURL = try PDFService.writeTemporaryPDF(
+                data,
+                filename: url.deletingPathExtension().lastPathComponent
+            )
+            refreshEstimate()
+        } catch {
+            pdfDocument = nil
+            originalData = nil
+            pdfURL = nil
+            originalSize = 0
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    private func refreshEstimate() {
+        estimateTask?.cancel()
+        compressedSize = nil
+
+        guard pdfDocument != nil, originalSize > 0 else {
+            estimatedSize = nil
+            estimateMayIncrease = false
+            isEstimating = false
+            return
+        }
+
+        if isPassthrough {
+            estimatedSize = originalSize
+            estimateMayIncrease = false
+            isEstimating = false
+            return
+        }
+
+        isEstimating = true
+        let document = pdfDocument!
+        let size = originalSize
+        let currentQuality = quality
+
+        estimateTask = Task {
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard !Task.isCancelled else { return }
+
+            let result = PDFService.estimateCompressedSize(
+                from: document,
+                originalSize: size,
+                quality: currentQuality
+            )
+
+            await MainActor.run {
+                guard !Task.isCancelled else { return }
+                estimatedSize = result.estimatedBytes
+                estimateMayIncrease = result.mayIncrease
+                isEstimating = false
+            }
+        }
     }
 
     private func formatBytes(_ count: Int) -> String {
@@ -118,13 +231,23 @@ struct CompressPDFView: View {
 
     @MainActor
     private func compress() async {
-        guard let pdfURL else { return }
+        guard let pdfDocument, let originalData, let pdfURL else { return }
         isProcessing = true
         errorMessage = nil
         defer { isProcessing = false }
 
         do {
-            let data = try PDFService.compressPDF(from: pdfURL, quality: quality, dpi: dpi)
+            let data: Data
+            if isPassthrough {
+                data = originalData
+            } else {
+                data = try PDFService.compressPDF(
+                    from: pdfDocument,
+                    quality: quality,
+                    originalData: originalData
+                )
+            }
+            compressedSize = data.count
             let base = pdfURL.deletingPathExtension().lastPathComponent
             exportedURL = try PDFService.writeTemporaryPDF(data, filename: "\(base)-smaller")
             showShareSheet = true

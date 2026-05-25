@@ -7,63 +7,41 @@ struct RedactPDFView: View {
     @State private var pdfDocument: PDFDocument?
     @State private var currentPage = 0
     @State private var boxesByPage: [Int: [CGRect]] = [:]
-    @State private var detectedPreview: [CGRect] = []
     @State private var showPicker = false
     @State private var isProcessing = false
     @State private var errorMessage: String?
     @State private var exportedURL: URL?
     @State private var showShareSheet = false
+    @State private var documentZoomScale: CGFloat = 1.0
+    @State private var resetZoomTrigger = 0
+    @State private var applyToAllPages = false
+    @State private var sharedRedactionSourcePage = 0
 
-    private var currentBoxes: Binding<[CGRect]> {
-        Binding(
-            get: { boxesByPage[currentPage] ?? [] },
-            set: { boxesByPage[currentPage] = $0 }
-        )
+    private var activeRedactionPage: Int {
+        applyToAllPages ? sharedRedactionSourcePage : currentPage
+    }
+
+    private var activeRedactionBoxes: [CGRect] {
+        boxesByPage[activeRedactionPage] ?? []
+    }
+
+    private var canUndo: Bool {
+        !activeRedactionBoxes.isEmpty
+    }
+
+    private var hasAnyRedactions: Bool {
+        !boxesByPage.values.flatMap({ $0 }).isEmpty
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                if let pdfDocument, let page = pdfDocument.page(at: currentPage) {
-                    pageControls(pdfDocument.pageCount)
-
-                    PageBoxOverlay(
-                        pageImage: page.thumbnail(of: CGSize(width: 600, height: 800), for: .mediaBox),
-                        mode: .multiRedact,
-                        boxes: currentBoxes,
-                        detectedBoxes: detectedPreview
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
-
-                    HStack(spacing: 12) {
-                        PrimaryButton(title: "Detect PII", icon: "wand.and.stars") {
-                            detectPII(in: pdfDocument)
-                        }
-                        PrimaryButton(title: "Apply Detected", icon: "checkmark.shield") {
-                            applyDetected()
-                        }
-                    }
-                } else {
-                    emptyState
+        Group {
+            if pdfDocument != nil {
+                editorContent
+            } else {
+                ScrollView {
+                    emptyStateContent
                 }
-
-                if let errorMessage {
-                    Text(errorMessage).font(.captionText).foregroundStyle(.red)
-                }
-
-                PrimaryButton(title: pdfDocument == nil ? "Choose PDF" : "Change PDF", icon: "doc") {
-                    showPicker = true
-                }
-
-                if pdfDocument != nil, !boxesByPage.values.flatMap({ $0 }).isEmpty {
-                    PrimaryButton(title: "Export Redacted PDF", icon: "eye.slash", isLoading: isProcessing) {
-                        Task { await redact() }
-                    }
-                }
-
-                PrivacyBadge()
             }
-            .padding(20)
         }
         .background(Color.paper.ignoresSafeArea())
         .navigationTitle("Redact PDF")
@@ -81,6 +59,127 @@ struct RedactPDFView: View {
         }
     }
 
+    private var editorContent: some View {
+        GeometryReader { geometry in
+            let bottomBarHeight: CGFloat = 132
+            let chromeHeight: CGFloat = 88
+            let canvasHeight = max(geometry.size.height - bottomBarHeight - chromeHeight, 280)
+
+            VStack(spacing: 12) {
+                if let pdfDocument, let page = pdfDocument.page(at: currentPage) {
+                    compactToolbar(pageCount: pdfDocument.pageCount)
+
+                    ZoomableRedactionCanvas(
+                        pageImage: page.thumbnail(of: CGSize(width: 600, height: 800), for: .mediaBox),
+                        pageIndex: currentPage,
+                        boxes: activeRedactionBoxes,
+                        onCommitBox: commitBox,
+                        zoomScale: $documentZoomScale,
+                        resetZoomTrigger: resetZoomTrigger
+                    )
+                    .id(currentPage)
+                    .frame(height: canvasHeight)
+                    .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+                    .accessibilityLabel("Document page")
+                    .accessibilityHint("Pinch to zoom. One finger draws redaction boxes.")
+
+                    Text("Pinch to zoom and drag to pan. Draw black boxes over content to redact.")
+                        .font(.caption2)
+                        .foregroundStyle(Color.sandLight)
+                        .multilineTextAlignment(.center)
+                }
+
+                Spacer(minLength: 0)
+
+                VStack(spacing: 12) {
+                    if let errorMessage {
+                        Text(errorMessage).font(.captionText).foregroundStyle(.red)
+                    }
+
+                    if pdfDocument != nil, !activeRedactionBoxes.isEmpty {
+                        Toggle("Apply redactions to all pages", isOn: $applyToAllPages)
+                            .font(.bodyText)
+                            .padding(.horizontal, 4)
+                            .onChange(of: applyToAllPages) { _, isOn in
+                                if isOn {
+                                    sharedRedactionSourcePage = currentPage
+                                }
+                            }
+                    }
+
+                    PrimaryButton(title: "Change PDF", icon: "doc") {
+                        showPicker = true
+                    }
+
+                    if pdfDocument != nil, hasAnyRedactions {
+                        PrimaryButton(title: "Export Redacted PDF", icon: "eye.slash", isLoading: isProcessing) {
+                            Task { await redact() }
+                        }
+                    }
+                }
+            }
+            .padding(20)
+        }
+    }
+
+    private var emptyStateContent: some View {
+        VStack(spacing: 20) {
+            emptyState
+
+            PrimaryButton(title: "Choose PDF", icon: "doc") {
+                showPicker = true
+            }
+
+            PrivacyBadge()
+        }
+        .padding(20)
+    }
+
+    private func compactToolbar(pageCount: Int) -> some View {
+        HStack(spacing: 12) {
+            Button {
+                currentPage = max(0, currentPage - 1)
+                resetDocumentZoom()
+            } label: {
+                Image(systemName: "chevron.left")
+            }
+            .disabled(currentPage == 0)
+
+            Text("Page \(currentPage + 1) of \(pageCount)")
+                .font(.bodyText.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+
+            Button {
+                currentPage = min(pageCount - 1, currentPage + 1)
+                resetDocumentZoom()
+            } label: {
+                Image(systemName: "chevron.right")
+            }
+            .disabled(currentPage >= pageCount - 1)
+
+            Spacer(minLength: 8)
+
+            Button {
+                undoLastRedaction()
+            } label: {
+                Label("Undo", systemImage: "arrow.uturn.backward")
+                    .font(.captionText.weight(.semibold))
+            }
+            .disabled(!canUndo)
+            .foregroundStyle(canUndo ? Color.forest : Color.sandLight)
+
+            if documentZoomScale > 1.05 {
+                Button("Reset Zoom") {
+                    resetZoomTrigger += 1
+                    documentZoomScale = 1.0
+                }
+                .font(.captionText.weight(.semibold))
+                .foregroundStyle(Color.forest)
+            }
+        }
+    }
+
     private var emptyState: some View {
         VStack(spacing: 16) {
             Image(systemName: "eye.slash")
@@ -88,67 +187,61 @@ struct RedactPDFView: View {
                 .foregroundStyle(Color.forest)
             Text("Redact sensitive info")
                 .font(.sectionTitle)
-            Text("Draw black boxes or auto-detect emails, phones, and IDs.")
+            Text("Draw black boxes over text or images you want removed permanently from the PDF.")
                 .font(.bodyText)
                 .foregroundStyle(Color.sandLight)
                 .multilineTextAlignment(.center)
         }
     }
 
-    private func pageControls(_ pageCount: Int) -> some View {
-        HStack {
-            Button {
-                currentPage = max(0, currentPage - 1)
-                refreshDetectedPreview()
-            } label: {
-                Image(systemName: "chevron.left")
-            }
-            .disabled(currentPage == 0)
-
-            Spacer()
-            Text("Page \(currentPage + 1) of \(pageCount)")
-                .font(.bodyText.weight(.semibold))
-            Spacer()
-
-            Button {
-                currentPage = min(pageCount - 1, currentPage + 1)
-                refreshDetectedPreview()
-            } label: {
-                Image(systemName: "chevron.right")
-            }
-            .disabled(currentPage >= pageCount - 1)
-        }
-    }
-
     private func loadPDF(_ url: URL) {
-        pdfURL = url
         currentPage = 0
         boxesByPage = [:]
-        detectedPreview = []
+        applyToAllPages = false
+        sharedRedactionSourcePage = 0
         errorMessage = nil
+
         do {
-            pdfDocument = try PDFService.loadDocument(from: url)
+            let data = try Data(contentsOf: url)
+            guard let document = PDFDocument(data: data), document.pageCount > 0 else {
+                throw PDFServiceError.invalidPDF
+            }
+            pdfDocument = document
+            pdfURL = try PDFService.writeTemporaryPDF(
+                data,
+                filename: url.deletingPathExtension().lastPathComponent
+            )
         } catch {
             pdfDocument = nil
-            errorMessage = error.localizedDescription
+            pdfURL = nil
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 
-    private func detectPII(in document: PDFDocument) {
-        let matches = PIIDetector.detect(in: document, pageIndex: currentPage)
-        detectedPreview = matches.map(\.normalizedRect)
+    private func resetDocumentZoom() {
+        resetZoomTrigger += 1
+        documentZoomScale = 1.0
     }
 
-    private func applyDetected() {
-        guard !detectedPreview.isEmpty else { return }
-        var existing = boxesByPage[currentPage] ?? []
-        existing.append(contentsOf: detectedPreview)
-        boxesByPage[currentPage] = existing
-        detectedPreview = []
+    private func commitBox(_ rect: CGRect) {
+        var pageBoxes = boxesByPage[activeRedactionPage] ?? []
+        pageBoxes.append(rect)
+        var updated = boxesByPage
+        updated[activeRedactionPage] = pageBoxes
+        boxesByPage = updated
     }
 
-    private func refreshDetectedPreview() {
-        detectedPreview = []
+    private func undoLastRedaction() {
+        var pageBoxes = boxesByPage[activeRedactionPage] ?? []
+        guard !pageBoxes.isEmpty else { return }
+        pageBoxes.removeLast()
+        var updated = boxesByPage
+        if pageBoxes.isEmpty {
+            updated.removeValue(forKey: activeRedactionPage)
+        } else {
+            updated[activeRedactionPage] = pageBoxes
+        }
+        boxesByPage = updated
     }
 
     @MainActor
@@ -159,7 +252,12 @@ struct RedactPDFView: View {
         defer { isProcessing = false }
 
         do {
-            let data = try PDFService.redactPDF(from: pdfURL, boxesByPage: boxesByPage)
+            let data = try PDFService.redactPDF(
+                from: pdfURL,
+                boxesByPage: boxesByPage,
+                applyToAllPages: applyToAllPages,
+                sourcePageIndex: sharedRedactionSourcePage
+            )
             let base = pdfURL.deletingPathExtension().lastPathComponent
             exportedURL = try PDFService.writeTemporaryPDF(data, filename: "\(base)-redacted")
             showShareSheet = true

@@ -1,7 +1,10 @@
+import AVFoundation
 import SwiftUI
+import UIKit
 import VisionKit
 
 struct DocumentScannerView: View {
+    @AppStorage("scan.autoCaptureEnabled") private var autoCaptureEnabled = true
     @State private var scannedImages: [UIImage] = []
     @State private var showScanner = false
     @State private var isProcessing = false
@@ -16,6 +19,8 @@ struct DocumentScannerView: View {
             } else {
                 scannedPagesView
             }
+
+            scanSettings
 
             if let errorMessage {
                 Text(errorMessage)
@@ -44,9 +49,15 @@ struct DocumentScannerView: View {
         .background(Color.paper.ignoresSafeArea())
         .navigationTitle("Scan Document")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showScanner) {
-            DocumentScannerRepresentable { images in
-                scannedImages.append(contentsOf: images)
+        .fullScreenCover(isPresented: $showScanner) {
+            if autoCaptureEnabled {
+                DocumentScannerRepresentable { images in
+                    scannedImages.append(contentsOf: images)
+                }
+            } else {
+                ManualDocumentCameraView { images in
+                    scannedImages.append(contentsOf: images)
+                }
             }
         }
         .sheet(isPresented: $showShareSheet) {
@@ -61,14 +72,32 @@ struct DocumentScannerView: View {
         }
     }
 
+    private var scanSettings: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle("Auto-capture pages", isOn: $autoCaptureEnabled)
+                .font(.bodyText)
+                .tint(.forest)
+
+            Text(autoCaptureEnabled
+                 ? "Uses Apple's scanner with automatic page detection."
+                 : "Manual mode: tap the shutter for each page.")
+                .font(.captionText)
+                .foregroundStyle(Color.sandLight)
+        }
+        .padding(16)
+        .background(Color.cream)
+        .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+        .padding(.horizontal, 20)
+    }
+
     private var emptyState: some View {
         VStack(spacing: 16) {
             Image(systemName: "doc.viewfinder")
                 .font(.system(size: 48))
                 .foregroundStyle(Color.forest)
-            Text("Scan documents with auto-crop")
+            Text("Scan documents page by page")
                 .font(.sectionTitle)
-            Text("Capture receipts, contracts, and notes. Pages are processed on your device.")
+            Text("Tap the shutter for each page. Enable auto-capture if you prefer Apple's automatic scanner.")
                 .font(.bodyText)
                 .foregroundStyle(Color.sandLight)
                 .multilineTextAlignment(.center)
@@ -153,6 +182,202 @@ struct DocumentScannerRepresentable: UIViewControllerRepresentable {
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
             dismiss()
+        }
+    }
+}
+
+// MARK: - Manual camera (default scan mode)
+
+struct ManualDocumentCameraView: View {
+    let onComplete: ([UIImage]) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var capturedImages: [UIImage] = []
+    @State private var isProcessingCapture = false
+    @State private var captureTrigger = 0
+
+    var body: some View {
+        ZStack {
+            ManualCameraPreview(captureTrigger: $captureTrigger, isProcessing: $isProcessingCapture) { image in
+                Task { await handleCapture(image) }
+            }
+            .ignoresSafeArea()
+
+            VStack {
+                HStack {
+                    Button("Cancel") { dismiss() }
+                        .foregroundStyle(.white)
+
+                    Spacer()
+
+                    if !capturedImages.isEmpty {
+                        Text("\(capturedImages.count) page\(capturedImages.count == 1 ? "" : "s")")
+                            .font(.captionText.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.black.opacity(0.45))
+                            .clipShape(Capsule())
+                    }
+
+                    Spacer()
+
+                    Button("Done") {
+                        onComplete(capturedImages)
+                        dismiss()
+                    }
+                    .foregroundStyle(capturedImages.isEmpty ? .white.opacity(0.4) : .white)
+                    .disabled(capturedImages.isEmpty)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+
+                Spacer()
+
+                Button {
+                    guard !isProcessingCapture else { return }
+                    captureTrigger += 1
+                } label: {
+                    ZStack {
+                        Circle()
+                            .strokeBorder(.white, lineWidth: 4)
+                            .frame(width: 78, height: 78)
+                        Circle()
+                            .fill(isProcessingCapture ? Color.white.opacity(0.5) : Color.white)
+                            .frame(width: 64, height: 64)
+                    }
+                }
+                .disabled(isProcessingCapture)
+                .padding(.bottom, 36)
+
+                Text("Tap shutter for each page")
+                    .font(.captionText)
+                    .foregroundStyle(.white.opacity(0.85))
+                    .padding(.bottom, 20)
+            }
+        }
+        .background(Color.black.ignoresSafeArea())
+    }
+
+    @MainActor
+    private func handleCapture(_ image: UIImage) async {
+        isProcessingCapture = true
+        defer { isProcessingCapture = false }
+
+        let processed = await DocumentScanProcessor.processCapturedImage(image)
+        capturedImages.append(processed)
+    }
+}
+
+private struct ManualCameraPreview: UIViewControllerRepresentable {
+    @Binding var captureTrigger: Int
+    @Binding var isProcessing: Bool
+    let onPhotoCaptured: (UIImage) -> Void
+
+    func makeUIViewController(context: Context) -> ManualCameraViewController {
+        let controller = ManualCameraViewController()
+        controller.onPhotoCaptured = onPhotoCaptured
+        context.coordinator.controller = controller
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: ManualCameraViewController, context: Context) {
+        context.coordinator.controller = uiViewController
+
+        if context.coordinator.lastCaptureTrigger != captureTrigger {
+            context.coordinator.lastCaptureTrigger = captureTrigger
+            guard !isProcessing else { return }
+            uiViewController.capturePhoto()
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    final class Coordinator {
+        var controller: ManualCameraViewController?
+        var lastCaptureTrigger = 0
+    }
+}
+
+final class ManualCameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
+    var onPhotoCaptured: ((UIImage) -> Void)?
+
+    private let session = AVCaptureSession()
+    private let photoOutput = AVCapturePhotoOutput()
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .black
+        configureSession()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer?.frame = view.bounds
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.session.startRunning()
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if session.isRunning {
+            session.stopRunning()
+        }
+    }
+
+    func capturePhoto() {
+        let settings = AVCapturePhotoSettings()
+        if photoOutput.supportedFlashModes.contains(.auto) {
+            settings.flashMode = .auto
+        }
+        photoOutput.capturePhoto(with: settings, delegate: self)
+    }
+
+    private func configureSession() {
+        session.beginConfiguration()
+        session.sessionPreset = .photo
+
+        guard
+            let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+            let input = try? AVCaptureDeviceInput(device: device),
+            session.canAddInput(input)
+        else {
+            session.commitConfiguration()
+            return
+        }
+
+        session.addInput(input)
+
+        if session.canAddOutput(photoOutput) {
+            session.addOutput(photoOutput)
+        }
+
+        session.commitConfiguration()
+
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.frame = view.bounds
+        view.layer.insertSublayer(previewLayer, at: 0)
+        self.previewLayer = previewLayer
+    }
+
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        guard error == nil,
+              let data = photo.fileDataRepresentation(),
+              let image = UIImage(data: data) else {
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.onPhotoCaptured?(image)
         }
     }
 }

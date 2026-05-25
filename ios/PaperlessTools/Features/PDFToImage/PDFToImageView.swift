@@ -7,7 +7,9 @@ struct PDFToImageView: View {
     @State private var pdfDocument: PDFDocument?
     @State private var showPicker = false
     @State private var format: ExportImageFormat = .png
+    @State private var isLoadingPDF = false
     @State private var isProcessing = false
+    @State private var processingMessage = "Converting pages…"
     @State private var errorMessage: String?
     @State private var exportedURL: URL?
     @State private var showShareSheet = false
@@ -52,7 +54,12 @@ struct PDFToImageView: View {
                     }
 
                     if pdfDocument != nil {
-                        PrimaryButton(title: "Save as \(format.label)", icon: "photo", isLoading: isProcessing) {
+                        PrimaryButton(
+                            title: "Save as \(format.label)",
+                            icon: "photo",
+                            isLoading: isProcessing,
+                            isDisabled: isLoadingPDF
+                        ) {
                             Task { await exportImages() }
                         }
                     }
@@ -78,8 +85,10 @@ struct PDFToImageView: View {
             }
         }
         .overlay {
-            if isProcessing {
-                ProcessingOverlay(message: "Converting pages…")
+            if isLoadingPDF {
+                ProcessingOverlay(message: "Loading PDF…")
+            } else if isProcessing {
+                ProcessingOverlay(message: processingMessage)
             }
         }
     }
@@ -139,14 +148,28 @@ struct PDFToImageView: View {
     }
 
     private func loadPDF(from url: URL) {
-        errorMessage = nil
-        pdfURL = url
+        Task {
+            isLoadingPDF = true
+            errorMessage = nil
+            defer { isLoadingPDF = false }
+            await Task.yield()
 
-        do {
-            pdfDocument = try PDFService.loadDocument(from: url)
-        } catch {
-            pdfDocument = nil
-            errorMessage = error.localizedDescription
+            do {
+                let data = try Data(contentsOf: url)
+                guard let document = PDFDocument(data: data), document.pageCount > 0 else {
+                    throw PDFServiceError.invalidPDF
+                }
+                let tempURL = try PDFService.writeTemporaryPDF(
+                    data,
+                    filename: url.deletingPathExtension().lastPathComponent
+                )
+                pdfURL = tempURL
+                pdfDocument = document
+            } catch {
+                pdfURL = nil
+                pdfDocument = nil
+                errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
         }
     }
 
@@ -155,29 +178,37 @@ struct PDFToImageView: View {
         guard let pdfURL else { return }
 
         isProcessing = true
+        processingMessage = "Converting pages…"
         errorMessage = nil
-        defer { isProcessing = false }
+        await Task.yield()
 
         let baseName = pdfURL.deletingPathExtension().lastPathComponent
+        let format = self.format
+        let sourceURL = pdfURL
+
+        defer { isProcessing = false }
 
         do {
-            let images = try PDFService.pdfToImages(from: pdfURL, format: format)
-            let entries: [(name: String, data: Data)] = try images.map { item in
-                let data: Data?
-                switch format {
-                case .png:
-                    data = item.image.pngData()
-                case .jpeg:
-                    data = item.image.jpegData(compressionQuality: 0.92)
+            let exportURL = try await Task.detached(priority: .userInitiated) {
+                let images = try PDFService.pdfToImages(from: sourceURL, format: format)
+                let entries: [(name: String, data: Data)] = try images.map { item in
+                    let data: Data?
+                    switch format {
+                    case .png:
+                        data = item.image.pngData()
+                    case .jpeg:
+                        data = item.image.jpegData(compressionQuality: 0.92)
+                    }
+                    guard let data else { throw PDFServiceError.exportFailed }
+                    return (name: item.name, data: data)
                 }
-                guard let data else { throw PDFServiceError.exportFailed }
-                return (name: item.name, data: data)
-            }
+                return try PDFService.exportFiles(named: "\(baseName)-images", entries: entries)
+            }.value
 
-            exportedURL = try PDFService.exportFiles(named: "\(baseName)-images", entries: entries)
+            exportedURL = exportURL
             showShareSheet = true
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 }
