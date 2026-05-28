@@ -177,7 +177,7 @@ struct FillAndSignView: View {
         }
         .sheet(isPresented: $showSignatureSheet) {
             SignatureCreatorSheet { image, name in
-                applySignature(image, name: name)
+                saveAndPlaceSignature(image, name: name)
             }
         }
         .sheet(isPresented: $showShareSheet) {
@@ -283,7 +283,7 @@ struct FillAndSignView: View {
 
                     ForEach(savedSignatures) { signature in
                         Button {
-                            applySignature(signature.image, name: signature.name)
+                            placeSignature(signature.image)
                         } label: {
                             if let image = signature.image {
                                 Image(uiImage: image)
@@ -305,11 +305,16 @@ struct FillAndSignView: View {
         }
     }
 
-    private func applySignature(_ image: UIImage?, name: String) {
+    private func placeSignature(_ image: UIImage?) {
         guard let image else { return }
         signatureImage = image
         signaturePageIndex = currentPageIndex
         signatureNormalizedRect = CGRect(x: 0.52, y: 0.78, width: 0.38, height: 0.12)
+    }
+
+    private func saveAndPlaceSignature(_ image: UIImage?, name: String) {
+        guard let image else { return }
+        placeSignature(image)
         try? StorageService.saveSignature(name: name, image: image)
         savedSignatures = StorageService.loadSignatures()
     }
@@ -502,9 +507,9 @@ struct SignatureCreatorSheet: View {
 
     private var typeSignatureContent: some View {
         VStack(spacing: 20) {
-            FormField(title: "Type your name", text: $typedName)
-
             typedSignaturePreviewCard
+
+            FormField(title: "Type your name", text: $typedName)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Color")

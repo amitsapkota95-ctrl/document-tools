@@ -163,20 +163,9 @@ struct SplitPDFView: View {
         }
     }
 
-    private func displayIndices(for document: PDFDocument) -> [Int] {
-        switch splitMode {
-        case .selectedPages:
-            let selected = selectedPages.sorted()
-            let unselected = (0..<document.pageCount).filter { !selectedPages.contains($0) }
-            return selected + unselected
-        case .everyPage, .byInterval:
-            return Array(0..<document.pageCount)
-        }
-    }
-
     private func pageGrid(_ document: PDFDocument) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-            ForEach(displayIndices(for: document), id: \.self) { index in
+            ForEach(0..<document.pageCount, id: \.self) { index in
                 if let page = document.page(at: index) {
                     pageCell(page: page, index: index)
                 }

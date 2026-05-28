@@ -25,7 +25,7 @@ struct ContentView: View {
 
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
+                    Label("More", systemImage: "ellipsis.circle.fill")
                 }
                 .tag(3)
         }
@@ -61,8 +61,6 @@ func destinationView(for destination: ToolDestination) -> some View {
             CropPDFView()
         case .extractText:
             ExtractTextView()
-        case .compareText:
-            CompareTextView()
         case .invoiceBuilder:
             InvoiceBuilderView()
         case .teleprompter:
@@ -88,7 +86,6 @@ func destination(for slug: ToolSlug) -> ToolDestination? {
     case .redactPdf: return .redactPdf
     case .cropPdf: return .cropPdf
     case .extractText: return .extractText
-    case .compareText: return .compareText
     case .invoiceBuilder: return .invoiceBuilder
     case .teleprompter: return .teleprompter
     }

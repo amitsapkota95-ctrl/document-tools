@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 struct PDFToImageView: View {
     @State private var pdfURL: URL?
     @State private var pdfDocument: PDFDocument?
+    @State private var selectedPages = Set<Int>()
     @State private var showPicker = false
     @State private var format: ExportImageFormat = .png
     @State private var isLoadingPDF = false
@@ -21,6 +22,7 @@ struct PDFToImageView: View {
                     emptyState
                 } else if let pdfDocument {
                     documentSummary(pdfDocument)
+                    pageSelectionHeader(pdfDocument)
                     pagePreviewGrid(pdfDocument)
                 }
 
@@ -58,7 +60,7 @@ struct PDFToImageView: View {
                             title: "Save as \(format.label)",
                             icon: "photo",
                             isLoading: isProcessing,
-                            isDisabled: isLoadingPDF
+                            isDisabled: isLoadingPDF || selectedPages.isEmpty
                         ) {
                             Task { await exportImages() }
                         }
@@ -99,7 +101,7 @@ struct PDFToImageView: View {
                 .foregroundStyle(Color.forest)
             Text("Convert PDF pages to images")
                 .font(.sectionTitle)
-            Text("Export each page as PNG or JPEG and share or save to Photos.")
+            Text("Select the pages you want, then export them as PNG or JPEG.")
                 .font(.bodyText)
                 .foregroundStyle(Color.sandLight)
                 .multilineTextAlignment(.center)
@@ -115,7 +117,7 @@ struct PDFToImageView: View {
                 Text(pdfURL?.lastPathComponent ?? "Document")
                     .font(.bodyText.weight(.semibold))
                     .lineLimit(1)
-                Text("\(document.pageCount) page\(document.pageCount == 1 ? "" : "s") to convert")
+                Text("\(selectedPages.count) of \(document.pageCount) page\(document.pageCount == 1 ? "" : "s") selected")
                     .font(.captionText)
                     .foregroundStyle(Color.sandLight)
             }
@@ -126,24 +128,66 @@ struct PDFToImageView: View {
         .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
     }
 
+    private func pageSelectionHeader(_ document: PDFDocument) -> some View {
+        HStack {
+            Text("Tap pages to include or exclude")
+                .font(.captionText)
+                .foregroundStyle(Color.sandLight)
+
+            Spacer()
+
+            Button("Select All") {
+                selectedPages = Set(0..<document.pageCount)
+            }
+            .font(.captionText.weight(.semibold))
+            .foregroundStyle(Color.forest)
+
+            Button("Deselect All") {
+                selectedPages.removeAll()
+            }
+            .font(.captionText.weight(.semibold))
+            .foregroundStyle(Color.forest)
+        }
+    }
+
     private func pagePreviewGrid(_ document: PDFDocument) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
             ForEach(0..<document.pageCount, id: \.self) { index in
                 if let page = document.page(at: index) {
-                    let thumbnail = page.thumbnail(of: CGSize(width: 120, height: 160), for: .mediaBox)
-                    VStack(spacing: 6) {
-                        Image(uiImage: thumbnail)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 120)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        Text("Page \(index + 1)")
-                            .font(.captionText)
-                            .foregroundStyle(Color.ink)
-                    }
+                    pageCell(page: page, index: index)
                 }
             }
         }
+    }
+
+    private func pageCell(page: PDFPage, index: Int) -> some View {
+        let isSelected = selectedPages.contains(index)
+        let thumbnail = page.thumbnail(of: CGSize(width: 120, height: 160), for: .mediaBox)
+
+        return Button {
+            if isSelected {
+                selectedPages.remove(index)
+            } else {
+                selectedPages.insert(index)
+            }
+        } label: {
+            VStack(spacing: 6) {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 120)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(isSelected ? Color.forest : Color.clear, lineWidth: 3)
+                    }
+
+                Text("Page \(index + 1)")
+                    .font(.captionText)
+                    .foregroundStyle(Color.ink)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private func loadPDF(from url: URL) {
@@ -164,9 +208,11 @@ struct PDFToImageView: View {
                 )
                 pdfURL = tempURL
                 pdfDocument = document
+                selectedPages = Set(0..<document.pageCount)
             } catch {
                 pdfURL = nil
                 pdfDocument = nil
+                selectedPages.removeAll()
                 errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
         }
@@ -184,12 +230,13 @@ struct PDFToImageView: View {
         let baseName = pdfURL.deletingPathExtension().lastPathComponent
         let format = self.format
         let sourceURL = pdfURL
+        let pageIndices = Array(selectedPages).sorted()
 
         defer { isProcessing = false }
 
         do {
             let exportURL = try await Task.detached(priority: .userInitiated) {
-                let images = try PDFService.pdfToImages(from: sourceURL, format: format)
+                let images = try PDFService.pdfToImages(from: sourceURL, format: format, pageIndices: pageIndices)
                 let entries: [(name: String, data: Data)] = try images.map { item in
                     let data: Data?
                     switch format {

@@ -38,11 +38,9 @@
 		A100000030 /* PDFToImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000032 /* PDFToImageView.swift */; };
 		A100000031 /* ZipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000033 /* ZipService.swift */; };
 		A100000032 /* HomeToolTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000034 /* HomeToolTile.swift */; };
-		A100000033 /* TextDiffService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000035 /* TextDiffService.swift */; };
 		A100000034 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000036 /* OCRService.swift */; };
 		A100000036 /* InvoicePDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000038 /* InvoicePDFRenderer.swift */; };
 		A100000037 /* PageBoxOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000039 /* PageBoxOverlay.swift */; };
-		A100000038 /* CompareTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000040 /* CompareTextView.swift */; };
 		A100000039 /* CompressPDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000041 /* CompressPDFView.swift */; };
 		A100000040 /* CropPDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000042 /* CropPDFView.swift */; };
 		A100000041 /* RedactPDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000043 /* RedactPDFView.swift */; };
@@ -106,11 +104,9 @@
 		A200000032 /* PDFToImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFToImageView.swift; sourceTree = "<group>"; };
 		A200000033 /* ZipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipService.swift; sourceTree = "<group>"; };
 		A200000034 /* HomeToolTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeToolTile.swift; sourceTree = "<group>"; };
-		A200000035 /* TextDiffService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextDiffService.swift; sourceTree = "<group>"; };
 		A200000036 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
 		A200000038 /* InvoicePDFRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoicePDFRenderer.swift; sourceTree = "<group>"; };
 		A200000039 /* PageBoxOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageBoxOverlay.swift; sourceTree = "<group>"; };
-		A200000040 /* CompareTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareTextView.swift; sourceTree = "<group>"; };
 		A200000041 /* CompressPDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressPDFView.swift; sourceTree = "<group>"; };
 		A200000042 /* CropPDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CropPDFView.swift; sourceTree = "<group>"; };
 		A200000043 /* RedactPDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedactPDFView.swift; sourceTree = "<group>"; };
@@ -236,7 +232,6 @@
 				A500000025 /* RedactPDF */,
 				A500000026 /* CropPDF */,
 				A500000027 /* ExtractText */,
-				A500000028 /* CompareText */,
 				A500000029 /* InvoiceBuilder */,
 				A500000030 /* Teleprompter */,
 			);
@@ -260,7 +255,6 @@
 				A200000025 /* PDFService.swift */,
 				A200000026 /* StorageService.swift */,
 				A200000033 /* ZipService.swift */,
-				A200000035 /* TextDiffService.swift */,
 				A200000036 /* OCRService.swift */,
 				A200000038 /* InvoicePDFRenderer.swift */,
 			);
@@ -420,14 +414,6 @@
 				A200000044 /* ExtractTextView.swift */,
 			);
 			path = ExtractText;
-			sourceTree = "<group>";
-		};
-		A500000028 /* CompareText */ = {
-			isa = PBXGroup;
-			children = (
-				A200000040 /* CompareTextView.swift */,
-			);
-			path = CompareText;
 			sourceTree = "<group>";
 		};
 		A500000029 /* InvoiceBuilder */ = {
@@ -642,11 +628,9 @@
 				A100000030 /* PDFToImageView.swift in Sources */,
 				A100000031 /* ZipService.swift in Sources */,
 				A100000032 /* HomeToolTile.swift in Sources */,
-				A100000033 /* TextDiffService.swift in Sources */,
 				A100000034 /* OCRService.swift in Sources */,
 				A100000036 /* InvoicePDFRenderer.swift in Sources */,
 				A100000037 /* PageBoxOverlay.swift in Sources */,
-				A100000038 /* CompareTextView.swift in Sources */,
 				A100000039 /* CompressPDFView.swift in Sources */,
 				A100000040 /* CropPDFView.swift in Sources */,
 				A100000041 /* RedactPDFView.swift in Sources */,

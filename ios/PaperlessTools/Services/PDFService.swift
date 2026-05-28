@@ -261,14 +261,27 @@ enum PDFService {
     static func pdfToImages(
         from url: URL,
         format: ExportImageFormat,
-        scale: CGFloat = 2.0
+        scale: CGFloat = 2.0,
+        pageIndices: [Int]? = nil
     ) throws -> [(name: String, image: UIImage)] {
         let document = try loadDocument(from: url)
         let baseName = url.deletingPathExtension().lastPathComponent
         var results: [(name: String, image: UIImage)] = []
 
-        for index in 0..<document.pageCount {
-            guard let page = document.page(at: index),
+        let indices: [Int]
+        if let pageIndices {
+            indices = Array(Set(pageIndices)).sorted()
+        } else {
+            indices = Array(0..<document.pageCount)
+        }
+
+        guard !indices.isEmpty else {
+            throw PDFServiceError.noPages
+        }
+
+        for index in indices {
+            guard index >= 0, index < document.pageCount,
+                  let page = document.page(at: index),
                   let image = renderPage(page, scale: scale) else {
                 throw PDFServiceError.exportFailed
             }

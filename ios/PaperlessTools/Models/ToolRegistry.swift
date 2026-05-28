@@ -10,7 +10,6 @@ enum ToolSlug: String, CaseIterable, Identifiable {
     case redactPdf = "redact-pdf"
     case cropPdf = "crop-pdf"
     case extractText = "extract-text-from-pdf"
-    case compareText = "compare-text"
     case invoiceBuilder = "invoice-builder"
     case teleprompter = "teleprompter"
     case qrTools = "qr-tools"
@@ -160,14 +159,6 @@ enum ToolRegistry {
             title: "Content Tools",
             tools: [
                 ToolDefinition(
-                    slug: .compareText,
-                    title: "Compare Two Texts",
-                    description: "See what changed between two versions side by side.",
-                    actionLabel: "Compare Texts",
-                    iconName: "arrow.left.arrow.right",
-                    isAvailableInMVP: true
-                ),
-                ToolDefinition(
                     slug: .invoiceBuilder,
                     title: "Build an Invoice",
                     description: "Create invoices and export searchable PDFs.",
@@ -234,7 +225,6 @@ enum ToolDestination: Hashable {
     case redactPdf
     case cropPdf
     case extractText
-    case compareText
     case invoiceBuilder
     case teleprompter
     case qrScanner

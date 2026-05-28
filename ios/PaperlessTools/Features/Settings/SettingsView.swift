@@ -6,7 +6,18 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Signature Vault") {
+                Section {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Paperless Tools")
+                            .font(.sectionTitle)
+                        Text("Your saved signatures and app info.")
+                            .font(.captionText)
+                            .foregroundStyle(Color.sandLight)
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                Section("Saved Signatures") {
                     if signatures.isEmpty {
                         Text("No saved signatures yet. Create one in Fill & Sign.")
                             .font(.captionText)
@@ -55,7 +66,7 @@ struct SettingsView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.paper.ignoresSafeArea())
-            .navigationTitle("Settings")
+            .navigationTitle("More")
             .onAppear {
                 signatures = StorageService.loadSignatures()
             }

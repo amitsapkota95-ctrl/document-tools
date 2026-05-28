@@ -14,11 +14,16 @@ struct TeleprompterControlBar: View {
         HStack(spacing: 16) {
             Button(action: onClose) {
                 Image(systemName: "xmark")
-                    .font(.body.weight(.semibold))
+                    .font(.title3.weight(.semibold))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
 
             Button(action: onSpeedDown) {
                 Image(systemName: "minus")
+                    .font(.title3.weight(.semibold))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
 
             Button(action: onPlayPause) {
@@ -31,19 +36,28 @@ struct TeleprompterControlBar: View {
 
             Button(action: onSpeedUp) {
                 Image(systemName: "plus")
+                    .font(.title3.weight(.semibold))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
 
             Button(action: onMarkers) {
                 Image(systemName: "list.bullet")
+                    .font(.title3.weight(.semibold))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
 
             Button(action: onSettings) {
                 Image(systemName: "gearshape")
+                    .font(.title3.weight(.semibold))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
         }
         .foregroundStyle(theme.text)
         .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
         .background(.ultraThinMaterial)
         .clipShape(Capsule())
         .padding(.horizontal, 16)

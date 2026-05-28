@@ -27,6 +27,9 @@ enum StorageService {
     static func saveSignature(name: String, image: UIImage) throws {
         guard let imageData = image.pngData() else { return }
         var signatures = loadSignatures()
+        if signatures.contains(where: { $0.imageData == imageData }) {
+            return
+        }
         let signature = SavedSignature(
             id: UUID(),
             name: name,

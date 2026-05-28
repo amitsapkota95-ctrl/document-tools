@@ -3,13 +3,18 @@ import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
 
+private struct ImageItem: Identifiable {
+    let id: UUID
+    let image: UIImage
+}
+
 struct ImageToPDFView: View {
     var initialImageURLs: [URL] = []
 
     private let maxImageCount = 20
 
     @State private var pickerSelection: [PhotosPickerItem] = []
-    @State private var images: [UIImage] = []
+    @State private var imageItems: [ImageItem] = []
     @State private var loadedItemIdentifiers: Set<String> = []
     @State private var pageSize: PDFPageSize = .fit
     @State private var isLoadingImages = false
@@ -27,11 +32,11 @@ struct ImageToPDFView: View {
 
                     PhotosPicker(
                         selection: $pickerSelection,
-                        maxSelectionCount: max(1, maxImageCount - images.count),
+                        maxSelectionCount: max(1, maxImageCount - imageItems.count),
                         matching: .images
                     ) {
                         Label(
-                            images.isEmpty ? "Choose from Photos" : "Add More Photos",
+                            imageItems.isEmpty ? "Choose from Photos" : "Add More Photos",
                             systemImage: "photo.on.rectangle"
                         )
                         .font(.buttonLabel)
@@ -41,15 +46,15 @@ struct ImageToPDFView: View {
                         .background(Color.forest50)
                         .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.buttonCornerRadius))
                     }
-                    .disabled(isLoadingImages || images.count >= maxImageCount)
+                    .disabled(isLoadingImages || imageItems.count >= maxImageCount)
                     .onChange(of: pickerSelection) { _, newItems in
                         guard !newItems.isEmpty else { return }
                         Task { await appendImages(from: newItems) }
                     }
 
-                    if !images.isEmpty {
+                    if !imageItems.isEmpty {
                         HStack {
-                            Text("\(images.count) of \(maxImageCount) images")
+                            Text("\(imageItems.count) of \(maxImageCount) images")
                                 .font(.captionText)
                                 .foregroundStyle(Color.sandLight)
 
@@ -74,8 +79,8 @@ struct ImageToPDFView: View {
                 .background(Color.cream)
                 .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
 
-                if !images.isEmpty {
-                    imagePreviewGrid
+                if !imageItems.isEmpty {
+                    imagePreviewList
 
                     PrimaryButton(title: "Create PDF", icon: "doc.fill", isLoading: isProcessing) {
                         Task { await exportPDF() }
@@ -107,27 +112,55 @@ struct ImageToPDFView: View {
             }
         }
         .task {
-            guard images.isEmpty, !initialImageURLs.isEmpty else { return }
+            guard imageItems.isEmpty, !initialImageURLs.isEmpty else { return }
             await loadImages(from: initialImageURLs)
         }
     }
 
     private var loadingMessage: String {
-        if images.isEmpty {
+        if imageItems.isEmpty {
             return "Loading images…"
         }
         return "Adding photos…"
     }
 
-    private var imagePreviewGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-            ForEach(Array(images.enumerated()), id: \.offset) { _, image in
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+    private var imagePreviewList: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Drag to reorder. PDF pages follow this order.")
+                .font(.captionText)
+                .foregroundStyle(Color.sandLight)
+
+            List {
+                ForEach(Array(imageItems.enumerated()), id: \.element.id) { index, item in
+                    HStack(spacing: 12) {
+                        Image(uiImage: item.image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 56, height: 56)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                        Text("Image \(index + 1)")
+                            .font(.bodyText)
+                            .lineLimit(1)
+
+                        Spacer()
+
+                        Text("#\(index + 1)")
+                            .font(.captionText)
+                            .foregroundStyle(Color.sandLight)
+                    }
+                }
+                .onMove { from, to in
+                    imageItems.move(fromOffsets: from, toOffset: to)
+                }
+                .onDelete { indexSet in
+                    imageItems.remove(atOffsets: indexSet)
+                }
             }
+            .listStyle(.plain)
+            .frame(minHeight: CGFloat(imageItems.count) * 64 + 16)
+            .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
+            .environment(\.editMode, .constant(.active))
         }
     }
 
@@ -144,8 +177,9 @@ struct ImageToPDFView: View {
             }
         }.value
 
-        let remainingCapacity = max(0, maxImageCount - images.count)
-        images.append(contentsOf: loaded.prefix(remainingCapacity))
+        let remainingCapacity = max(0, maxImageCount - imageItems.count)
+        let newItems = loaded.prefix(remainingCapacity).map { ImageItem(id: UUID(), image: $0) }
+        imageItems.append(contentsOf: newItems)
 
         if loaded.count > remainingCapacity {
             errorMessage = "Maximum of \(maxImageCount) images reached."
@@ -166,7 +200,7 @@ struct ImageToPDFView: View {
         var addedCount = 0
 
         for item in items {
-            guard images.count < maxImageCount else { break }
+            guard imageItems.count < maxImageCount else { break }
 
             if let identifier = item.itemIdentifier, loadedItemIdentifiers.contains(identifier) {
                 continue
@@ -177,7 +211,7 @@ struct ImageToPDFView: View {
                 continue
             }
 
-            images.append(image)
+            imageItems.append(ImageItem(id: UUID(), image: image))
             addedCount += 1
 
             if let identifier = item.itemIdentifier {
@@ -187,13 +221,13 @@ struct ImageToPDFView: View {
 
         if addedCount == 0, !items.isEmpty {
             errorMessage = "Could not load the selected photos."
-        } else if images.count >= maxImageCount {
+        } else if imageItems.count >= maxImageCount {
             errorMessage = "Maximum of \(maxImageCount) images reached."
         }
     }
 
     private func resetImages() {
-        images = []
+        imageItems = []
         loadedItemIdentifiers = []
         pickerSelection = []
         errorMessage = nil
@@ -206,7 +240,7 @@ struct ImageToPDFView: View {
         defer { isProcessing = false }
 
         do {
-            let selectedImages = images
+            let selectedImages = imageItems.map(\.image)
             let selectedPageSize = pageSize
             let data = try await Task.detached(priority: .userInitiated) {
                 try PDFService.imagesToPDF(images: selectedImages, pageSize: selectedPageSize)

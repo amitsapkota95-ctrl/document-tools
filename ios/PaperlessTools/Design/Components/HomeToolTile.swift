@@ -110,7 +110,6 @@ struct HomeToolTile: View {
         case .redactPdf: return "Redact"
         case .cropPdf: return "Crop"
         case .extractText: return "Extract"
-        case .compareText: return "Compare"
         case .invoiceBuilder: return "Invoice"
         case .teleprompter: return "Teleprompter"
         default: return tool.title
