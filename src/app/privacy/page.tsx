@@ -5,7 +5,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/seo/site";
 export const metadata: Metadata = {
   title: `Privacy Policy — ${SITE_NAME}`,
   description:
-    "How paperless.tools and the Paperless Tools iOS app handle your data, including on-device processing and URL shortener retention.",
+    "How paperless.tools and the Paperless Tools iOS app handle your data, including on-device processing and URL shortener server storage.",
   alternates: {
     canonical: `${SITE_URL}/privacy`,
   },
@@ -29,6 +29,10 @@ export default function PrivacyPage() {
             designed the product so PDFs, scans, signatures, and OCR output are not uploaded for
             routine document tasks.
           </p>
+          <p>
+            The <strong>URL shortener</strong> is the only feature that sends user-provided data to
+            our servers. Everything else runs locally in your browser or on your device.
+          </p>
         </section>
 
         <section className="space-y-3">
@@ -41,25 +45,44 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="font-serif text-xl font-semibold text-ink">URL shortener (network feature)</h2>
+          <h2 className="font-serif text-xl font-semibold text-ink">URL shortener (server storage)</h2>
           <p>
-            When you use the URL shortener in the iOS app or on the website, the original URL is
+            When you use the URL shortener on the website or in the iOS app, the original URL is
             sent to our server at{" "}
-            <code className="rounded bg-cream-200 px-1.5 py-0.5 text-sm">paperless.tools</code> to
-            create a short link. We store:
+            <code className="rounded bg-cream-200 px-1.5 py-0.5 text-sm">paperless.tools</code> via{" "}
+            <code className="rounded bg-cream-200 px-1.5 py-0.5 text-sm">POST /api/shorten</code>.
+            We save your link on our servers so the short URL works and you can view basic click
+            statistics.
           </p>
+          <p>We store the following in Cloudflare KV (our link storage):</p>
           <ul className="list-disc space-y-2 pl-6">
-            <li>The submitted URL</li>
-            <li>A short code used to redirect the link</li>
-            <li>Basic click statistics (e.g. redirect counts)</li>
+            <li>
+              <strong>Original URL</strong> — the address you submitted, mapped to a short code
+            </li>
+            <li>
+              <strong>Short code</strong> — the random identifier used in links like{" "}
+              <code className="rounded bg-cream-200 px-1.5 py-0.5 text-sm">/x/abc12</code>
+            </li>
+            <li>
+              <strong>Click statistics</strong> — when someone opens a short link, we record the
+              time of the click, approximate country (from Cloudflare request headers), and referer
+              (where the click came from, if available)
+            </li>
           </ul>
           <p>
-            Shortened URL records are retained for <strong>72 hours</strong>, then deleted. This
-            retention period is also shown in the app before you shorten a link.
+            Click stats are available on the stats page (
+            <code className="rounded bg-cream-200 px-1.5 py-0.5 text-sm">/stats/&#123;code&#125;</code>
+            ) for links you create. This data is used only to operate the shortener and show you
+            redirect counts — not for advertising or cross-app tracking.
           </p>
           <p>
-            URL shortener data is used only to provide the service. It is not used for advertising,
-            cross-app tracking, or sold to third parties.
+            All URL shortener records (the link mapping and click statistics) are automatically
+            deleted after <strong>72 hours</strong>. This retention period is also disclosed in the
+            iOS app before you shorten a link.
+          </p>
+          <p>
+            URL shortener data is not linked to an account, is not used for advertising, and is
+            not sold to third parties.
           </p>
         </section>
 
@@ -87,8 +110,9 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="font-serif text-xl font-semibold text-ink">Third-party services</h2>
           <p>
-            The URL shortener uses HTTPS to our own infrastructure. Standard TLS encryption protects
-            data in transit. The iOS app declares that it uses only exempt encryption (HTTPS).
+            The URL shortener uses HTTPS to our own infrastructure hosted on Cloudflare. Standard TLS
+            encryption protects data in transit. The iOS app declares that it uses only exempt
+            encryption (HTTPS).
           </p>
         </section>
 
