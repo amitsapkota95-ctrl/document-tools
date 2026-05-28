@@ -14,6 +14,8 @@ struct FeaturedToolCard: View {
 }
 
 struct FeaturedShortcutCard: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let title: String
     let actionLabel: String
     let iconName: String
@@ -54,7 +56,7 @@ struct FeaturedShortcutCard: View {
             RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius)
                 .stroke(HomeToolAccent.color(for: category).opacity(0.12), lineWidth: 1)
         }
-        .shadow(color: PaperlessTheme.cardShadow, radius: 10, y: 4)
+        .shadow(color: PaperlessTheme.cardShadow(for: colorScheme), radius: 10, y: 4)
     }
 }
 
@@ -125,7 +127,7 @@ enum HomeToolAccent {
     static func color(for category: ToolCategoryID?) -> Color {
         switch category {
         case .pdf: return Color.forest
-        case .utilities: return Color(red: 30 / 255, green: 64 / 255, blue: 175 / 255)
+        case .utilities: return Color.utilitiesBlue
         case .content: return Color.clay
         case .none: return Color.forest
         }
@@ -136,12 +138,9 @@ enum HomeToolAccent {
         case .pdf:
             return [Color.forest, Color.forestMuted]
         case .utilities:
-            return [
-                Color(red: 30 / 255, green: 64 / 255, blue: 175 / 255),
-                Color(red: 59 / 255, green: 130 / 255, blue: 246 / 255),
-            ]
+            return [Color.utilitiesBlue, Color.utilitiesBlueLight]
         case .content:
-            return [Color.clay, Color(red: 234 / 255, green: 88 / 255, blue: 12 / 255)]
+            return [Color.clay, Color.contentOrange]
         case .none:
             return [Color.forest, Color.forestMuted]
         }

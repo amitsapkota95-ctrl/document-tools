@@ -43,7 +43,7 @@ struct QRScannerView: View {
             Spacer()
         }
         .padding(.top, 20)
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Scan QR")
         .navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.success, trigger: triggerHaptic)

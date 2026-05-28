@@ -67,6 +67,7 @@
 		A100000067 /* SharedImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000066 /* SharedImportCoordinator.swift */; };
 		A100000068 /* CameraPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000067 /* CameraPermissionView.swift */; };
 		A100000069 /* PaperlessToolsShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A300000002 /* PaperlessToolsShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A100000071 /* PaperlessScreenBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000071 /* PaperlessScreenBackground.swift */; };
 		A100000070 /* URLShortenerStorageNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000070 /* URLShortenerStorageNotice.swift */; };
 /* End PBXBuildFile section */
 
@@ -134,6 +135,7 @@
 		A200000068 /* PaperlessTools.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaperlessTools.entitlements; sourceTree = "<group>"; };
 		A200000069 /* PaperlessToolsShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaperlessToolsShareExtension.entitlements; sourceTree = "<group>"; };
 		A200000070 /* URLShortenerStorageNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLShortenerStorageNotice.swift; sourceTree = "<group>"; };
+		A200000071 /* PaperlessScreenBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperlessScreenBackground.swift; sourceTree = "<group>"; };
 		A300000001 /* PaperlessTools.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperlessTools.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A300000002 /* PaperlessToolsShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PaperlessToolsShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -208,9 +210,18 @@
 			children = (
 				A200000003 /* Colors.swift */,
 				A200000004 /* Typography.swift */,
+				A500000034 /* Modifiers */,
 				A500000011 /* Components */,
 			);
 			path = Design;
+			sourceTree = "<group>";
+		};
+		A500000034 /* Modifiers */ = {
+			isa = PBXGroup;
+			children = (
+				A200000071 /* PaperlessScreenBackground.swift */,
+			);
+			path = Modifiers;
 			sourceTree = "<group>";
 		};
 		A500000007 /* Features */ = {
@@ -655,6 +666,7 @@
 				A100000067 /* SharedImportCoordinator.swift in Sources */,
 				A100000068 /* CameraPermissionView.swift in Sources */,
 				A100000070 /* URLShortenerStorageNotice.swift in Sources */,
+				A100000071 /* PaperlessScreenBackground.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

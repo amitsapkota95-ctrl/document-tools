@@ -32,7 +32,7 @@ struct TeleprompterView: View {
             }
             .padding(20)
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Teleprompter")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: script) { _, newValue in

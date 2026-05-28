@@ -165,7 +165,7 @@ struct FillAndSignView: View {
             Spacer()
         }
         .padding(.top, 12)
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Fill & Sign")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {
@@ -290,7 +290,7 @@ struct FillAndSignView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 80, height: 60)
-                                    .background(Color.white)
+                                    .background(Color.cream)
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 8)
@@ -452,7 +452,7 @@ struct SignatureCreatorSheet: View {
     private var drawCanvasBackground: UIColor {
         penColor == .white
             ? UIColor(white: 0.2, alpha: 1)
-            : UIColor(red: 244 / 255, green: 241 / 255, blue: 234 / 255, alpha: 1)
+            : UIColor(Color.cream200)
     }
 
     var body: some View {
@@ -537,7 +537,7 @@ struct SignatureCreatorSheet: View {
                             }
                         }
                         .padding(12)
-                        .background(selectedFont == font ? Color.forest50 : Color.white)
+                        .background(selectedFont == font ? Color.forest50 : Color.cream)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)

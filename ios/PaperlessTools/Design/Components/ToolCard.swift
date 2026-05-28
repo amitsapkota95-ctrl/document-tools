@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ToolCard: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let tool: ToolDefinition
     var isAvailable: Bool = true
 
@@ -43,7 +45,7 @@ struct ToolCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cream)
         .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
-        .shadow(color: PaperlessTheme.cardShadow, radius: 8, y: 2)
+        .shadow(color: PaperlessTheme.cardShadow(for: colorScheme), radius: 8, y: 2)
         .opacity(isAvailable ? 1 : 0.7)
     }
 }

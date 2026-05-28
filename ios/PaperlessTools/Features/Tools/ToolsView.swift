@@ -30,7 +30,7 @@ struct ToolsView: View {
                 }
                 .padding(20)
             }
-            .background(Color.paper.ignoresSafeArea())
+            .paperlessScreenBackground()
             .navigationTitle("Tools")
             .navigationDestination(for: ToolDestination.self) { destination in
                 destinationView(for: destination)

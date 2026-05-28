@@ -37,7 +37,7 @@ struct ScanTabView: View {
             Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.paper.ignoresSafeArea())
+            .paperlessScreenBackground()
             .navigationTitle("Scan")
             .navigationDestination(isPresented: $showQRScanner) {
                 QRScannerView()

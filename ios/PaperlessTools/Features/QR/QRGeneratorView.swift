@@ -50,7 +50,7 @@ struct QRToolsView: View {
                 QRScannerView()
             }
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("QR Code")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -100,7 +100,7 @@ struct QRGeneratorView: View {
                 }
             }
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .sheet(isPresented: $showShareSheet) {
             if let shareImage {
                 ShareSheet(items: [shareImage])

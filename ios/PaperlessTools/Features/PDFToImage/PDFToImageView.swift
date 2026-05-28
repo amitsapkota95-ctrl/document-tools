@@ -70,7 +70,7 @@ struct PDFToImageView: View {
             }
             .padding(20)
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("PDF to Image")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {

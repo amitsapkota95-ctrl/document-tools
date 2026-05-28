@@ -96,7 +96,7 @@ struct ImageToPDFView: View {
             }
             .padding(20)
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Images to PDF")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showShareSheet) {
@@ -157,7 +157,7 @@ struct ImageToPDFView: View {
                     imageItems.remove(atOffsets: indexSet)
                 }
             }
-            .listStyle(.plain)
+            .paperlessListStyle()
             .frame(minHeight: CGFloat(imageItems.count) * 64 + 16)
             .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
             .environment(\.editMode, .constant(.active))

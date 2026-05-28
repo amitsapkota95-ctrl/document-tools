@@ -56,7 +56,7 @@ struct ExtractTextView: View {
             }
             .padding(20)
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Extract Text")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {

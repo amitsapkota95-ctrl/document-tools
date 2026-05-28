@@ -45,7 +45,7 @@ struct DocumentScannerView: View {
             Spacer()
         }
         .padding(.top, 20)
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Scan Document")
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showScanner) {

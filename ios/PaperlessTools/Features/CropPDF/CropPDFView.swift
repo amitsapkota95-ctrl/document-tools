@@ -51,7 +51,7 @@ struct CropPDFView: View {
                 }
             }
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Crop PDF")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {

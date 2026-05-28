@@ -14,6 +14,7 @@ struct TeleprompterSettingsSheet: View {
                     Text("\(Int(settings.fontSize)) pt")
                         .font(.caption)
                         .foregroundStyle(Color.sandLight)
+                        .listRowBackground(Color.cream)
                 }
 
                 Section("Theme") {
@@ -22,20 +23,24 @@ struct TeleprompterSettingsSheet: View {
                             Text(TeleprompterTheme.theme(for: themeID).label).tag(themeID)
                         }
                     }
+                    .listRowBackground(Color.cream)
                 }
 
                 Section("Cue line") {
                     Toggle("Show cue line", isOn: $settings.showCueLine)
+                        .listRowBackground(Color.cream)
 
                     if settings.showCueLine {
                         Slider(value: $settings.cuePosition, in: 0.2...0.45, step: 0.01) {
                             Text("Cue position")
                         }
+                        .listRowBackground(Color.cream)
                         Picker("Cue style", selection: $settings.cueStyle) {
                             ForEach(TeleprompterCueStyle.allCases) { style in
                                 Text(style.label).tag(style)
                             }
                         }
+                        .listRowBackground(Color.cream)
                     }
                 }
 
@@ -45,17 +50,22 @@ struct TeleprompterSettingsSheet: View {
                             Text(mode.label).tag(mode)
                         }
                     }
+                    .listRowBackground(Color.cream)
                 }
 
                 Section("Speed") {
                     Slider(value: $settings.scrollSpeed, in: 10...120, step: 5) {
                         Text("Scroll speed")
                     }
+                    .listRowBackground(Color.cream)
                     Slider(value: $settings.targetWpm, in: 100...180, step: 5) {
                         Text("Target WPM")
                     }
+                    .listRowBackground(Color.cream)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .paperlessScreenBackground()
             .navigationTitle("Prompter Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

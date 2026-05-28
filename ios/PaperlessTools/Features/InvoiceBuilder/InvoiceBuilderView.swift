@@ -34,7 +34,7 @@ struct InvoiceBuilderView: View {
             }
             .padding(20)
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Invoice Builder")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showShareSheet) {
@@ -209,7 +209,9 @@ struct InvoiceBuilderView: View {
 
     private func formSection<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.sectionTitle)
+            Text(title)
+                .font(.sectionTitle)
+                .foregroundStyle(Color.ink)
             content()
         }
         .padding(16)

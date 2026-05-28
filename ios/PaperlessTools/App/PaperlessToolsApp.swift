@@ -4,6 +4,10 @@ import SwiftUI
 struct PaperlessToolsApp: App {
     @StateObject private var sharedImportCoordinator = SharedImportCoordinator()
 
+    init() {
+        PaperlessAppearance.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

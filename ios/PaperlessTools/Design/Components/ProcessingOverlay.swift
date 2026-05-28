@@ -1,11 +1,13 @@
 import SwiftUI
 
 struct ProcessingOverlay: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let message: String
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.35)
+            PaperlessTheme.overlayScrim(for: colorScheme)
                 .ignoresSafeArea()
 
             VStack(spacing: 16) {
@@ -20,7 +22,7 @@ struct ProcessingOverlay: View {
             .padding(28)
             .background(Color.cream)
             .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
-            .shadow(radius: 12)
+            .shadow(color: PaperlessTheme.cardShadow(for: colorScheme), radius: 12)
         }
     }
 }

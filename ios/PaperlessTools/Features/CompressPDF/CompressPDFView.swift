@@ -46,7 +46,7 @@ struct CompressPDFView: View {
             }
             .padding(20)
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Compress PDF")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: quality) { _, _ in

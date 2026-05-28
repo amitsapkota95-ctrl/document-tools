@@ -52,6 +52,7 @@ struct ZoomableRedactionCanvas: UIViewRepresentable {
     }
 
     func updateUIView(_ scrollView: DocumentZoomScrollView, context: Context) {
+        scrollView.backgroundColor = UIColor(Color.cream200)
         context.coordinator.onCommitBox = onCommitBox
         context.coordinator.updatePageIfNeeded(pageIndex: pageIndex, pageImage: pageImage)
         context.coordinator.configureLayoutIfNeeded(for: scrollView.bounds.size)

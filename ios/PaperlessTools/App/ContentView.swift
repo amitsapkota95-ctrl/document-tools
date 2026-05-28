@@ -29,7 +29,7 @@ struct ContentView: View {
                 }
                 .tag(3)
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
     }
 }
 

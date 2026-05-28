@@ -64,7 +64,7 @@ struct SplitPDFView: View {
             }
         }
         .padding(.top, pdfDocument == nil ? 20 : 12)
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Split PDF")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {

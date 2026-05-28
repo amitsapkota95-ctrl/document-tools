@@ -48,7 +48,7 @@ struct URLShortenerView: View {
             }
             .padding(20)
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Shorten Link")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

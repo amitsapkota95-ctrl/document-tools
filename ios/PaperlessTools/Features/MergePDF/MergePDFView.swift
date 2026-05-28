@@ -42,7 +42,7 @@ struct MergePDFView: View {
             Spacer()
         }
         .padding(.top, 20)
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Combine PDFs")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {
@@ -107,7 +107,7 @@ struct MergePDFView: View {
                 pdfURLs.remove(atOffsets: indexSet)
             }
         }
-        .listStyle(.plain)
+        .paperlessListStyle()
         .environment(\.editMode, .constant(.active))
     }
 

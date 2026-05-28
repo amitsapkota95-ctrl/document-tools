@@ -43,7 +43,7 @@ struct RedactPDFView: View {
                 }
             }
         }
-        .background(Color.paper.ignoresSafeArea())
+        .paperlessScreenBackground()
         .navigationTitle("Redact PDF")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {

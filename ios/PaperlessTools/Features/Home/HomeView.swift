@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var selectedTab: Int
     @State private var navigationPath = NavigationPath()
 
@@ -22,7 +23,7 @@ struct HomeView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
-            .background(Color.paper.ignoresSafeArea())
+            .paperlessScreenBackground()
             .navigationTitle("paperless.tools")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: ToolDestination.self) { destination in
@@ -70,7 +71,7 @@ struct HomeView: View {
             )
         )
         .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
-        .shadow(color: PaperlessTheme.cardShadow, radius: 12, y: 4)
+        .shadow(color: PaperlessTheme.cardShadow(for: colorScheme), radius: 12, y: 4)
     }
 
     private var featuredToolsSection: some View {
