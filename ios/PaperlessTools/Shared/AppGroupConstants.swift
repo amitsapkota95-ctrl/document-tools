@@ -113,6 +113,7 @@ enum SharedImportService {
 enum SharedImportError: LocalizedError {
     case appGroupUnavailable
     case noSupportedContent
+    case invalidManifest
 
     var errorDescription: String? {
         switch self {
@@ -120,6 +121,8 @@ enum SharedImportError: LocalizedError {
             return "Shared storage is unavailable."
         case .noSupportedContent:
             return "No supported content was found to import."
+        case .invalidManifest:
+            return "The shared import could not be read."
         }
     }
 }

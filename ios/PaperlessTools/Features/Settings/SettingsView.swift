@@ -7,13 +7,22 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Paperless Tools")
-                            .font(.sectionTitle)
-                            .foregroundStyle(Color.ink)
-                        Text("Your saved signatures and app info.")
-                            .font(.captionText)
-                            .foregroundStyle(Color.sandLight)
+                    HStack(spacing: 14) {
+                        Image("BrandIcon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 56, height: 56)
+                            .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                            .accessibilityHidden(true)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Paperless Tools")
+                                .font(.sectionTitle)
+                                .foregroundStyle(Color.ink)
+                            Text("Your saved signatures and app info.")
+                                .font(.captionText)
+                                .foregroundStyle(Color.sandLight)
+                        }
                     }
                     .padding(.vertical, 4)
                     .listRowBackground(Color.cream)
@@ -57,6 +66,11 @@ struct SettingsView: View {
                 }
 
                 Section("About") {
+                    Link(destination: URL(string: "https://paperless.tools/privacy")!) {
+                        Label("Privacy Policy", systemImage: "hand.raised")
+                    }
+                    .listRowBackground(Color.cream)
+
                     Link(destination: URL(string: "https://paperless.tools")!) {
                         Label("Website", systemImage: "globe")
                     }

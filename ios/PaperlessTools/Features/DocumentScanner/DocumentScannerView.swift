@@ -12,6 +12,14 @@ struct DocumentScannerView: View {
     @State private var exportedURL: URL?
     @State private var showShareSheet = false
 
+    private var visionKitSupported: Bool {
+        VNDocumentCameraViewController.isSupported
+    }
+
+    private var effectiveAutoCaptureEnabled: Bool {
+        visionKitSupported && autoCaptureEnabled
+    }
+
     var body: some View {
         VStack(spacing: 20) {
             if scannedImages.isEmpty {
@@ -33,11 +41,13 @@ struct DocumentScannerView: View {
                 PrimaryButton(title: scannedImages.isEmpty ? "Start Scanning" : "Add Pages", icon: "doc.viewfinder") {
                     showScanner = true
                 }
+                .accessibilityLabel(scannedImages.isEmpty ? "Start scanning" : "Add pages")
 
                 if !scannedImages.isEmpty {
                     PrimaryButton(title: "Save as PDF", icon: "square.and.arrow.up", isLoading: isProcessing) {
                         Task { await exportPDF() }
                     }
+                    .accessibilityLabel("Save as PDF")
                 }
             }
             .padding(.horizontal, 20)
@@ -49,7 +59,7 @@ struct DocumentScannerView: View {
         .navigationTitle("Scan Document")
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showScanner) {
-            if autoCaptureEnabled {
+            if effectiveAutoCaptureEnabled {
                 DocumentScannerRepresentable(
                     onScanComplete: { images in
                         scannedImages.append(contentsOf: images)
@@ -83,15 +93,21 @@ struct DocumentScannerView: View {
 
     private var scanSettings: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Toggle("Auto-capture pages", isOn: $autoCaptureEnabled)
-                .font(.bodyText)
-                .tint(.forest)
+            if visionKitSupported {
+                Toggle("Auto-capture pages", isOn: $autoCaptureEnabled)
+                    .font(.bodyText)
+                    .tint(.forest)
 
-            Text(autoCaptureEnabled
-                 ? "Uses Apple's scanner with automatic page detection."
-                 : "Manual mode: tap the shutter for each page.")
-                .font(.captionText)
-                .foregroundStyle(Color.sandLight)
+                Text(effectiveAutoCaptureEnabled
+                     ? "Uses Apple's scanner with automatic page detection."
+                     : "Manual mode: tap the shutter for each page.")
+                    .font(.captionText)
+                    .foregroundStyle(Color.sandLight)
+            } else {
+                Text("Auto-capture isn't available on this device. Manual camera mode is used instead.")
+                    .font(.captionText)
+                    .foregroundStyle(Color.sandLight)
+            }
         }
         .padding(16)
         .background(Color.cream)
@@ -235,6 +251,7 @@ struct ManualDocumentCameraView: View {
                 HStack {
                     Button("Cancel") { dismiss() }
                         .foregroundStyle(.white)
+                        .accessibilityLabel("Cancel scanning")
 
                     Spacer()
 
@@ -256,6 +273,7 @@ struct ManualDocumentCameraView: View {
                     }
                     .foregroundStyle(capturedImages.isEmpty ? .white.opacity(0.4) : .white)
                     .disabled(capturedImages.isEmpty)
+                    .accessibilityLabel("Finish scanning")
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
@@ -276,6 +294,7 @@ struct ManualDocumentCameraView: View {
                     }
                 }
                 .disabled(isProcessingCapture)
+                .accessibilityLabel("Capture page")
                 .padding(.bottom, 36)
 
                 Text("Tap shutter for each page")

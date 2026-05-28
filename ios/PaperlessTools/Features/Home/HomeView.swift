@@ -46,21 +46,13 @@ struct HomeView: View {
 
             Spacer(minLength: 0)
 
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.forest50, Color.forest100],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 88, height: 88)
-
-                Image(systemName: "doc.text.fill")
-                    .font(.system(size: 36, weight: .semibold))
-                    .foregroundStyle(Color.forest)
-            }
+            Image("BrandIcon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 88, height: 88)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .shadow(color: Color.forest.opacity(0.2), radius: 8, y: 4)
+                .accessibilityLabel("Paperless Tools")
         }
         .padding(20)
         .background(

@@ -242,6 +242,7 @@ struct SplitPDFView: View {
             .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.buttonCornerRadius))
         }
         .disabled(isLoading)
+        .accessibilityLabel(title)
     }
 
     private var splitButtonTitle: String {

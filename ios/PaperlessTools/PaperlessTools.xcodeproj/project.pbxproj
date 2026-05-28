@@ -68,6 +68,11 @@
 		A100000068 /* CameraPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000067 /* CameraPermissionView.swift */; };
 		A100000069 /* PaperlessToolsShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A300000002 /* PaperlessToolsShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A100000071 /* PaperlessScreenBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000071 /* PaperlessScreenBackground.swift */; };
+		A100000072 /* PDFCoordinateConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000072 /* PDFCoordinateConverter.swift */; };
+		A100000073 /* TemporaryFileCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000073 /* TemporaryFileCleanup.swift */; };
+		A100000074 /* PDFCoordinateConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000074 /* PDFCoordinateConverterTests.swift */; };
+		A100000076 /* Appleicon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A200000076 /* Appleicon.icon */; };
+		A100000077 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A200000077 /* LaunchScreen.storyboard */; };
 		A100000070 /* URLShortenerStorageNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000070 /* URLShortenerStorageNotice.swift */; };
 /* End PBXBuildFile section */
 
@@ -136,6 +141,12 @@
 		A200000069 /* PaperlessToolsShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaperlessToolsShareExtension.entitlements; sourceTree = "<group>"; };
 		A200000070 /* URLShortenerStorageNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLShortenerStorageNotice.swift; sourceTree = "<group>"; };
 		A200000071 /* PaperlessScreenBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperlessScreenBackground.swift; sourceTree = "<group>"; };
+		A200000072 /* PDFCoordinateConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFCoordinateConverter.swift; sourceTree = "<group>"; };
+		A200000073 /* TemporaryFileCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFileCleanup.swift; sourceTree = "<group>"; };
+		A200000074 /* PDFCoordinateConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFCoordinateConverterTests.swift; sourceTree = "<group>"; };
+		A200000076 /* Appleicon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Appleicon.icon; sourceTree = "<group>"; };
+		A200000077 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		A300000003 /* PaperlessToolsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperlessToolsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A300000001 /* PaperlessTools.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperlessTools.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A300000002 /* PaperlessToolsShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PaperlessToolsShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -155,6 +166,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A400000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -168,7 +186,10 @@
 				A500000009 /* Services */,
 				A200000065 /* AppGroupConstants.swift */,
 				A500000010 /* Resources */,
+				A200000076 /* Appleicon.icon */,
+				A200000077 /* LaunchScreen.storyboard */,
 				A500000003 /* ShareExtension */,
+				A500000035 /* PaperlessToolsTests */,
 				A200000029 /* Info.plist */,
 				A200000064 /* PrivacyInfo.xcprivacy */,
 				A200000068 /* PaperlessTools.entitlements */,
@@ -191,8 +212,18 @@
 			children = (
 				A300000001 /* PaperlessTools.app */,
 				A300000002 /* PaperlessToolsShareExtension.appex */,
+				A300000003 /* PaperlessToolsTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A500000035 /* PaperlessToolsTests */ = {
+			isa = PBXGroup;
+			children = (
+				A200000074 /* PDFCoordinateConverterTests.swift */,
+			);
+			name = PaperlessToolsTests;
+			path = ../PaperlessToolsTests;
 			sourceTree = "<group>";
 		};
 		A500000005 /* App */ = {
@@ -264,6 +295,8 @@
 				A200000024 /* APIService.swift */,
 				A200000048 /* DocumentScanProcessor.swift */,
 				A200000025 /* PDFService.swift */,
+				A200000072 /* PDFCoordinateConverter.swift */,
+				A200000073 /* TemporaryFileCleanup.swift */,
 				A200000026 /* StorageService.swift */,
 				A200000033 /* ZipService.swift */,
 				A200000036 /* OCRService.swift */,
@@ -488,6 +521,13 @@
 			remoteGlobalIDString = A600000002;
 			remoteInfo = PaperlessToolsShareExtension;
 		};
+		B500000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A900000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A600000001;
+			remoteInfo = PaperlessTools;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -541,6 +581,23 @@
 			productReference = A300000002 /* PaperlessToolsShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		A600000003 /* PaperlessToolsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A800000005 /* Build configuration list for PBXNativeTarget "PaperlessToolsTests" */;
+			buildPhases = (
+				A700000006 /* Sources */,
+				A400000003 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B600000002 /* PBXTargetDependency */,
+			);
+			name = PaperlessToolsTests;
+			productName = PaperlessToolsTests;
+			productReference = A300000003 /* PaperlessToolsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXTargetDependency section */
@@ -548,6 +605,11 @@
 			isa = PBXTargetDependency;
 			target = A600000002 /* PaperlessToolsShareExtension */;
 			targetProxy = B500000001 /* PBXContainerItemProxy */;
+		};
+		B600000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A600000001 /* PaperlessTools */;
+			targetProxy = B500000002 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -582,6 +644,7 @@
 			targets = (
 				A600000001 /* PaperlessTools */,
 				A600000002 /* PaperlessToolsShareExtension */,
+				A600000003 /* PaperlessToolsTests */,
 			);
 		};
 /* End PBXProject section */
@@ -593,6 +656,8 @@
 			files = (
 				A100000027 /* Assets.xcassets in Resources */,
 				A100000064 /* PrivacyInfo.xcprivacy in Resources */,
+				A100000076 /* Appleicon.icon in Resources */,
+				A100000077 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -667,6 +732,8 @@
 				A100000068 /* CameraPermissionView.swift in Sources */,
 				A100000070 /* URLShortenerStorageNotice.swift in Sources */,
 				A100000071 /* PaperlessScreenBackground.swift in Sources */,
+				A100000072 /* PDFCoordinateConverter.swift in Sources */,
+				A100000073 /* TemporaryFileCleanup.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -679,6 +746,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A700000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000074 /* PDFCoordinateConverterTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -686,11 +761,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Appleicon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CODE_SIGN_ENTITLEMENTS = PaperlessTools.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -712,11 +788,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Appleicon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CODE_SIGN_ENTITLEMENTS = PaperlessTools.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -740,7 +817,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/PaperlessToolsShareExtension.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = BV3NW7GXY9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
@@ -765,7 +842,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/PaperlessToolsShareExtension.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = BV3NW7GXY9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
@@ -781,6 +858,44 @@
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AA00000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = BV3NW7GXY9;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tools.paperless.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PaperlessTools.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PaperlessTools";
+			};
+			name = Debug;
+		};
+		AA00000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = BV3NW7GXY9;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = tools.paperless.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PaperlessTools.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PaperlessTools";
 			};
 			name = Release;
 		};
@@ -900,6 +1015,15 @@
 			buildConfigurations = (
 				AA00000003 /* Debug */,
 				AA00000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A800000005 /* Build configuration list for PBXNativeTarget "PaperlessToolsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA00000007 /* Debug */,
+				AA00000008 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -25,12 +25,16 @@ enum SharedImportRoute: Identifiable, Equatable {
 final class SharedImportCoordinator: ObservableObject {
     @Published var pendingRoute: SharedImportRoute?
     @Published var pendingImportID: String?
+    @Published var importErrorMessage: String?
 
     func handleIncomingURL(_ url: URL) {
         guard url.scheme == AppGroupConstants.urlScheme, url.host == "import" else { return }
 
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        guard let importID = components?.queryItems?.first(where: { $0.name == "id" })?.value else { return }
+        guard let importID = components?.queryItems?.first(where: { $0.name == "id" })?.value else {
+            importErrorMessage = "Couldn't open the shared file."
+            return
+        }
 
         pendingImportID = importID
         routeImport(id: importID)
@@ -52,14 +56,23 @@ final class SharedImportCoordinator: ObservableObject {
             case .url:
                 if let urlString = manifest.urlString {
                     pendingRoute = .urlShortener(urlString)
+                } else {
+                    throw SharedImportError.invalidManifest
                 }
             }
 
             pendingImportID = id
+            importErrorMessage = nil
         } catch {
             SharedImportService.deleteImport(id: id)
             pendingImportID = nil
+            pendingRoute = nil
+            importErrorMessage = "Couldn't open the shared file. Try sharing it again."
         }
+    }
+
+    func clearImportError() {
+        importErrorMessage = nil
     }
 
     func clearPendingImport() {

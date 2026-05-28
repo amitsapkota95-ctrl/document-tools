@@ -107,6 +107,14 @@ struct RedactPDFView: View {
                                     sharedRedactionSourcePage = currentPage
                                 }
                             }
+
+                        if applyToAllPages {
+                            Text("Uses the same box positions on every page. Best for uniform page sizes.")
+                                .font(.caption2)
+                                .foregroundStyle(Color.sandLight)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 4)
+                        }
                     }
 
                     PrimaryButton(title: "Change PDF", icon: "doc") {
@@ -144,6 +152,7 @@ struct RedactPDFView: View {
                 Image(systemName: "chevron.left")
             }
             .disabled(currentPage == 0)
+            .accessibilityLabel("Previous page")
 
             Text("Page \(currentPage + 1) of \(pageCount)")
                 .font(.bodyText.weight(.semibold))
@@ -157,6 +166,7 @@ struct RedactPDFView: View {
                 Image(systemName: "chevron.right")
             }
             .disabled(currentPage >= pageCount - 1)
+            .accessibilityLabel("Next page")
 
             Spacer(minLength: 8)
 
@@ -168,6 +178,7 @@ struct RedactPDFView: View {
             }
             .disabled(!canUndo)
             .foregroundStyle(canUndo ? Color.forest : Color.sandLight)
+            .accessibilityLabel("Undo last redaction box")
 
             if documentZoomScale > 1.05 {
                 Button("Reset Zoom") {
@@ -176,6 +187,7 @@ struct RedactPDFView: View {
                 }
                 .font(.captionText.weight(.semibold))
                 .foregroundStyle(Color.forest)
+                .accessibilityLabel("Reset zoom")
             }
         }
     }

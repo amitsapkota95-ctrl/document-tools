@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 extension View {
     func paperlessScreenBackground() -> some View {
@@ -15,6 +16,8 @@ extension View {
 enum PaperlessAppearance {
     static func configure() {
         let paper = Color.paperUIColor
+
+        UIWindow.appearance().backgroundColor = paper
 
         let tabBarAppearance = UITabBarAppearance()
         tabBarAppearance.configureWithOpaqueBackground()

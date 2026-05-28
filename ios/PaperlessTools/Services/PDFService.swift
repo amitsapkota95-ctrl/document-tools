@@ -513,13 +513,7 @@ enum PDFService {
     }
 
     private static func pdfRect(fromNormalized normalized: CGRect, page: PDFPage) -> CGRect {
-        let bounds = page.bounds(for: .mediaBox)
-        return CGRect(
-            x: bounds.minX + normalized.minX * bounds.width,
-            y: bounds.minY + (1 - normalized.maxY) * bounds.height,
-            width: normalized.width * bounds.width,
-            height: normalized.height * bounds.height
-        )
+        PDFCoordinateConverter.pdfRect(fromNormalized: normalized, page: page)
     }
 
     private static func renderRedactedPage(_ page: PDFPage, boxes: [CGRect]) -> PDFPage? {
@@ -560,11 +554,7 @@ enum PDFService {
     }
 
     private static func paddedNormalizedRect(_ normalized: CGRect, padding: CGFloat = 0.006) -> CGRect {
-        let x = max(0, normalized.minX - padding)
-        let y = max(0, normalized.minY - padding)
-        let maxX = min(1, normalized.maxX + padding)
-        let maxY = min(1, normalized.maxY + padding)
-        return CGRect(x: x, y: y, width: maxX - x, height: maxY - y)
+        PDFCoordinateConverter.paddedNormalizedRect(normalized, padding: padding)
     }
 
     private static func singlePagePDFData(from page: PDFPage) -> Data? {

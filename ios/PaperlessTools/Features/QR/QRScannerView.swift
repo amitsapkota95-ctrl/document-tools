@@ -6,6 +6,7 @@ struct QRScannerView: View {
     @State private var scannedCode: String?
     @State private var triggerHaptic = false
     @State private var scannerResetTrigger = 0
+    @State private var cameraSetupError: String?
 
     var body: some View {
         VStack(spacing: 20) {
@@ -15,6 +16,9 @@ struct QRScannerView: View {
                     onCodeScanned: { code in
                         scannedCode = code
                         triggerHaptic.toggle()
+                    },
+                    onSetupFailed: { message in
+                        cameraSetupError = message
                     }
                 )
                 .frame(maxWidth: .infinity)
@@ -26,7 +30,13 @@ struct QRScannerView: View {
             .clipShape(RoundedRectangle(cornerRadius: PaperlessTheme.cardCornerRadius))
             .padding(.horizontal, 20)
 
-            if let scannedCode {
+            if let cameraSetupError {
+                Text(cameraSetupError)
+                    .font(.captionText)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            } else if let scannedCode {
                 ScannedResultCard(payload: scannedCode) {
                     self.scannedCode = nil
                     scannerResetTrigger += 1
@@ -115,10 +125,12 @@ struct ScannedResultCard: View {
 struct QRScannerRepresentable: UIViewControllerRepresentable {
     let resetTrigger: Int
     let onCodeScanned: (String) -> Void
+    let onSetupFailed: (String) -> Void
 
     func makeUIViewController(context: Context) -> QRScannerViewController {
         let controller = QRScannerViewController()
         controller.onCodeScanned = onCodeScanned
+        controller.onSetupFailed = onSetupFailed
         return controller
     }
 
@@ -140,6 +152,7 @@ struct QRScannerRepresentable: UIViewControllerRepresentable {
 
 final class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     var onCodeScanned: ((String) -> Void)?
+    var onSetupFailed: ((String) -> Void)?
 
     private var captureSession: AVCaptureSession?
     private var previewLayer: AVCaptureVideoPreviewLayer?
@@ -180,13 +193,21 @@ final class QRScannerViewController: UIViewController, AVCaptureMetadataOutputOb
         guard let device = AVCaptureDevice.default(for: .video),
               let input = try? AVCaptureDeviceInput(device: device),
               session.canAddInput(input) else {
+            DispatchQueue.main.async { [weak self] in
+                self?.onSetupFailed?("Unable to access the camera.")
+            }
             return
         }
 
         session.addInput(input)
 
         let output = AVCaptureMetadataOutput()
-        guard session.canAddOutput(output) else { return }
+        guard session.canAddOutput(output) else {
+            DispatchQueue.main.async { [weak self] in
+                self?.onSetupFailed?("Unable to access the camera.")
+            }
+            return
+        }
         session.addOutput(output)
         output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
         output.metadataObjectTypes = [.qr]
