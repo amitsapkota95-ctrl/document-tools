@@ -33,6 +33,12 @@ export function SiteFooter() {
             >
               How It Works
             </a>
+            <a
+              href="/privacy"
+              className="text-xs font-bold transition-colors hover:text-white"
+            >
+              Privacy
+            </a>
           </div>
 
           <div className="md:text-right">
